@@ -48,7 +48,7 @@ export const events: Events = {
     "Whirlpool": [
         "Don't fall in. You don't want to get sucked in by that!",
         "If you throw coins in and the whirlpool glows, that's when you know we're in for a treat!",
-        "Sometimes we're rewarded for being generous, when throwing couns into the water.",
+        "Sometimes we're rewarded for being generous, when throwing coins into the water.",
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary..."
     ],
