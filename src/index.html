@@ -1,8 +1,157 @@
 <!DOCTYPE html>
-<html>
-	<head></head>
-	<body>
-		<div id="output"></div>
-		<script src="./main.js"></script>
-	</body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSF Event Tracker</title>
+    <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
+    <style>
+		* {
+			color: black
+		}
+        /* Body styling */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Tabs navigation */
+        .tabs {
+            display: flex;
+            width: 80%;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+		
+        .tab {
+			flex: 1;
+            padding: 4px 10px;
+            text-align: center;
+            cursor: pointer;
+            background-image: url('https://runeapps.org/nis/alt1-currentskin/tabback.png');
+            background-size: cover;
+			color: white
+        }
+
+		.tab:not(.active) {
+			filter: brightness(50%)
+		}
+
+        .tab.active {
+            color: white;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            width: 80%;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-top: 3px solid #0077cc;
+        }
+
+		.tab span {
+			display: inline-block;
+			transform: scaleY(1); /* Keep the text normal */
+		}
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* General styles */
+        h2 {
+            color: #0077cc;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="nis body" id="body">
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <div class="tab active" data-tab="mainTab">Main</div>
+        <div class="tab" data-tab="settingsTab">Settings</div>
+        <div class="tab" data-tab="statusTab">Status</div>
+    </div>
+
+    <!-- Main Tab Content -->
+    <div id="mainTab" class="tab-content active">
+        <h2>Main Content</h2>
+        <p>Welcome to the DSF Event Tracker! This is the main page.</p>
+    </div>
+
+    <!-- Settings Tab Content -->
+    <div id="settingsTab" class="tab-content">
+        <form id="settingsForm">
+            <div class="form-group">
+                <label for="discordID">Discord ID</label>
+                <input type="text" id="discordID" placeholder="Enter Discord ID">
+            </div>
+            <div class="form-group">
+                <button type="submit">Save Settings</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Status Tab Content -->
+    <div id="statusTab" class="tab-content">
+        <h2>Status</h2>
+        <p>Everything seems to be running smoothly. No issues reported.</p>
+    </div>
+
+    <script>
+        // JavaScript for handling tabs
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove 'active' class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add 'active' class to the clicked tab and its content
+                tab.classList.add('active');
+                document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+            });
+        });
+
+        // Load settings from localStorage if available
+        const discordIDInput = document.getElementById('discordID');
+        const saveddiscordID = localStorage.getItem('discordID');
+        if (saveddiscordID) {
+            discordIDInput.value = saveddiscordID;
+        }
+
+        // Handle form submission and save to localStorage
+        const settingsForm = document.getElementById('settingsForm');
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const discordID = discordIDInput.value;
+            localStorage.setItem('discordID', discordID);
+            alert('Settings saved successfully!');
+        });
+
+    </script>
+	<script src="./main.js"></script>
+</body>
 </html>
