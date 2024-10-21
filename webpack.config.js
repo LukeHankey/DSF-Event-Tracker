@@ -1,5 +1,5 @@
 const path = require("path");
-const { webpack, DefinePlugin } = require("webpack");
+const { DefinePlugin } = require("webpack");
 
 /**
  * @type {import("webpack").Configuration}
