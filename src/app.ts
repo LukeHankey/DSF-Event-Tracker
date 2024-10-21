@@ -7,23 +7,10 @@ import axios from "axios";
 import "./index.html";
 import "./appconfig.json";
 import "./icon.png";
+import "./settingsbutton.png"
+import { Events, events } from "./events"
 
-/** TODO
- * Check with more players if the duplicates won't be an issue
- * Clearing of the duplicates after a period of time
- * Ensure all events are working correctly
- * Refactor code into files
- * Create html pages
- * Setup GitHub repository for alt1 and server
- * Authenticate requests from frontend to server with CORS origin as IP of instance
-    * Either find a way to get rsn or have in a settings box to pass along in request as User-Agent 
-* Add logs on backend
-* Either directly add count from backend or have the bot do it based on messages being sent through webhook
-* Setup the website via github pages?
- */
 
-// Setting up output element for displaying results
-var output = document.getElementById("output");
 const chatbox = new ChatBoxReader();
 chatbox.readargs.colors.push(
     a1lib.mixColor(...[239, 0, 0]),  // red text
