@@ -1,5 +1,11 @@
-export interface Events {
-    [name: string]: string[]
+export type EventKeys = "Travelling merchant" | "Jellyfish" | "Arkaneo" | "Sea Monster" | "Treasure Turtle" | "Whale" | "Whirlpool" | "Testing";
+
+type EventTimes = {
+    [key in EventKeys]: number
+}
+
+export type Events = {
+    [key in EventKeys]: string[];
 }
 
 export const events: Events = {
@@ -53,4 +59,18 @@ export const events: Events = {
         "I nearly fell in before, that was scary..."
     ],
     "Testing": ["Guys: 1", "Guys: Test"],
+}
+
+const ONE_MINUTE = 60
+
+// In seconds
+export const eventTimes: EventTimes = {
+    "Travelling merchant": ONE_MINUTE * 10,
+    "Arkaneo": 39,
+    "Jellyfish": ONE_MINUTE * 2,
+    "Whale": ONE_MINUTE * 2,
+    "Sea Monster": ONE_MINUTE * 2,
+    "Whirlpool": ONE_MINUTE * 5,
+    "Treasure Turtle": ONE_MINUTE * 5,
+    "Testing": 5
 }
