@@ -60,6 +60,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (lines?.length) {
         for (const line of lines) {
             console.log(line)
+            const time = line.fragments[1].text
 
             // If any keyword was found in any fragment, collect all fragment texts
             const allTextFromLine = line.fragments.map(fragment => fragment.text).join(""); // Join all fragment texts
@@ -82,6 +83,20 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     );
 
+                    const mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
+                    const content = `A ${matchingEvent} is active on world ${current_world}!`
+
+                    // Main element, event element, suggestion/report element
+                    if (mainTabPs.length === 3) {
+                        const eventP = mainTabPs[1]
+                        eventP.textContent = content
+                    } else {
+                        const eventP = document.createElement("p");
+                        eventP.textContent = content
+                        document.querySelector('#mainTab p').after(eventP)
+                    }
+                    
+                    // Send timer request to avoid duplicate calls
                     if (response.status === 201) {
                         const eventTime = eventTimes[matchingEvent]
                         const response = await axios.post(
@@ -95,6 +110,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 timeout: eventTime
                             }
                         )
+
+                        mainTabPs[1].textContent = `A ${matchingEvent} spawned on world ${current_world} at ${time}.`
+
                         if (response.status != 200) {
                             console.log(`There was no ${matchingEvent}_${current_world} in the server cache.`)
                         }
