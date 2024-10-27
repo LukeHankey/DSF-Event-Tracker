@@ -60,15 +60,15 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (lines?.length) {
         for (const line of lines) {
             console.log(line)
-            const time = line.fragments[1].text
-
+            
             // If any keyword was found in any fragment, collect all fragment texts
             const allTextFromLine = line.fragments.map(fragment => fragment.text).join(""); // Join all fragment texts
-
+            
             // Check if the text contains any keywords from the 'events' object
             const matchingEvent = getMatchingEvent(allTextFromLine, events);
-
+            
             if (matchingEvent) {
+                const time = line.fragments[1].text
                 // Send the combined text to the server
                 try {
                     const current_world = alt1.currentWorld
