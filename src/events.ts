@@ -20,6 +20,9 @@ export const events: Events = {
     "Arkaneo": [
         "I've heard stories of an angler named Tavia who managed to take a chunk out of him once.",
         "Look at how fast he is!",
+        "It's Arkaneo!",
+        "I've never seen something move so fast in my life!",
+        "No one has ever been able to catch this one.",
     ],
     "Sea Monster": [
         "Ahh! The sea monster is back, get some rotten food from those barrels!", // Rotten fish
