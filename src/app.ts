@@ -59,7 +59,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 try {
                     const current_world = alt1.currentWorld
                     const response = await axios.post(
-                        "http://127.0.0.1:5000/send_webhook", {
+                        "http://18.169.241.92:8080/send_webhook", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     if (response.status === 201) {
                         const eventTime = eventTimes[matchingEvent]
                         const response = await axios.post(
-                            "http://127.0.0.1:5000/clear_event_timer", {
+                            "http://18.169.241.92:8080/clear_event_timer", {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
