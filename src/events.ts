@@ -1,5 +1,11 @@
-export interface Events {
-    [name: string]: string[]
+export type EventKeys = "Travelling merchant" | "Jellyfish" | "Arkaneo" | "Sea Monster" | "Treasure Turtle" | "Whale" | "Whirlpool" | "Testing";
+
+type EventTimes = {
+    [key in EventKeys]: number
+}
+
+export type Events = {
+    [key in EventKeys]: string[];
 }
 
 export const events: Events = {
@@ -51,9 +57,23 @@ export const events: Events = {
     "Whirlpool": [
         "Don't fall in. You don't want to get sucked in by that!",
         "If you throw coins in and the whirlpool glows, that's when you know we're in for a treat!",
-        "Sometimes we're rewarded for being generous, when throwing couns into the water.",
+        "Sometimes we're rewarded for being generous, when throwing coins into the water.",
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary..."
     ],
     "Testing": ["Guys: 1", "Guys: Test"],
+}
+
+const ONE_MINUTE = 60
+
+// In seconds
+export const eventTimes: EventTimes = {
+    "Travelling merchant": ONE_MINUTE * 10,
+    "Arkaneo": 39,
+    "Jellyfish": ONE_MINUTE * 2,
+    "Whale": ONE_MINUTE * 2,
+    "Sea Monster": ONE_MINUTE * 2,
+    "Whirlpool": ONE_MINUTE * 5,
+    "Treasure Turtle": ONE_MINUTE * 5,
+    "Testing": 5
 }

@@ -7,8 +7,7 @@ import axios from "axios";
 import "./index.html";
 import "./appconfig.json";
 import "./icon.png";
-import "./settingsbutton.png"
-import { Events, events } from "./events"
+import { Events, EventKeys, events, eventTimes } from "./events"
 
 
 const chatbox = new ChatBoxReader();
@@ -58,14 +57,35 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             if (matchingEvent) {
                 // Send the combined text to the server
                 try {
-                    await axios.post("http://127.0.0.1:5000/send_webhook", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        event: matchingEvent,
-                        world: alt1.currentWorld
-                    });
+                    const current_world = alt1.currentWorld
+                    const response = await axios.post(
+                        "http://18.169.241.92:8080/send_webhook", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            event: matchingEvent,
+                            world: current_world
+                        }
+                    );
+
+                    if (response.status === 201) {
+                        const eventTime = eventTimes[matchingEvent]
+                        const response = await axios.post(
+                            "http://18.169.241.92:8080/clear_event_timer", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                event: matchingEvent,
+                                world: current_world,
+                                timeout: eventTime
+                            }
+                        )
+                        if (response.status != 200) {
+                            console.log(`There was no ${matchingEvent}_${current_world} in the server cache.`)
+                        }
+                    }
                 } catch (err) {
                     console.log(1, err)
                 }
@@ -75,7 +95,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 }
 
 // Helper function to check if the line contains a keyword from the events object
-function getMatchingEvent(lineText: string, events: Events): string | null {
+function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
     // Define the regex pattern to match the line format
     const regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
 
@@ -89,7 +109,7 @@ function getMatchingEvent(lineText: string, events: Events): string | null {
         for (const phrase of phrases) {
             // Check if the lineText includes any of the phrases
             if (lineText.includes(phrase)) {
-                return eventKey; // Return the event key if a phrase matches
+                return eventKey as EventKeys; // Return the event key if a phrase matches
             }
         }
     }
