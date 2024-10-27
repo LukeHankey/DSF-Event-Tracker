@@ -118,7 +118,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     }
                 } catch (err) {
-                    console.log(1, err)
+                    console.log("Duplicate event - ignoring.")
                 }
             }
         }
