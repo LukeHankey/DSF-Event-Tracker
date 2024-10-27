@@ -20,6 +20,15 @@ chatbox.readargs.colors.push(
 
 // Define a variable to hold the interval ID
 let captureInterval;
+let previousMainContent;
+
+const capturePhrases = [
+    "You need to run this page in alt1 to capture the screen.",
+    "Page is not installed as an app or permissions are not correct.",
+    "Could not find chat box.",
+    "RuneScape window has lost focus. Auto-capturing has paused.",
+
+]
 
 // Capture function to get the screen image
 export function capture() {
@@ -41,6 +50,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (!chatData) {
         document.querySelector('#mainTab p').textContent = "Could not find chat box."
         return;
+    }
+
+    if (document.querySelector('#mainTab p').textContent === "Could not find chat box.") {
+        document.querySelector('#mainTab p').innerHTML = previousMainContent
     }
 
     var lines = chatbox.read(); // Read lines from the detected chat box
@@ -137,19 +150,23 @@ function stopCapturing(): void {
 // Check if we are running inside alt1
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
+    previousMainContent = document.querySelector('#mainTab p').innerHTML;
     startCapturing(); // Start capturing when Alt1 is identified
 } else {
     let addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-    document.querySelector('#mainTab p').innerHTML = `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`
+    document.querySelector('#mainTab p').innerHTML = `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
 }
 
 // Handle RuneScape game window focus and blur events using Alt1 API
 a1lib.on("rsfocus", () => {
     startCapturing(); // Start capturing when the RuneScape game window is focused
-    document.querySelector('#mainTab p').textContent = "Welcome to the DSF Event Tracker! This is the main page."
+    document.querySelector('#mainTab p').innerHTML = previousMainContent;
 });
 
 a1lib.on("rsblur", () => {
     stopCapturing(); // Stop capturing when the RuneScape game window loses focus
-    document.querySelector('#mainTab p').textContent = "RuneScape window has lost focus. Auto-capturing has paused."
+    if (!capturePhrases.includes(previousMainContent)) {
+        previousMainContent = document.querySelector('#mainTab p').innerHTML;
+    }
+    document.querySelector('#mainTab p').innerHTML = "RuneScape window has lost focus. Auto-capturing has paused.";
 });
