@@ -125,6 +125,15 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     }
 }
 
+// Helper function to check similarity between two strings based on word matches
+function getSimilarity(text: string, phrase: string): number {
+    const textWords = text.toLowerCase().split(/\s+/);
+    const phraseWords = phrase.toLowerCase().split(/\s+/);
+    
+    const matches = phraseWords.filter(word => textWords.includes(word)).length;
+    return (matches / phraseWords.length) * 100; // Similarity percentage
+}
+
 // Helper function to check if the line contains a keyword from the events object
 function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
     // Define the regex pattern to match the line format
@@ -139,7 +148,7 @@ function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
     for (const [eventKey, phrases] of Object.entries(events)) {
         for (const phrase of phrases) {
             // Check if the lineText includes any of the phrases
-            if (lineText.includes(phrase)) {
+            if (lineText.includes(phrase) || getSimilarity(lineText, phrase) >= 60) {
                 return eventKey as EventKeys; // Return the event key if a phrase matches
             }
         }
