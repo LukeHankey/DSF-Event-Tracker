@@ -162,11 +162,6 @@ function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
     return null; // Return null if no match is found
 }
 
-// Function to convert RGB array to a hex color code
-function rgbToHex([r, g, b]: [number, number, number]): string {
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-}
-
 // Function to start capturing
 function startCapturing(): void {
     if (captureInterval) return; // Prevent starting multiple intervals
