@@ -139,9 +139,14 @@ function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
     // Define the regex pattern to match the line format
     const regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
 
-    // Check if the lineText matches the regex
+    // Check if the lineText matches the regex or is a testing event
     if (!regex.test(lineText) && !events["Testing"].some(phrase => lineText.includes(phrase))) {
         return null; // Return null if the format does not match
+    }
+
+    // Chop 'Misty: '
+    if (lineText.startsWith("Misty: ")) {
+        lineText = lineText.slice(7)
     }
 
     // Loop through the events object
