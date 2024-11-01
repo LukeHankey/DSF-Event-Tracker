@@ -1,6 +1,6 @@
 // alt1 base libs, provides all the commonly used methods for image matching and capture
 import * as a1lib from "alt1";
-import ChatBoxReader from "@alt1/chatbox";
+import ChatBoxReader from "alt1/chatbox";
 import axios from "axios";
 
 // Import necessary files

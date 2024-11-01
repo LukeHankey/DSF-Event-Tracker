@@ -4,9 +4,7 @@
 		"watch": "webpack --watch"
 	},
 	"dependencies": {
-		"@alt1/base": "^1.0.0-alpha.7",
-		"@alt1/chatbox": "^1.0.0-alpha.7",
-		"alt1": "^0.0.1",
+		"alt1": "^0.0.9",
 		"axios": "^1.7.7"
 	},
 	"devDependencies": {
