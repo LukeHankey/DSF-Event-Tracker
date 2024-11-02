@@ -77,6 +77,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Origin": document.location.href,
                             },
                             event: matchingEvent,
                             world: current_world
@@ -84,7 +85,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     );
 
                     const mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
-                    const content = `A ${matchingEvent} is active on world ${current_world}!`
+                    const content = `A ${matchingEvent} spawned on world ${current_world} at ${time}.`
 
                     // Main element, event element, suggestion/report element
                     if (mainTabPs.length === 3) {
@@ -104,14 +105,13 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
+                                    "Origin": document.location.href,
                                 },
                                 event: matchingEvent,
                                 world: current_world,
                                 timeout: eventTime
                             }
                         )
-
-                        mainTabPs[1].textContent = `A ${matchingEvent} spawned on world ${current_world} at ${time}.`
 
                         if (response.status != 200) {
                             console.log(`There was no ${matchingEvent}_${current_world} in the server cache.`)
