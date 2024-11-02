@@ -77,6 +77,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Origin": document.location.href,
                             },
                             event: matchingEvent,
                             world: current_world
@@ -104,6 +105,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
+                                    "Origin": document.location.href,
                                 },
                                 event: matchingEvent,
                                 world: current_world,
