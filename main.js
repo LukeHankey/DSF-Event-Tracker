@@ -9068,7 +9068,7 @@ function readChatFromImage(img) {
                 case 2:
                     _a.trys.push([2, 6, , 7]);
                     current_world = alt1.currentWorld;
-                    return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://18.169.241.92/send_webhook", {
+                    return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -9093,7 +9093,7 @@ function readChatFromImage(img) {
                     }
                     if (!(response.status === 201)) return [3 /*break*/, 5];
                     eventTime = _events__WEBPACK_IMPORTED_MODULE_3__.eventTimes[matchingEvent];
-                    return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://18.169.241.92/clear_event_timer", {
+                    return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/clear_event_timer", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
