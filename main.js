@@ -9072,6 +9072,7 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Origin": "https://lukehankey.github.io/DSF-Event-Tracker/",
                             },
                             event: matchingEvent,
                             world: current_world
@@ -9079,7 +9080,7 @@ function readChatFromImage(img) {
                 case 3:
                     response = _a.sent();
                     mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
-                    content = "A ".concat(matchingEvent, " is active on world ").concat(current_world, "!");
+                    content = "A ".concat(matchingEvent, " spawned on world ").concat(current_world, " at ").concat(time, ".");
                     // Main element, event element, suggestion/report element
                     if (mainTabPs.length === 3) {
                         eventP = mainTabPs[1];
@@ -9096,6 +9097,7 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Origin": "https://lukehankey.github.io/DSF-Event-Tracker/",
                             },
                             event: matchingEvent,
                             world: current_world,
@@ -9103,7 +9105,6 @@ function readChatFromImage(img) {
                         })];
                 case 4:
                     response_1 = _a.sent();
-                    mainTabPs[1].textContent = "A ".concat(matchingEvent, " spawned on world ").concat(current_world, " at ").concat(time, ".");
                     if (response_1.status != 200) {
                         console.log("There was no ".concat(matchingEvent, "_").concat(current_world, " in the server cache."));
                     }
@@ -9111,6 +9112,7 @@ function readChatFromImage(img) {
                 case 5: return [3 /*break*/, 7];
                 case 6:
                     err_1 = _a.sent();
+                    console.log(err_1);
                     console.log("Duplicate event - ignoring.");
                     return [3 /*break*/, 7];
                 case 7:
