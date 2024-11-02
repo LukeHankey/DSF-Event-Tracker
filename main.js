@@ -9072,7 +9072,7 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": "https://lukehankey.github.io/DSF-Event-Tracker/",
+                                "Origin": document.location.href,
                             },
                             event: matchingEvent,
                             world: current_world
@@ -9097,7 +9097,7 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": "https://lukehankey.github.io/DSF-Event-Tracker/",
+                                "Origin": document.location.href,
                             },
                             event: matchingEvent,
                             world: current_world,
@@ -9112,7 +9112,6 @@ function readChatFromImage(img) {
                 case 5: return [3 /*break*/, 7];
                 case 6:
                     err_1 = _a.sent();
-                    console.log(err_1);
                     console.log("Duplicate event - ignoring.");
                     return [3 /*break*/, 7];
                 case 7:
