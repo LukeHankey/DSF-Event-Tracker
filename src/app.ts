@@ -30,14 +30,6 @@ if (DEBUG) {
     ORIGIN = document.location.href
 }
 
-const capturePhrases = [
-    "You need to run this page in alt1 to capture the screen.",
-    "Page is not installed as an app or permissions are not correct.",
-    "Could not find chat box.",
-    "RuneScape window has lost focus. Auto-capturing has paused.",
-
-]
-
 // Capture function to get the screen image
 export function capture() {
     if (!window.alt1) {
@@ -201,12 +193,4 @@ if (window.alt1) {
 a1lib.on("rsfocus", () => {
     startCapturing(); // Start capturing when the RuneScape game window is focused
     document.querySelector('#mainTab p').innerHTML = previousMainContent;
-});
-
-a1lib.on("rsblur", () => {
-    stopCapturing(); // Stop capturing when the RuneScape game window loses focus
-    if (!capturePhrases.includes(previousMainContent)) {
-        previousMainContent = document.querySelector('#mainTab p').innerHTML;
-    }
-    document.querySelector('#mainTab p').innerHTML = "RuneScape window has lost focus. Auto-capturing has paused.";
 });
