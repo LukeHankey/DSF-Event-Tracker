@@ -48,8 +48,12 @@ export function capture() {
         document.querySelector('#mainTab p').textContent = "Page is not installed as an app or permissions are not correct."
         return;
     }
-    var img = a1lib.captureHoldFullRs();
-    readChatFromImage(img);
+    try {
+        var img = a1lib.captureHoldFullRs();
+        readChatFromImage(img);
+    } catch (err) {
+        console.log("Failed to capture screen")
+    }
 }
 
 // Function to read chat messages from the image and display colored text
