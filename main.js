@@ -9019,19 +9019,13 @@ alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]));
 var captureInterval;
 var previousMainContent;
 var ORIGIN;
-var DEBUG = true;
+var DEBUG = false;
 if (DEBUG) {
     ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
 }
 else {
     ORIGIN = document.location.href;
 }
-var capturePhrases = [
-    "You need to run this page in alt1 to capture the screen.",
-    "Page is not installed as an app or permissions are not correct.",
-    "Could not find chat box.",
-    "RuneScape window has lost focus. Auto-capturing has paused.",
-];
 // Capture function to get the screen image
 function capture() {
     if (!window.alt1) {
@@ -9060,11 +9054,9 @@ function readChatFromImage(img) {
                     chatData = chatbox.find(img);
                     if (!chatData) {
                         document.querySelector('#mainTab p').textContent = "Could not find chat box.";
-                        console.log("No chat box found");
                         return [2 /*return*/];
                     }
                     if (document.querySelector('#mainTab p').textContent === "Could not find chat box.") {
-                        console.log(1, previousMainContent);
                         document.querySelector('#mainTab p').innerHTML = previousMainContent;
                     }
                     lines = chatbox.read();
@@ -9196,11 +9188,6 @@ alt1__WEBPACK_IMPORTED_MODULE_5__.on("rsfocus", function () {
     startCapturing(); // Start capturing when the RuneScape game window is focused
     document.querySelector('#mainTab p').innerHTML = previousMainContent;
 });
-// a1lib.on("rsblur", () => {
-//     if (!capturePhrases.includes(previousMainContent)) {
-//         previousMainContent = document.querySelector('#mainTab p').innerHTML;
-//     }
-// });
 
 })();
 
