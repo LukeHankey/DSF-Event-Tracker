@@ -9181,11 +9181,9 @@ alt1__WEBPACK_IMPORTED_MODULE_5__.on("rsfocus", function () {
     document.querySelector('#mainTab p').innerHTML = previousMainContent;
 });
 alt1__WEBPACK_IMPORTED_MODULE_5__.on("rsblur", function () {
-    stopCapturing(); // Stop capturing when the RuneScape game window loses focus
     if (!capturePhrases.includes(previousMainContent)) {
         previousMainContent = document.querySelector('#mainTab p').innerHTML;
     }
-    document.querySelector('#mainTab p').innerHTML = "RuneScape window has lost focus. Auto-capturing has paused.";
 });
 
 })();
