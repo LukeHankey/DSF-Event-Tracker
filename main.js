@@ -9018,6 +9018,14 @@ alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]));
 // Define a variable to hold the interval ID
 var captureInterval;
 var previousMainContent;
+var ORIGIN;
+var DEBUG = true;
+if (DEBUG) {
+    ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
+}
+else {
+    ORIGIN = document.location.href;
+}
 var capturePhrases = [
     "You need to run this page in alt1 to capture the screen.",
     "Page is not installed as an app or permissions are not correct.",
@@ -9034,8 +9042,13 @@ function capture() {
         document.querySelector('#mainTab p').textContent = "Page is not installed as an app or permissions are not correct.";
         return;
     }
-    var img = alt1__WEBPACK_IMPORTED_MODULE_5__.captureHoldFullRs();
-    readChatFromImage(img);
+    try {
+        var img = alt1__WEBPACK_IMPORTED_MODULE_5__.captureHoldFullRs();
+        readChatFromImage(img);
+    }
+    catch (err) {
+        console.log("Failed to capture screen");
+    }
 }
 // Function to read chat messages from the image and display colored text
 function readChatFromImage(img) {
@@ -9047,9 +9060,11 @@ function readChatFromImage(img) {
                     chatData = chatbox.find(img);
                     if (!chatData) {
                         document.querySelector('#mainTab p').textContent = "Could not find chat box.";
+                        console.log("No chat box found");
                         return [2 /*return*/];
                     }
                     if (document.querySelector('#mainTab p').textContent === "Could not find chat box.") {
+                        console.log(1, previousMainContent);
                         document.querySelector('#mainTab p').innerHTML = previousMainContent;
                     }
                     lines = chatbox.read();
@@ -9072,10 +9087,11 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": document.location.href,
+                                "Origin": ORIGIN,
                             },
                             event: matchingEvent,
-                            world: current_world
+                            world: current_world,
+                            debug: DEBUG,
                         })];
                 case 3:
                     response = _a.sent();
@@ -9097,7 +9113,7 @@ function readChatFromImage(img) {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": document.location.href,
+                                "Origin": ORIGIN,
                             },
                             event: matchingEvent,
                             world: current_world,
@@ -9180,11 +9196,11 @@ alt1__WEBPACK_IMPORTED_MODULE_5__.on("rsfocus", function () {
     startCapturing(); // Start capturing when the RuneScape game window is focused
     document.querySelector('#mainTab p').innerHTML = previousMainContent;
 });
-alt1__WEBPACK_IMPORTED_MODULE_5__.on("rsblur", function () {
-    if (!capturePhrases.includes(previousMainContent)) {
-        previousMainContent = document.querySelector('#mainTab p').innerHTML;
-    }
-});
+// a1lib.on("rsblur", () => {
+//     if (!capturePhrases.includes(previousMainContent)) {
+//         previousMainContent = document.querySelector('#mainTab p').innerHTML;
+//     }
+// });
 
 })();
 
