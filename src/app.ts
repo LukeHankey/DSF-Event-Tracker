@@ -22,7 +22,7 @@ chatbox.readargs.colors.push(
 let captureInterval;
 let previousMainContent;
 let ORIGIN;
-const DEBUG = true
+const DEBUG = false
 
 if (DEBUG) {
     ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/"
