@@ -21,14 +21,14 @@ chatbox.readargs.colors.push(
 // Define a variable to hold the interval ID
 let captureInterval;
 let previousMainContent;
+let ORIGIN;
+const DEBUG = true
 
-const capturePhrases = [
-    "You need to run this page in alt1 to capture the screen.",
-    "Page is not installed as an app or permissions are not correct.",
-    "Could not find chat box.",
-    "RuneScape window has lost focus. Auto-capturing has paused.",
-
-]
+if (DEBUG) {
+    ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/"
+} else {
+    ORIGIN = document.location.href
+}
 
 // Capture function to get the screen image
 export function capture() {
@@ -40,8 +40,12 @@ export function capture() {
         document.querySelector('#mainTab p').textContent = "Page is not installed as an app or permissions are not correct."
         return;
     }
-    var img = a1lib.captureHoldFullRs();
-    readChatFromImage(img);
+    try {
+        var img = a1lib.captureHoldFullRs();
+        readChatFromImage(img);
+    } catch (err) {
+        console.log("Failed to capture screen")
+    }
 }
 
 // Function to read chat messages from the image and display colored text
@@ -77,10 +81,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": document.location.href,
+                                "Origin": ORIGIN,
                             },
                             event: matchingEvent,
-                            world: current_world
+                            world: current_world,
+                            debug: DEBUG,
                         }
                     );
 
@@ -105,7 +110,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    "Origin": document.location.href,
+                                    "Origin": ORIGIN,
                                 },
                                 event: matchingEvent,
                                 world: current_world,
@@ -188,12 +193,4 @@ if (window.alt1) {
 a1lib.on("rsfocus", () => {
     startCapturing(); // Start capturing when the RuneScape game window is focused
     document.querySelector('#mainTab p').innerHTML = previousMainContent;
-});
-
-a1lib.on("rsblur", () => {
-    stopCapturing(); // Stop capturing when the RuneScape game window loses focus
-    if (!capturePhrases.includes(previousMainContent)) {
-        previousMainContent = document.querySelector('#mainTab p').innerHTML;
-    }
-    document.querySelector('#mainTab p').innerHTML = "RuneScape window has lost focus. Auto-capturing has paused.";
 });
