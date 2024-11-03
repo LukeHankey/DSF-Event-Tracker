@@ -21,6 +21,14 @@ chatbox.readargs.colors.push(
 // Define a variable to hold the interval ID
 let captureInterval;
 let previousMainContent;
+let ORIGIN;
+const DEBUG = true
+
+if (DEBUG) {
+    ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/"
+} else {
+    ORIGIN = document.location.href
+}
 
 const capturePhrases = [
     "You need to run this page in alt1 to capture the screen.",
@@ -77,10 +85,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                "Origin": document.location.href,
+                                "Origin": ORIGIN,
                             },
                             event: matchingEvent,
-                            world: current_world
+                            world: current_world,
+                            debug: DEBUG,
                         }
                     );
 
@@ -105,7 +114,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    "Origin": document.location.href,
+                                    "Origin": ORIGIN,
                                 },
                                 event: matchingEvent,
                                 world: current_world,
