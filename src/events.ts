@@ -61,7 +61,7 @@ export const events: Events = {
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary..."
     ],
-    "Testing": ["Guys: 1", "Guys: Test"],
+    "Testing": ["Guys: 1", "Guys: Test", "Guys: Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
 }
 
 const ONE_MINUTE = 60
