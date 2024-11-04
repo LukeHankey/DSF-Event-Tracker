@@ -62,19 +62,29 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector('#mainTab p').innerHTML = previousMainContent
     }
 
-    var lines = chatbox.read(); // Read lines from the detected chat box
+    const lines = chatbox.read(); // Read lines from the detected chat box
+    if (!hasTimestamps) lines.some(line => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text)) ? hasTimestamps = true : hasTimestamps = false
+
+    let combinedText = ""
+    let recentTimestamp: null | string = null;
     if (lines?.length) {
         for (const line of lines) {
             console.log(line)
             
             // If any keyword was found in any fragment, collect all fragment texts
             const allTextFromLine = line.fragments.map(fragment => fragment.text).join(""); // Join all fragment texts
-            
+            combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine
+
+            if (hasTimestamps && line.fragments.length > 1) {
+                recentTimestamp = line.fragments[1].text
+            }
+
             // Check if the text contains any keywords from the 'events' object
-            const matchingEvent = getMatchingEvent(allTextFromLine, events);
-            
-            if (matchingEvent) {
-                const time = line.fragments[1].text
+            const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
+
+            if (matchingEvent && !partialMatch) {
+                const time = line.fragments[1]?.text ?? recentTimestamp
+
                 // Send the combined text to the server
                 try {
                     const current_world = alt1.currentWorld
@@ -127,46 +137,46 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 } catch (err) {
                     console.log("Duplicate event - ignoring.")
                 }
+            } else if (!partialMatch) {
+                console.log("reset")
+                combinedText = ""
             }
         }
     }
 }
 
-// Helper function to check similarity between two strings based on word matches
-function getSimilarity(text: string, phrase: string): number {
-    const textWords = text.toLowerCase().split(/\s+/);
-    const phraseWords = phrase.toLowerCase().split(/\s+/);
-    
-    const matches = phraseWords.filter(word => textWords.includes(word)).length;
-    return (matches / phraseWords.length) * 100; // Similarity percentage
-}
-
 // Helper function to check if the line contains a keyword from the events object
-function getMatchingEvent(lineText: string, events: Events): EventKeys | null {
+function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys] | [boolean, null] {
     // Define the regex pattern to match the line format
     const regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
+    const timeRegex = /\[\d{2}:\d{2}:\d{2}\]/;
+
+    // Chop '[hh:mm:ss] '
+    if (timeRegex.test(lineText)) lineText = lineText.slice(11)
 
     // Check if the lineText matches the regex or is a testing event
-    if (!regex.test(lineText) && !events["Testing"].some(phrase => lineText.includes(phrase))) {
-        return null; // Return null if the format does not match
+    if (!regex.test(lineText) && !events["Testing"].some(phrase => phrase.includes(lineText))) {
+        return [false, null]; // Return null if the format does not match
     }
 
     // Chop 'Misty: '
-    if (lineText.startsWith("Misty: ")) {
-        lineText = lineText.slice(7)
-    }
+    if (lineText.startsWith("Misty: ")) lineText = lineText.slice(7)
 
     // Loop through the events object
     for (const [eventKey, phrases] of Object.entries(events)) {
         for (const phrase of phrases) {
-            // Check if the lineText includes any of the phrases
-            if (lineText.includes(phrase) || getSimilarity(lineText, phrase) >= 60) {
-                return eventKey as EventKeys; // Return the event key if a phrase matches
+            // Check if the lineText equals any of the phrases
+            if (lineText === phrase) {
+                return [false, eventKey as EventKeys]; // Return the event key if a phrase matches
+            }
+
+            if (phrase.includes(lineText)) {
+                return [true, eventKey as EventKeys];
             }
         }
     }
     
-    return null; // Return null if no match is found
+    return [false, null]; // Return null if no match is found
 }
 
 // Function to start capturing
