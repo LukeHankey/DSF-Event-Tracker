@@ -76,7 +76,7 @@ var events = {
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary..."
     ],
-    "Testing": ["Guys: 1", "Guys: Test"],
+    "Testing": ["Guys: 1", "Guys: Test", "Guys: Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
 };
 var ONE_MINUTE = 60;
 // In seconds
@@ -9018,13 +9018,12 @@ alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]));
 // Define a variable to hold the interval ID
 var captureInterval;
 var previousMainContent;
-var ORIGIN;
+var hasTimestamps;
+var ORIGIN = document.location.href;
+// DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 var DEBUG = false;
 if (DEBUG) {
     ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
-}
-else {
-    ORIGIN = document.location.href;
 }
 // Capture function to get the screen image
 function capture() {
@@ -9047,9 +9046,10 @@ function capture() {
 // Function to read chat messages from the image and display colored text
 function readChatFromImage(img) {
     return __awaiter(this, void 0, void 0, function () {
-        var chatData, lines, _i, lines_1, line, allTextFromLine, matchingEvent, time, current_world, response, mainTabPs, content, eventP, eventP, eventTime, response_1, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var chatData, lines, combinedText, recentTimestamp, _i, lines_1, line, allTextFromLine, _a, partialMatch, matchingEvent, time, current_world, response, mainTabPs, content, eventP, eventP, eventTime, response_1, err_1;
+        var _b, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     chatData = chatbox.find(img);
                     if (!chatData) {
@@ -9060,20 +9060,28 @@ function readChatFromImage(img) {
                         document.querySelector('#mainTab p').innerHTML = previousMainContent;
                     }
                     lines = chatbox.read();
-                    if (!(lines === null || lines === void 0 ? void 0 : lines.length)) return [3 /*break*/, 8];
+                    if (!hasTimestamps)
+                        lines.some(function (line) { return line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text); }) ? hasTimestamps = true : hasTimestamps = false;
+                    combinedText = "";
+                    recentTimestamp = null;
+                    if (!(lines === null || lines === void 0 ? void 0 : lines.length)) return [3 /*break*/, 10];
                     _i = 0, lines_1 = lines;
-                    _a.label = 1;
+                    _d.label = 1;
                 case 1:
-                    if (!(_i < lines_1.length)) return [3 /*break*/, 8];
+                    if (!(_i < lines_1.length)) return [3 /*break*/, 10];
                     line = lines_1[_i];
                     console.log(line);
                     allTextFromLine = line.fragments.map(function (fragment) { return fragment.text; }).join("");
-                    matchingEvent = getMatchingEvent(allTextFromLine, _events__WEBPACK_IMPORTED_MODULE_3__.events);
-                    if (!matchingEvent) return [3 /*break*/, 7];
-                    time = line.fragments[1].text;
-                    _a.label = 2;
+                    combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine;
+                    if (hasTimestamps && line.fragments.length > 1) {
+                        recentTimestamp = line.fragments[1].text;
+                    }
+                    _a = getMatchingEvent(combinedText, _events__WEBPACK_IMPORTED_MODULE_3__.events), partialMatch = _a[0], matchingEvent = _a[1];
+                    if (!(matchingEvent && !partialMatch)) return [3 /*break*/, 8];
+                    time = (_c = (_b = line.fragments[1]) === null || _b === void 0 ? void 0 : _b.text) !== null && _c !== void 0 ? _c : recentTimestamp;
+                    _d.label = 2;
                 case 2:
-                    _a.trys.push([2, 6, , 7]);
+                    _d.trys.push([2, 6, , 7]);
                     current_world = alt1.currentWorld;
                     return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
                             method: 'POST',
@@ -9086,7 +9094,7 @@ function readChatFromImage(img) {
                             debug: DEBUG,
                         })];
                 case 3:
-                    response = _a.sent();
+                    response = _d.sent();
                     mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
                     content = "A ".concat(matchingEvent, " spawned on world ").concat(current_world, " at ").concat(time, ".");
                     // Main element, event element, suggestion/report element
@@ -9112,55 +9120,61 @@ function readChatFromImage(img) {
                             timeout: eventTime
                         })];
                 case 4:
-                    response_1 = _a.sent();
+                    response_1 = _d.sent();
                     if (response_1.status != 200) {
                         console.log("There was no ".concat(matchingEvent, "_").concat(current_world, " in the server cache."));
                     }
-                    _a.label = 5;
+                    _d.label = 5;
                 case 5: return [3 /*break*/, 7];
                 case 6:
-                    err_1 = _a.sent();
+                    err_1 = _d.sent();
                     console.log("Duplicate event - ignoring.");
                     return [3 /*break*/, 7];
-                case 7:
+                case 7: return [3 /*break*/, 9];
+                case 8:
+                    if (!partialMatch) {
+                        console.log("reset");
+                        combinedText = "";
+                    }
+                    _d.label = 9;
+                case 9:
                     _i++;
                     return [3 /*break*/, 1];
-                case 8: return [2 /*return*/];
+                case 10: return [2 /*return*/];
             }
         });
     });
-}
-// Helper function to check similarity between two strings based on word matches
-function getSimilarity(text, phrase) {
-    var textWords = text.toLowerCase().split(/\s+/);
-    var phraseWords = phrase.toLowerCase().split(/\s+/);
-    var matches = phraseWords.filter(function (word) { return textWords.includes(word); }).length;
-    return (matches / phraseWords.length) * 100; // Similarity percentage
 }
 // Helper function to check if the line contains a keyword from the events object
 function getMatchingEvent(lineText, events) {
     // Define the regex pattern to match the line format
     var regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
+    var timeRegex = /\[\d{2}:\d{2}:\d{2}\]/;
+    // Chop '[hh:mm:ss] '
+    if (timeRegex.test(lineText))
+        lineText = lineText.slice(11);
     // Check if the lineText matches the regex or is a testing event
-    if (!regex.test(lineText) && !events["Testing"].some(function (phrase) { return lineText.includes(phrase); })) {
-        return null; // Return null if the format does not match
+    if (!regex.test(lineText) && !events["Testing"].some(function (phrase) { return phrase.includes(lineText); })) {
+        return [false, null]; // Return null if the format does not match
     }
     // Chop 'Misty: '
-    if (lineText.startsWith("Misty: ")) {
+    if (lineText.startsWith("Misty: "))
         lineText = lineText.slice(7);
-    }
     // Loop through the events object
     for (var _i = 0, _a = Object.entries(events); _i < _a.length; _i++) {
         var _b = _a[_i], eventKey = _b[0], phrases = _b[1];
         for (var _c = 0, phrases_1 = phrases; _c < phrases_1.length; _c++) {
             var phrase = phrases_1[_c];
-            // Check if the lineText includes any of the phrases
-            if (lineText.includes(phrase) || getSimilarity(lineText, phrase) >= 60) {
-                return eventKey; // Return the event key if a phrase matches
+            // Check if the lineText equals any of the phrases
+            if (lineText === phrase) {
+                return [false, eventKey]; // Return the event key if a phrase matches
+            }
+            if (phrase.includes(lineText)) {
+                return [true, eventKey];
             }
         }
     }
-    return null; // Return null if no match is found
+    return [false, null]; // Return null if no match is found
 }
 // Function to start capturing
 function startCapturing() {
