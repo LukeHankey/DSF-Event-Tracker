@@ -19,15 +19,16 @@ chatbox.readargs.colors.push(
 );
 
 // Define a variable to hold the interval ID
-let captureInterval;
-let previousMainContent;
-let ORIGIN;
+let captureInterval: NodeJS.Timeout;
+let previousMainContent: string;
+let hasTimestamps: boolean;
+let ORIGIN = document.location.href
+
+// DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 const DEBUG = false
 
 if (DEBUG) {
     ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/"
-} else {
-    ORIGIN = document.location.href
 }
 
 // Capture function to get the screen image
@@ -48,9 +49,10 @@ export function capture() {
     }
 }
 
+
 // Function to read chat messages from the image and display colored text
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
-    var chatData = chatbox.find(img); // Find chat boxes in the image
+    const chatData = chatbox.find(img); // Find chat boxes in the image
     if (!chatData) {
         document.querySelector('#mainTab p').textContent = "Could not find chat box."
         return;
