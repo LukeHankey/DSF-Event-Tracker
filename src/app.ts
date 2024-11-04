@@ -146,7 +146,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 }
 
 // Helper function to check if the line contains a keyword from the events object
-function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys] | [boolean, null] {
+function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys | null] {
     // Define the regex pattern to match the line format
     const regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
     const timeRegex = /\[\d{2}:\d{2}:\d{2}\]/;
