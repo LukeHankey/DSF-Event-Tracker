@@ -71,13 +71,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         for (const line of lines) {
             console.log(line)
             
-            // If any keyword was found in any fragment, collect all fragment texts
-            const allTextFromLine = line.fragments.map(fragment => fragment.text).join(""); // Join all fragment texts
+            const allTextFromLine = line.text
             combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine
 
-            if (hasTimestamps && line.fragments.length > 1) {
-                recentTimestamp = line.fragments[1].text
-            }
+            if (hasTimestamps && line.fragments.length > 1) recentTimestamp = line.fragments[1].text
 
             // Check if the text contains any keywords from the 'events' object
             const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
@@ -138,7 +135,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     console.log("Duplicate event - ignoring.")
                 }
             } else if (!partialMatch) {
-                console.log("reset")
                 combinedText = ""
             }
         }
