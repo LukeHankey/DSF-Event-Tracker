@@ -85,8 +85,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 const time = line.fragments[1]?.text ?? recentTimestamp
 
                 // Send the combined text to the server
+                const current_world = alt1.currentWorld
                 try {
-                    const current_world = alt1.currentWorld
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
                             method: 'POST',
@@ -134,7 +134,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     }
                 } catch (err) {
-                    console.log("Duplicate event - ignoring.")
+                    console.log(`Duplicate event - ignoring ${matchingEvent} on ${current_world}`)
                 }
             } else if (!partialMatch) {
                 combinedText = ""
