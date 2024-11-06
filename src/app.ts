@@ -22,7 +22,8 @@ chatbox.readargs.colors.push(
 let captureInterval: NodeJS.Timeout;
 let previousMainContent: string;
 let hasTimestamps: boolean;
-let ORIGIN = document.location.href
+let lastChatMessage = "";
+let ORIGIN = document.location.href;
 
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 const DEBUG = false
@@ -69,6 +70,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     let recentTimestamp: null | string = null;
     if (lines?.length) {
         for (const line of lines) {
+            lastChatMessage = line.text
             console.log(line)
             
             const allTextFromLine = line.text
