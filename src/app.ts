@@ -22,7 +22,7 @@ chatbox.readargs.colors.push(
 let captureInterval: NodeJS.Timeout;
 let previousMainContent: string;
 let hasTimestamps: boolean;
-let lastChatMessage = "";
+let lastTimestamp: Date;
 let ORIGIN = document.location.href;
 
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
