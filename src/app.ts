@@ -22,7 +22,9 @@ chatbox.readargs.colors.push(
 let captureInterval: NodeJS.Timeout;
 let previousMainContent: string;
 let hasTimestamps: boolean;
-let ORIGIN = document.location.href
+let lastTimestamp: Date;
+let lastMessage: string;
+let ORIGIN = document.location.href;
 
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 const DEBUG = false
@@ -62,22 +64,29 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector('#mainTab p').innerHTML = previousMainContent
     }
 
-    const lines = chatbox.read(); // Read lines from the detected chat box
+    let lines = chatbox.read(); // Read lines from the detected chat box
     if (!hasTimestamps) lines.some(line => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text)) ? hasTimestamps = true : hasTimestamps = false
 
     let combinedText = ""
     let recentTimestamp: null | string = null;
     if (lines?.length) {
+        // Remove blank lines
+        if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
+        
+        // Remove all messages which are not older than the lastTimestamp
+        // Messages will not be sent if there are messages which are sent at the same time!
+        if (lastTimestamp) lines = lines.filter(line => new Date(`${new Date().toLocaleDateString()} ` + line.fragments[1]?.text) >= lastTimestamp)
+
         for (const line of lines) {
+            if (line.text === lastMessage) continue
+            lastMessage = line.text
             console.log(line)
             
-            // If any keyword was found in any fragment, collect all fragment texts
-            const allTextFromLine = line.fragments.map(fragment => fragment.text).join(""); // Join all fragment texts
+            const allTextFromLine = line.text
             combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine
-
-            if (hasTimestamps && line.fragments.length > 1) {
-                recentTimestamp = line.fragments[1].text
-            }
+            
+            if (hasTimestamps && line.fragments.length > 1) recentTimestamp = line.fragments[1].text
+            lastTimestamp = new Date(`${new Date().toLocaleDateString()} ` + recentTimestamp) ?? new Date()
 
             // Check if the text contains any keywords from the 'events' object
             const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
@@ -86,8 +95,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 const time = line.fragments[1]?.text ?? recentTimestamp
 
                 // Send the combined text to the server
+                const current_world = alt1.currentWorld
                 try {
-                    const current_world = alt1.currentWorld
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
                             method: 'POST',
@@ -135,10 +144,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     }
                 } catch (err) {
-                    console.log("Duplicate event - ignoring.")
+                    console.log(`Duplicate event - ignoring ${matchingEvent} on ${current_world}`)
                 }
             } else if (!partialMatch) {
-                console.log("reset")
                 combinedText = ""
             }
         }
