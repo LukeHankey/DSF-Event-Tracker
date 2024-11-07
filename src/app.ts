@@ -63,20 +63,26 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector('#mainTab p').innerHTML = previousMainContent
     }
 
-    const lines = chatbox.read(); // Read lines from the detected chat box
+    let lines = chatbox.read(); // Read lines from the detected chat box
     if (!hasTimestamps) lines.some(line => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text)) ? hasTimestamps = true : hasTimestamps = false
 
     let combinedText = ""
     let recentTimestamp: null | string = null;
     if (lines?.length) {
+        // Remove blank lines
+        if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
+        
+        // Remove all messages which are not older than the lastTimestamp
+        if (lastTimestamp) lines = lines.filter(line => new Date(`${new Date().toLocaleDateString()} ` + line.fragments[1].text) > lastTimestamp)
+
         for (const line of lines) {
-            lastChatMessage = line.text
             console.log(line)
             
             const allTextFromLine = line.text
             combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine
-
+            
             if (hasTimestamps && line.fragments.length > 1) recentTimestamp = line.fragments[1].text
+            lastTimestamp = new Date(`${new Date().toLocaleDateString()} ` + recentTimestamp) ?? new Date()
 
             // Check if the text contains any keywords from the 'events' object
             const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
