@@ -23,6 +23,7 @@ let captureInterval: NodeJS.Timeout;
 let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
+let lastMessage: string;
 let ORIGIN = document.location.href;
 
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
@@ -76,6 +77,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         if (lastTimestamp) lines = lines.filter(line => new Date(`${new Date().toLocaleDateString()} ` + line.fragments[1].text) > lastTimestamp)
 
         for (const line of lines) {
+            if (line.text === lastMessage) continue
+            lastMessage = line.text
             console.log(line)
             
             const allTextFromLine = line.text
