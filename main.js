@@ -9019,6 +9019,8 @@ alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]));
 var captureInterval;
 var previousMainContent;
 var hasTimestamps;
+var lastTimestamp;
+var lastMessage;
 var ORIGIN = document.location.href;
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 var DEBUG = false;
@@ -9047,9 +9049,9 @@ function capture() {
 function readChatFromImage(img) {
     return __awaiter(this, void 0, void 0, function () {
         var chatData, lines, combinedText, recentTimestamp, _i, lines_1, line, allTextFromLine, _a, partialMatch, matchingEvent, time, current_world, response, mainTabPs, content, eventP, eventP, eventTime, response_1, err_1;
-        var _b, _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var _b, _c, _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0:
                     chatData = chatbox.find(img);
                     if (!chatData) {
@@ -9065,24 +9067,34 @@ function readChatFromImage(img) {
                     combinedText = "";
                     recentTimestamp = null;
                     if (!(lines === null || lines === void 0 ? void 0 : lines.length)) return [3 /*break*/, 10];
+                    // Remove blank lines
+                    if (lines.some(function (line) { return line.text === ""; }))
+                        lines = lines.filter(function (line) { return line.text !== ""; });
+                    // Remove all messages which are not older than the lastTimestamp
+                    // Messages will not be sent if there are messages which are sent at the same time!
+                    if (lastTimestamp)
+                        lines = lines.filter(function (line) { var _a; return new Date("".concat(new Date().toLocaleDateString(), " ") + ((_a = line.fragments[1]) === null || _a === void 0 ? void 0 : _a.text)) >= lastTimestamp; });
                     _i = 0, lines_1 = lines;
-                    _d.label = 1;
+                    _e.label = 1;
                 case 1:
                     if (!(_i < lines_1.length)) return [3 /*break*/, 10];
                     line = lines_1[_i];
+                    if (line.text === lastMessage)
+                        return [3 /*break*/, 9];
+                    lastMessage = line.text;
                     console.log(line);
-                    allTextFromLine = line.fragments.map(function (fragment) { return fragment.text; }).join("");
+                    allTextFromLine = line.text;
                     combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine;
-                    if (hasTimestamps && line.fragments.length > 1) {
+                    if (hasTimestamps && line.fragments.length > 1)
                         recentTimestamp = line.fragments[1].text;
-                    }
+                    lastTimestamp = (_b = new Date("".concat(new Date().toLocaleDateString(), " ") + recentTimestamp)) !== null && _b !== void 0 ? _b : new Date();
                     _a = getMatchingEvent(combinedText, _events__WEBPACK_IMPORTED_MODULE_3__.events), partialMatch = _a[0], matchingEvent = _a[1];
                     if (!(matchingEvent && !partialMatch)) return [3 /*break*/, 8];
-                    time = (_c = (_b = line.fragments[1]) === null || _b === void 0 ? void 0 : _b.text) !== null && _c !== void 0 ? _c : recentTimestamp;
-                    _d.label = 2;
-                case 2:
-                    _d.trys.push([2, 6, , 7]);
+                    time = (_d = (_c = line.fragments[1]) === null || _c === void 0 ? void 0 : _c.text) !== null && _d !== void 0 ? _d : recentTimestamp;
                     current_world = alt1.currentWorld;
+                    _e.label = 2;
+                case 2:
+                    _e.trys.push([2, 6, , 7]);
                     return [4 /*yield*/, axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
                             method: 'POST',
                             headers: {
@@ -9094,7 +9106,7 @@ function readChatFromImage(img) {
                             debug: DEBUG,
                         })];
                 case 3:
-                    response = _d.sent();
+                    response = _e.sent();
                     mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
                     content = "A ".concat(matchingEvent, " spawned on world ").concat(current_world, " at ").concat(time, ".");
                     // Main element, event element, suggestion/report element
@@ -9120,23 +9132,22 @@ function readChatFromImage(img) {
                             timeout: eventTime
                         })];
                 case 4:
-                    response_1 = _d.sent();
+                    response_1 = _e.sent();
                     if (response_1.status != 200) {
                         console.log("There was no ".concat(matchingEvent, "_").concat(current_world, " in the server cache."));
                     }
-                    _d.label = 5;
+                    _e.label = 5;
                 case 5: return [3 /*break*/, 7];
                 case 6:
-                    err_1 = _d.sent();
-                    console.log("Duplicate event - ignoring.");
+                    err_1 = _e.sent();
+                    console.log("Duplicate event - ignoring ".concat(matchingEvent, " on ").concat(current_world));
                     return [3 /*break*/, 7];
                 case 7: return [3 /*break*/, 9];
                 case 8:
                     if (!partialMatch) {
-                        console.log("reset");
                         combinedText = "";
                     }
-                    _d.label = 9;
+                    _e.label = 9;
                 case 9:
                     _i++;
                     return [3 /*break*/, 1];
