@@ -1,7 +1,10 @@
 // alt1 base libs, provides all the commonly used methods for image matching and capture
 import * as a1lib from "alt1";
 import ChatBoxReader from "alt1/chatbox";
+import * as OCR from "alt1/ocr";
 import axios from "axios";
+import { webpackImages } from "alt1/base";
+import font from "alt1/fonts/aa_8px_mono.js";
 
 // Import necessary files
 import "./index.html";
@@ -18,6 +21,10 @@ chatbox.readargs.colors.push(
     a1lib.mixColor(...[0, 166, 82]),  // misty text
 );
 
+const imgs = webpackImages({
+    runescapeWorldPretext: require("./runescape_world_pretext.data.png")
+})
+
 // Define a variable to hold the interval ID
 let captureInterval: NodeJS.Timeout;
 let previousMainContent: string;
@@ -25,6 +32,7 @@ let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
 let ORIGIN = document.location.href;
+let worldHopMessage: boolean = false;
 
 // DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
 const DEBUG = false
@@ -51,10 +59,27 @@ export function capture() {
     }
 }
 
+const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefined> => {
+    const imageRef = imgs.runescapeWorldPretext
+    const pos = img.findSubimage(imageRef)
+    const buffData: ImageData = img.toData();
+    
+    let worldNumber;
+    if(pos.length) {
+        for (let match of pos) {
+            const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2)
+            worldNumber = textObj.text.match(/\d{1,3}/)
+        }
+    }
+    
+    return worldNumber
+}
+
 
 // Function to read chat messages from the image and display colored text
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
+    
     if (!chatData) {
         document.querySelector('#mainTab p').textContent = "Could not find chat box."
         return;
@@ -65,6 +90,15 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     }
 
     let lines = chatbox.read(); // Read lines from the detected chat box
+    if ((lines.length > 1 && lines.some(line => line.text.includes("Attempting to switch worlds..."))) || worldHopMessage) {
+        let worldNumber = await findWorldNumber(img)
+        if (!worldNumber) {
+            console.log("Unable to capture world number from Friends List. Make sure the interface is viewable on screen.")
+        } else {
+            sessionStorage.setItem("currentWorld", worldNumber)
+        }
+        worldHopMessage = false
+     }
     if (!hasTimestamps) lines.some(line => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text)) ? hasTimestamps = true : hasTimestamps = false
 
     let combinedText = ""
@@ -74,6 +108,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (lines?.length) {
         // Remove blank lines
         if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
+
+        lines.some(line => line.text.includes("Attempting to switch worlds...")) ? worldHopMessage = true : worldHopMessage = false
         
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
@@ -99,7 +135,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 const time = line.fragments[1]?.text ?? recentTimestamp
 
                 // Send the combined text to the server
-                const current_world = alt1.currentWorld
+                const current_world = alt1.currentWorld < 0 ? sessionStorage.getItem("currentWorld") : alt1.currentWorld
                 try {
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
