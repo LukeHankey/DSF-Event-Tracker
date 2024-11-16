@@ -9,7 +9,7 @@ As long as the alt1 app is open (can be minimized), events from Misty will be ca
 ## Requirements
 
 - **Game Messages** must be set to either Filtered or ON.
-- Please make sure the chatbox is clear of anything like buff bars overlapping.pp
+- Please make sure the chatbox is clear of anything like buff bars overlapping.
 
 ## Installation
 
