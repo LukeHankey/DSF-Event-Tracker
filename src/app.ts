@@ -69,6 +69,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     let combinedText = ""
     let recentTimestamp: null | string = null;
+    lastTimestamp = new Date(sessionStorage.getItem("lastTimestamp"))
+    lastMessage = sessionStorage.getItem("lastMessage")
     if (lines?.length) {
         // Remove blank lines
         if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
@@ -80,6 +82,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         for (const line of lines) {
             if (line.text === lastMessage) continue
             lastMessage = line.text
+            sessionStorage.setItem("lastMessage", lastMessage)
             console.log(line)
             
             const allTextFromLine = line.text
@@ -87,7 +90,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             
             if (hasTimestamps && line.fragments.length > 1) recentTimestamp = line.fragments[1].text
             lastTimestamp = new Date(`${new Date().toLocaleDateString()} ` + recentTimestamp) ?? new Date()
-
+            sessionStorage.setItem("lastTimestamp", String(lastTimestamp))
+            
             // Check if the text contains any keywords from the 'events' object
             const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
 
