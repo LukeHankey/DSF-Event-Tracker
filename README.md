@@ -4,12 +4,12 @@ This event tracker is an alt1 toolkit app for the Deep Sea Fishing Hub in RuneSc
 
 ## How to use
 
-As long as the alt1 app is open (can be minimized) and the game client is in focus, events from Misty will be captured and relayed to the [Deep Sea Fishing](https://discord.gg/whirlpooldnd) Discord.
+As long as the alt1 app is open (can be minimized), events from Misty will be captured and relayed to the [Deep Sea Fishing](https://discord.gg/whirlpooldnd) Discord.
 
 ## Requirements
 
 - **Game Messages** must be set to either Filtered or ON.
-- The game window must be in focus to capture the chatbox.
+- Please make sure the chatbox is clear of anything like buff bars overlapping.pp
 
 ## Installation
 
