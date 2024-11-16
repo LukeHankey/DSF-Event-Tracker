@@ -59,7 +59,7 @@ export function capture() {
     }
 }
 
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string> => {
+const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefined> => {
     const imageRef = imgs.runescapeWorldPretext
     const pos = img.findSubimage(imageRef)
     const buffData: ImageData = img.toData();
@@ -91,7 +91,12 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     let lines = chatbox.read(); // Read lines from the detected chat box
     if ((lines.length > 1 && lines.some(line => line.text.includes("Attempting to switch worlds..."))) || worldHopMessage) {
-        sessionStorage.setItem("currentWorld", await findWorldNumber(img))
+        let worldNumber = await findWorldNumber(img)
+        if (!worldNumber) {
+            console.log("Unable to capture world number from Friends List. Make sure the interface is viewable on screen.")
+        } else {
+            sessionStorage.setItem("currentWorld", worldNumber)
+        }
         worldHopMessage = false
      }
     if (!hasTimestamps) lines.some(line => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text)) ? hasTimestamps = true : hasTimestamps = false
