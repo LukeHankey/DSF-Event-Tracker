@@ -33,13 +33,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   eventTimes: () => (/* binding */ eventTimes),
 /* harmony export */   events: () => (/* binding */ events)
 /* harmony export */ });
+// Gold text for event arrival is at the start of each value array
+// Fisherman text is at the end of events, if any
 var events = {
     "Travelling merchant": [
+        "The travelling merchant has arrived at the hub!",
         "I wonder what they've got for sale today?",
         "I've seen them sell some really sweet items before.",
         "They don't come around these parts too often, so make sure you check them out!"
     ],
     "Jellyfish": [
+        "A giant jellyfish has appeared!",
         "Jellyfish invasion inbound, get ready!", // Start
         "Another wave of jellyifsh just hopped onto the deck, get rid of them!", // Second round
         "Get them off the deck!", // Randomly
@@ -49,6 +53,7 @@ var events = {
         "They're messing up the deck, get rid of 'em!", // Randomly
     ],
     "Arkaneo": [
+        "The sailfish, Arkaneo, has appeared!",
         "I've heard stories of an angler named Tavia who managed to take a chunk out of him once.",
         "Look at how fast he is!",
         "It's Arkaneo!",
@@ -56,6 +61,7 @@ var events = {
         "No one has ever been able to catch this one.",
     ],
     "Sea Monster": [
+        "A sea monster has appeared!",
         "Ahh! The sea monster is back, get some rotten food from those barrels!", // Rotten fish
         "Oh no, it's hungry! Start throwing any raw food you've got at it", // Raw fish
         "Come on, throw him some fish!", // Randomly
@@ -67,6 +73,7 @@ var events = {
         "Throw him some fish!", // Randomly
     ],
     "Treasure Turtle": [
+        "A treasure turtle has appeared at the hub!",
         "Check him out, don't miss your chance!",
         "I bet that chest is full of treasure.",
         "Lovely, lovely treasure...",
@@ -74,19 +81,26 @@ var events = {
         "These treasure turtles are awfully rare I'll have you know.",
     ],
     "Whale": [
+        "A whale has appeared at the hub!",
         "Captain, there be whales here!",
         "Don't fall in. You wouldn't want to get swallowed by that one!",
         "His mouth is full of fish, cast your lines!",
         "That's one giant whale!",
+        // Fisherman
+        "Get him to spit me out!",
+        "Ughhhhh! HELP!",
+        "Ugh! Give me a hand, he's swallowed me whole!",
+        "AHHHHHHHHHH! It's REALLY wet in here!"
     ],
     "Whirlpool": [
+        "A whirlpool has appeared at the hub!",
         "Don't fall in. You don't want to get sucked in by that!",
         "If you throw coins in and the whirlpool glows, that's when you know we're in for a treat!",
         "Sometimes we're rewarded for being generous, when throwing coins into the water.",
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary..."
     ],
-    "Testing": ["Guys: 1", "Guys: Test", "Guys: Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
+    "Testing": ["1", "Test", "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
 };
 var ONE_MINUTE = 60;
 // In seconds
@@ -9096,7 +9110,8 @@ var chatbox = new (alt1_chatbox__WEBPACK_IMPORTED_MODULE_4___default())();
 chatbox.readargs.colors.push(alt1__WEBPACK_IMPORTED_MODULE_5__.mixColor.apply(alt1__WEBPACK_IMPORTED_MODULE_5__, [239, 0, 0]), alt1__WEBPACK_IMPORTED_MODULE_5__.mixColor.apply(// red text
 alt1__WEBPACK_IMPORTED_MODULE_5__, [255, 100, 0]), alt1__WEBPACK_IMPORTED_MODULE_5__.mixColor.apply(// dark orange text
 alt1__WEBPACK_IMPORTED_MODULE_5__, [255, 136, 0]), alt1__WEBPACK_IMPORTED_MODULE_5__.mixColor.apply(// dsf merch text
-alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]));
+alt1__WEBPACK_IMPORTED_MODULE_5__, [0, 166, 82]), alt1__WEBPACK_IMPORTED_MODULE_5__.mixColor.apply(// misty text
+alt1__WEBPACK_IMPORTED_MODULE_5__, [50, 120, 190]));
 var imgs = (0,alt1__WEBPACK_IMPORTED_MODULE_5__.webpackImages)({
     runescapeWorldPretext: __webpack_require__(/*! ./runescape_world_pretext.data.png */ "./runescape_world_pretext.data.png")
 });
@@ -9286,34 +9301,27 @@ function readChatFromImage(img) {
 }
 // Helper function to check if the line contains a keyword from the events object
 function getMatchingEvent(lineText, events) {
-    // Define the regex pattern to match the line format
-    var regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
-    var timeRegex = /\[\d{2}:\d{2}:\d{2}\]/;
-    // Chop '[hh:mm:ss] '
-    if (timeRegex.test(lineText))
-        lineText = lineText.slice(11);
-    // Check if the lineText matches the regex or is a testing event
-    if (!regex.test(lineText) && !events["Testing"].some(function (phrase) { return phrase.includes(lineText); })) {
-        return [false, null]; // Return null if the format does not match
-    }
-    // Chop 'Misty: '
-    if (lineText.startsWith("Misty: "))
-        lineText = lineText.slice(7);
-    // Loop through the events object
+    // Define the regex pattern to match the time format and remove it if present
+    var timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
+    lineText = lineText.replace(timeRegex, "");
+    // Define allowed prefixes and remove them if present
+    var prefixes = ["Misty: ", "Fisherman: ", "Guys: "];
+    var matchingPrefix = prefixes.find(function (prefix) { return lineText.startsWith(prefix); });
+    if (matchingPrefix)
+        lineText = lineText.slice(matchingPrefix.length);
+    // Accepted: Misty: something -> something \\ Match "something" in the event values
+    // Declined: FooBar: something -> FooBar: something \\ Match "FooBar: something" in the event values
+    // Check if the lineText matches a phrase in any event
     for (var _i = 0, _a = Object.entries(events); _i < _a.length; _i++) {
         var _b = _a[_i], eventKey = _b[0], phrases = _b[1];
-        for (var _c = 0, phrases_1 = phrases; _c < phrases_1.length; _c++) {
-            var phrase = phrases_1[_c];
-            // Check if the lineText equals any of the phrases
-            if (lineText === phrase) {
-                return [false, eventKey]; // Return the event key if a phrase matches
-            }
-            if (phrase.includes(lineText)) {
-                return [true, eventKey];
-            }
-        }
+        var exactMatch = phrases.find(function (phrase) { return lineText === phrase; });
+        if (exactMatch)
+            return [false, eventKey];
+        var partialMatch = phrases.find(function (phrase) { return phrase.includes(lineText); });
+        if (partialMatch)
+            return [true, eventKey];
     }
-    return [false, null]; // Return null if no match is found
+    return [false, null]; // No match found
 }
 // Function to start capturing
 function startCapturing() {
