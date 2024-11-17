@@ -19,6 +19,7 @@ chatbox.readargs.colors.push(
     a1lib.mixColor(...[255, 100, 0]),  // dark orange text
     a1lib.mixColor(...[255, 136, 0]),  // dsf merch text
     a1lib.mixColor(...[0, 166, 82]),  // misty text
+    a1lib.mixColor(...[50, 120, 190])  // fisherman
 );
 
 const imgs = webpackImages({
@@ -205,37 +206,30 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
 // Helper function to check if the line contains a keyword from the events object
 function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys | null] {
-    // Define the regex pattern to match the line format
-    const regex = /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Misty: .+$/;
-    const timeRegex = /\[\d{2}:\d{2}:\d{2}\]/;
+    // Define the regex pattern to match the time format and remove it if present
+    const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
+    lineText = lineText.replace(timeRegex, "");
 
-    // Chop '[hh:mm:ss] '
-    if (timeRegex.test(lineText)) lineText = lineText.slice(11)
+    // Define allowed prefixes and remove them if present
+    const prefixes = ["Misty: ", "Fisherman: ", "Guys: "];
+    const matchingPrefix = prefixes.find(prefix => lineText.startsWith(prefix));
+    if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
 
-    // Check if the lineText matches the regex or is a testing event
-    if (!regex.test(lineText) && !events["Testing"].some(phrase => phrase.includes(lineText))) {
-        return [false, null]; // Return null if the format does not match
-    }
+    // Accepted: Misty: something -> something \\ Match "something" in the event values
+    // Declined: FooBar: something -> FooBar: something \\ Match "FooBar: something" in the event values
 
-    // Chop 'Misty: '
-    if (lineText.startsWith("Misty: ")) lineText = lineText.slice(7)
-
-    // Loop through the events object
+    // Check if the lineText matches a phrase in any event
     for (const [eventKey, phrases] of Object.entries(events)) {
-        for (const phrase of phrases) {
-            // Check if the lineText equals any of the phrases
-            if (lineText === phrase) {
-                return [false, eventKey as EventKeys]; // Return the event key if a phrase matches
-            }
+        const exactMatch = phrases.find(phrase => lineText === phrase);
+        if (exactMatch) return [false, eventKey as EventKeys];
 
-            if (phrase.includes(lineText)) {
-                return [true, eventKey as EventKeys];
-            }
-        }
+        const partialMatch = phrases.find(phrase => phrase.includes(lineText));
+        if (partialMatch) return [true, eventKey as EventKeys];
     }
-    
-    return [false, null]; // Return null if no match is found
+
+    return [false, null]; // No match found
 }
+
 
 // Function to start capturing
 function startCapturing(): void {
