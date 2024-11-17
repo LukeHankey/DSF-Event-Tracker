@@ -9141,7 +9141,7 @@ var findWorldNumber = function (img) { return __awaiter(void 0, void 0, void 0, 
             for (_i = 0, pos_1 = pos; _i < pos_1.length; _i++) {
                 match = pos_1[_i];
                 textObj = alt1_ocr__WEBPACK_IMPORTED_MODULE_6__.findReadLine(buffData, (alt1_fonts_aa_8px_mono_js__WEBPACK_IMPORTED_MODULE_7___default()), [[255, 155, 0]], match.x + 5, match.y + 2);
-                worldNumber = textObj.text.match(/\d{1,3}/);
+                worldNumber = textObj.text.match(/\d{1,3}/)[0];
             }
         }
         return [2 /*return*/, worldNumber];
@@ -9150,7 +9150,7 @@ var findWorldNumber = function (img) { return __awaiter(void 0, void 0, void 0, 
 // Function to read chat messages from the image and display colored text
 function readChatFromImage(img) {
     return __awaiter(this, void 0, void 0, function () {
-        var chatData, lines, worldNumber, combinedText, recentTimestamp, _i, lines_1, line, allTextFromLine, _a, partialMatch, matchingEvent, time, current_world, response, mainTabPs, content, eventP, eventP, eventTime, response_1, err_1;
+        var chatData, lines, worldNumber, previousWorld, combinedText, recentTimestamp, _i, lines_1, line, allTextFromLine, _a, partialMatch, matchingEvent, time, current_world, response, mainTabPs, content, eventP, eventP, eventTime, response_1, err_1;
         var _b, _c, _d;
         return __generator(this, function (_e) {
             switch (_e.label) {
@@ -9172,7 +9172,11 @@ function readChatFromImage(img) {
                         console.log("Unable to capture world number from Friends List. Make sure the interface is viewable on screen.");
                     }
                     else {
-                        sessionStorage.setItem("currentWorld", worldNumber);
+                        previousWorld = sessionStorage.getItem("currentWorld");
+                        if (previousWorld !== worldNumber) {
+                            sessionStorage.setItem("previousWorld", previousWorld);
+                            sessionStorage.setItem("currentWorld", worldNumber);
+                        }
                     }
                     worldHopMessage = false;
                     _e.label = 2;
@@ -9211,7 +9215,11 @@ function readChatFromImage(img) {
                     _a = getMatchingEvent(combinedText, _events__WEBPACK_IMPORTED_MODULE_3__.events), partialMatch = _a[0], matchingEvent = _a[1];
                     if (!(matchingEvent && !partialMatch)) return [3 /*break*/, 10];
                     time = (_d = (_c = line.fragments[1]) === null || _c === void 0 ? void 0 : _c.text) !== null && _d !== void 0 ? _d : recentTimestamp;
-                    current_world = alt1.currentWorld < 0 ? sessionStorage.getItem("currentWorld") : alt1.currentWorld;
+                    current_world = worldHopMessage
+                        ? sessionStorage.getItem("previousWorld")
+                        : alt1.currentWorld < 0
+                            ? sessionStorage.getItem("currentWorld")
+                            : alt1.currentWorld;
                     _e.label = 4;
                 case 4:
                     _e.trys.push([4, 8, , 9]);
