@@ -68,7 +68,7 @@ const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefine
     if(pos.length) {
         for (let match of pos) {
             const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2)
-            worldNumber = textObj.text.match(/\d{1,3}/)
+            worldNumber = textObj.text.match(/\d{1,3}/)[0]
         }
     }
     
@@ -95,7 +95,12 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         if (!worldNumber) {
             console.log("Unable to capture world number from Friends List. Make sure the interface is viewable on screen.")
         } else {
-            sessionStorage.setItem("currentWorld", worldNumber)
+            // Save the previous world just in case
+            const previousWorld = sessionStorage.getItem("currentWorld")
+            if (previousWorld !== worldNumber) {
+                sessionStorage.setItem("previousWorld", previousWorld)
+                sessionStorage.setItem("currentWorld", worldNumber)
+            }
         }
         worldHopMessage = false
      }
@@ -135,7 +140,12 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 const time = line.fragments[1]?.text ?? recentTimestamp
 
                 // Send the combined text to the server
-                const current_world = alt1.currentWorld < 0 ? sessionStorage.getItem("currentWorld") : alt1.currentWorld
+                const current_world = worldHopMessage
+                    ? sessionStorage.getItem("previousWorld")
+                    : alt1.currentWorld < 0
+                        ? sessionStorage.getItem("currentWorld")
+                        : alt1.currentWorld
+
                 try {
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
