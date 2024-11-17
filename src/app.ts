@@ -19,6 +19,7 @@ chatbox.readargs.colors.push(
     a1lib.mixColor(...[255, 100, 0]),  // dark orange text
     a1lib.mixColor(...[255, 136, 0]),  // dsf merch text
     a1lib.mixColor(...[0, 166, 82]),  // misty text
+    a1lib.mixColor(...[50, 120, 190])  // fisherman
 );
 
 const imgs = webpackImages({
