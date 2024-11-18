@@ -9235,6 +9235,8 @@ function readChatFromImage(img) {
                         : alt1.currentWorld < 0
                             ? sessionStorage.getItem("currentWorld")
                             : alt1.currentWorld;
+                    if (current_world === null)
+                        return [3 /*break*/, 11];
                     _e.label = 4;
                 case 4:
                     _e.trys.push([4, 8, , 9]);
