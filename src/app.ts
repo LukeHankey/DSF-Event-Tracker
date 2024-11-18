@@ -146,6 +146,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     : alt1.currentWorld < 0
                         ? sessionStorage.getItem("currentWorld")
                         : alt1.currentWorld
+                
+                if (current_world === null) continue
 
                 try {
                     const response = await axios.post(
