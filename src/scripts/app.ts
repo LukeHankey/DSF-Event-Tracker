@@ -11,7 +11,7 @@ import "../appconfig.json";
 import "../styles/style.css";
 import "../index.html";
 import { Events, EventKeys, events, eventTimes } from "./events";
-import "./init";
+import "./ui";
 
 
 const chatbox = new ChatBoxReader();
