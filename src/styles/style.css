@@ -83,6 +83,7 @@ a {
 
 .tabs__content--active {
     display: block;
+    overflow: auto;
 }
 
 /* -------------------------------------

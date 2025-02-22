@@ -54,7 +54,10 @@ if (DEBUG) {
  * - Set up one refresh interval for updating timers
  */
 export function initCapture(): void {
-  previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
+    if (localStorage.getItem("captureFrequency") === null) {
+        localStorage.setItem("captureFrequency", "2")
+    }
+    previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
     loadEventHistory()
     renderEventHistory(); // Initial render
 
@@ -93,7 +96,7 @@ export function capture(): void {
  */
 export function startCapturing(): void {
   if (captureInterval) return; // already running
-  captureInterval = setInterval(capture, 1000);
+  captureInterval = setInterval(capture, (parseInt(localStorage.getItem("captureFrequency")) || 2) * 1000);
 }
 
 /**

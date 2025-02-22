@@ -127,6 +127,12 @@ if (rsnInput && savedRSN) {
 	rsnInput.value = savedRSN;
 }
 
+const captureFrequency = document.getElementById("rsn") as HTMLInputElement | null;
+const savedCaptureFrequency = localStorage.getItem("rsn");
+if (captureFrequency && savedCaptureFrequency) {
+	captureFrequency.value = savedCaptureFrequency;
+}
+
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById("settingsForm") as HTMLFormElement | null;
 settingsForm?.addEventListener("submit", (e) => {
@@ -139,6 +145,11 @@ settingsForm?.addEventListener("submit", (e) => {
 	if (rsnInput) {
 		const rsn = rsnInput.value;
 		localStorage.setItem("rsn", rsn);
+	}
+
+	if (captureFrequency) {
+		const intervalFrequency = captureFrequency.value;
+		localStorage.setItem("captureFrequency", intervalFrequency)
 	}
 
 	// Show success toast notification
