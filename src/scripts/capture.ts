@@ -1,82 +1,101 @@
-// alt1 base libs, provides all the commonly used methods for image matching and capture
 import * as a1lib from "alt1";
 import ChatBoxReader from "alt1/chatbox";
 import * as OCR from "alt1/ocr";
 import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
+import { Events, EventKeys, events, eventTimes } from "./events";
 
-// Import necessary files
-import "./index.html";
-import "./appconfig.json";
-import "./icon.png";
-import { Events, EventKeys, events, eventTimes } from "./events"
-
-
+/**
+ * ChatBoxReader & color definitions
+ */
 const chatbox = new ChatBoxReader();
 chatbox.readargs.colors.push(
-    a1lib.mixColor(...[239, 0, 0]),  // red text
-    a1lib.mixColor(...[255, 100, 0]),  // dark orange text
-    a1lib.mixColor(...[255, 136, 0]),  // dsf merch text
-    a1lib.mixColor(...[0, 166, 82]),  // misty text
-    a1lib.mixColor(...[50, 120, 190])  // fisherman
+  a1lib.mixColor(...[239, 0, 0]),   // red text
+  a1lib.mixColor(...[255, 100, 0]), // dark orange text
+  a1lib.mixColor(...[255, 136, 0]), // dsf merch text
+  a1lib.mixColor(...[0, 166, 82]),  // misty text
+  a1lib.mixColor(...[50, 120, 190]) // fisherman
 );
 
+/**
+ * Image references for world number detection
+ */
 const imgs = webpackImages({
-    runescapeWorldPretext: require("./runescape_world_pretext.data.png")
-})
+  runescapeWorldPretext: require("../assets/runescape_world_pretext.data.png"),
+});
 
-// Define a variable to hold the interval ID
-let captureInterval: NodeJS.Timeout;
+/**
+ * Internal state variables
+ */
+let captureInterval: NodeJS.Timeout | null;
 let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
+let worldHopMessage = false;
+let mainboxRect = false
+
+// Toggle for debugging
+const DEBUG = true;
 let ORIGIN = document.location.href;
-let worldHopMessage: boolean = false;
-
-// DONT FORGET TO CHANGE THIS BACK TO FALSE FOR PRODUCTION \\
-const DEBUG = false
-
 if (DEBUG) {
-    ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/"
+  ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
 }
 
-// Capture function to get the screen image
-export function capture() {
-    if (!window.alt1) {
-        document.querySelector('#mainTab p').textContent = "You need to run this page in alt1 to capture the screen."
-        return;
-    }
-    if (!alt1.permissionPixel || !alt1.permissionGameState || !alt1.permissionOverlay) {
-        document.querySelector('#mainTab p').textContent = "Page is not installed as an app or permissions are not correct."
-        return;
-    }
-    try {
-        var img = a1lib.captureHoldFullRs();
-        readChatFromImage(img);
-    } catch (err) {
-        console.log("Failed to capture screen")
-    }
+/**
+ * Initialize capture logic
+ * - Store initial main content
+ */
+export function initCapture(): void {
+  previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
 }
 
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefined> => {
-    const imageRef = imgs.runescapeWorldPretext
-    const pos = img.findSubimage(imageRef)
-    const buffData: ImageData = img.toData();
-    
-    let worldNumber;
-    if(pos.length) {
-        for (let match of pos) {
-            const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2)
-            worldNumber = textObj.text.match(/\d{1,3}/)[0]
-        }
-    }
-    
-    return worldNumber
+/**
+ * Capture the screen with alt1
+ */
+export function capture(): void {
+  if (!window.alt1) {
+    document.querySelector("#mainTab p")!.textContent =
+      "You need to run this page in alt1 to capture the screen.";
+    return;
+  }
+  if (!alt1.permissionPixel || !alt1.permissionGameState || !alt1.permissionOverlay) {
+    document.querySelector("#mainTab p")!.textContent =
+      "Page is not installed as an app or permissions are not correct.";
+    return;
+  }
+
+  try {
+    const img = a1lib.captureHoldFullRs();
+    readChatFromImage(img);
+  } catch (err) {
+    console.log("Failed to capture screen:", err);
+  }
+}
+
+/**
+ * Continuously capture the screen every second
+ */
+export function startCapturing(): void {
+  if (captureInterval) return; // already running
+  captureInterval = setInterval(capture, 1000);
+}
+
+/**
+ * Stop capturing
+ */
+export function stopCapturing(): void {
+  if (captureInterval) {
+    clearInterval(captureInterval);
+    captureInterval = null;
+  }
 }
 
 
+/**
+ * Read lines from the captured chat image
+ */
 // Function to read chat messages from the image and display colored text
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
@@ -84,6 +103,13 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (!chatData) {
         document.querySelector('#mainTab p').textContent = "Could not find chat box."
         return;
+    }
+
+    // Highlight the main chatbox
+    if (!mainboxRect) {
+        const { x, y, width, height } = chatbox.pos.mainbox.rect;
+        alt1.overLayRect(a1lib.mixColor(255, 0, 0), x, y, width, height, 2000, 3)
+        mainboxRect = true
     }
 
     if (document.querySelector('#mainTab p').textContent === "Could not find chat box.") {
@@ -206,6 +232,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     }
 }
 
+/**
+ * Find the matching event, partial or exact
+ */
 // Helper function to check if the line contains a keyword from the events object
 function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys | null] {
     // Define the regex pattern to match the time format and remove it if present
@@ -232,31 +261,21 @@ function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys
     return [false, null]; // No match found
 }
 
-
-// Function to start capturing
-function startCapturing(): void {
-    if (captureInterval) return; // Prevent starting multiple intervals
-    captureInterval = setInterval(capture, 1000); // Start capturing every 1 second
+/**
+ * Find the current world number in the friend list
+ */
+const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefined> => {
+    const imageRef = imgs.runescapeWorldPretext
+    const pos = img.findSubimage(imageRef)
+    const buffData: ImageData = img.toData();
+    
+    let worldNumber;
+    if(pos.length) {
+        for (let match of pos) {
+            const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2)
+            worldNumber = textObj.text.match(/\d{1,3}/)[0]
+        }
+    }
+    
+    return worldNumber
 }
-
-// Function to stop capturing
-function stopCapturing(): void {
-    clearInterval(captureInterval);
-    captureInterval = null; // Clear the interval ID
-}
-
-// Check if we are running inside alt1
-if (window.alt1) {
-    alt1.identifyAppUrl("./appconfig.json");
-    previousMainContent = document.querySelector('#mainTab p').innerHTML;
-    startCapturing(); // Start capturing when Alt1 is identified
-} else {
-    let addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-    document.querySelector('#mainTab p').innerHTML = `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
-}
-
-// Handle RuneScape game window focus and blur events using Alt1 API
-a1lib.on("rsfocus", () => {
-    startCapturing(); // Start capturing when the RuneScape game window is focused
-    document.querySelector('#mainTab p').innerHTML = previousMainContent;
-});
