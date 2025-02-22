@@ -17,7 +17,7 @@ module.exports = {
         // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.TestApp
         library: { type: "umd", name: "TestApp" }
     },
-    devtool: "false",
+    devtool: "eval",
     // devtool: "source-map",
     mode: "development",
     // prevent webpack from bundling these imports (alt1 libs can use them when running in nodejs)
