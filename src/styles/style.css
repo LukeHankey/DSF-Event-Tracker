@@ -74,7 +74,11 @@ a {
 /* -------------------------------------
 3) FORMS
 ------------------------------------- */
-.form__group {
+form .form__group {
+    margin-bottom: 0;
+}
+
+form .form__group:not(:last-of-type) {
     margin-bottom: 15px;
 }
 
