@@ -7,10 +7,11 @@ import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 
 // Import necessary files
-import "./index.html";
-import "./appconfig.json";
-import "./icon.png";
-import { Events, EventKeys, events, eventTimes } from "./events"
+import "../appconfig.json";
+import "../styles/style.css";
+import "../index.html";
+import { Events, EventKeys, events, eventTimes } from "./events";
+import "./init";
 
 
 const chatbox = new ChatBoxReader();
@@ -23,7 +24,7 @@ chatbox.readargs.colors.push(
 );
 
 const imgs = webpackImages({
-    runescapeWorldPretext: require("./runescape_world_pretext.data.png")
+    runescapeWorldPretext: require("../assets/runescape_world_pretext.data.png")
 })
 
 // Define a variable to hold the interval ID
@@ -65,11 +66,11 @@ const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefine
     const pos = img.findSubimage(imageRef)
     const buffData: ImageData = img.toData();
     
-    let worldNumber;
+    let worldNumber: string | undefined;
     if(pos.length) {
         for (let match of pos) {
             const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2)
-            worldNumber = textObj.text.match(/\d{1,3}/)[0]
+            worldNumber = textObj?.text.match(/\d{1,3}/)?.[0] ?? undefined;
         }
     }
     
@@ -115,8 +116,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         // Remove blank lines
         if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
 
-        lines.some(line => line.text.includes("Attempting to switch worlds...")) ? worldHopMessage = true : worldHopMessage = false
-        
+        worldHopMessage = lines.some(line => line.text.includes("Attempting to switch worlds..."));
+
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
         if (lastTimestamp) lines = lines.filter(line => new Date(`${new Date().toLocaleDateString()} ` + line.fragments[1]?.text) >= lastTimestamp)
@@ -152,7 +153,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 try {
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
-                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 "Origin": ORIGIN,
@@ -181,7 +181,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         const eventTime = eventTimes[matchingEvent]
                         const response = await axios.post(
                             "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/clear_event_timer", {
-                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     "Origin": ORIGIN,
@@ -235,14 +234,18 @@ function getMatchingEvent(lineText: string, events: Events): [boolean, EventKeys
 
 // Function to start capturing
 function startCapturing(): void {
-    if (captureInterval) return; // Prevent starting multiple intervals
+    if (captureInterval) {
+        return; // Prevent starting multiple intervals
+    }
     captureInterval = setInterval(capture, 1000); // Start capturing every 1 second
 }
 
 // Function to stop capturing
 function stopCapturing(): void {
-    clearInterval(captureInterval);
-    captureInterval = null; // Clear the interval ID
+    if (captureInterval) {
+        clearInterval(captureInterval);
+        captureInterval = null; // Clear the interval ID
+    }
 }
 
 // Check if we are running inside alt1

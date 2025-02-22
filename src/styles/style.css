@@ -1,0 +1,186 @@
+/* -------------------------------------
+1) GLOBAL / BASE STYLES
+------------------------------------- */
+* {
+    color: black;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+}
+
+h2 {
+    color: #0077cc;
+    margin-block-start: 0;
+}
+
+a {
+    text-decoration-color: blue;
+    color: blue;
+}
+
+/* -------------------------------------
+2) TABS
+------------------------------------- */
+.tabs {
+    display: flex;
+    width: 80%;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tabs__tab {
+    flex: 1;
+    padding: 6px 12px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.6); /* Slight transparency */
+    border-bottom: 2px solid transparent; /* Prevents jumping effect */
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.tabs__tab--active {
+    border-bottom: 3px solid #0077cc; /* Highlights active tab */
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.tabs__tab:hover {
+    filter: brightness(120%); /* Hover effect */
+}
+
+.tabs__tab:not(.tabs__tab--active) {
+    filter: brightness(50%);
+}
+
+/* Tab content */
+.tabs__content {
+    display: none;
+    padding: 10px;
+    width: 80%;
+    background-color: white;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Depth effect */
+}
+
+.tabs__content--active {
+    display: block;
+}
+
+/* -------------------------------------
+3) FORMS
+------------------------------------- */
+.form__group {
+    margin-bottom: 15px;
+}
+
+.form__group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form__group input {
+    width: 80%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form__group button {
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #0077cc, #005fa3);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.form__group button:hover {
+    background: linear-gradient(135deg, #0099ff, #0077cc);
+}
+
+.form__saved-message {
+    color: green;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* -------------------------------------
+4) TOAST NOTIFICATION
+------------------------------------- */
+.toast {
+    position: fixed;
+    bottom: 10px;
+    right: 10px; /* Bottom right position */
+    background-color: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s, transform 0.3s ease-in-out;
+    transform: translateX(100%); /* Initially hidden offscreen */
+}
+
+/* BEM-style modifier for "show" */
+.toast--show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0); /* Slide in */
+}
+
+/* -------------------------------------
+5) STATUS
+------------------------------------- */
+.status {
+    display: flex;            /* use flex layout */
+    align-items: center;      /* vertically center icon and text */
+    justify-content: flex-start; /* left-align contents */
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    margin: auto;             /* keeps the .status box centered on the page */
+}
+  
+.status__icon {
+    font-size: 24px;
+    margin-right: 8px;        /* space between icon and text */
+}
+  
+
+/* Modifiers for status color states */
+.status--ok {
+    color: #28a745; /* Green ✅ */
+}
+
+.status--warning {
+    color: #ffc107; /* Yellow ⚠️ */
+}
+
+.status--error {
+    color: #dc3545; /* Red ❌ */
+}
+
+/* Notification Dot */
+.status__notification {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 50%;
+    display: none; /* Hidden by default */
+}
