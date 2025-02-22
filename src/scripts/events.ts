@@ -89,5 +89,14 @@ export const eventTimes: EventTimes = {
     "Sea Monster": ONE_MINUTE * 2,
     "Whirlpool": ONE_MINUTE * 5,
     "Treasure Turtle": ONE_MINUTE * 5,
-    "Testing": 5
+    "Testing": 30
 }
+
+export interface EventRecord {
+    event: string;
+    world: string;
+    duration: number; // in seconds, or you can use a string if you prefer
+    reportedBy: string;
+    timestamp: number; // ISO string or any format you like
+  }
+  

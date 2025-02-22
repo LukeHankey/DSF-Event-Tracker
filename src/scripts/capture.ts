@@ -4,7 +4,7 @@ import * as OCR from "alt1/ocr";
 import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
-import { Events, EventKeys, events, eventTimes } from "./events";
+import { Events, EventKeys, events, eventTimes, EventRecord } from "./events";
 
 /**
  * ChatBoxReader & color definitions
@@ -29,12 +29,16 @@ const imgs = webpackImages({
  * Internal state variables
  */
 let captureInterval: NodeJS.Timeout | null;
+let refreshInterval: NodeJS.Timeout | null = null;
 let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
+
 let worldHopMessage = false;
-let mainboxRect = false
+let mainboxRect = false;
+let eventHistory: EventRecord[] = [];
+const timeLeftCells = new Map<number, HTMLElement>();
 
 // Toggle for debugging
 const DEBUG = true;
@@ -46,9 +50,19 @@ if (DEBUG) {
 /**
  * Initialize capture logic
  * - Store initial main content
+ * - Load and render event history
+ * - Set up one refresh interval for updating timers
  */
 export function initCapture(): void {
   previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
+    loadEventHistory()
+    renderEventHistory(); // Initial render
+
+    // Start timer only if event history is visible:
+    const eventHistoryTab = document.getElementById("eventHistoryTab");
+    if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
+        startEventTimerRefresh();
+    }
 }
 
 /**
@@ -96,7 +110,6 @@ export function stopCapturing(): void {
 /**
  * Read lines from the captured chat image
  */
-// Function to read chat messages from the image and display colored text
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
     
@@ -171,14 +184,13 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     ? sessionStorage.getItem("previousWorld")
                     : alt1.currentWorld < 0
                         ? sessionStorage.getItem("currentWorld")
-                        : alt1.currentWorld
+                        : String(alt1.currentWorld)
                 
                 if (current_world === null) continue
 
                 try {
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook", {
-                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 "Origin": ORIGIN,
@@ -189,25 +201,20 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     );
 
-                    const mainTabPs = document.getElementById("mainTab").getElementsByTagName("p");
-                    const content = `A ${matchingEvent} spawned on world ${current_world} at ${time}.`
-
-                    // Main element, event element, suggestion/report element
-                    if (mainTabPs.length === 3) {
-                        const eventP = mainTabPs[1]
-                        eventP.textContent = content
-                    } else {
-                        const eventP = document.createElement("p");
-                        eventP.textContent = content
-                        document.querySelector('#mainTab p').after(eventP)
-                    }
+                    let rsn = localStorage.getItem("rsn");
+                    addNewEvent({
+                        event: matchingEvent,
+                        world: current_world,
+                        duration: eventTimes[matchingEvent],
+                        reportedBy: rsn,
+                        timestamp: Date.now()
+                    })
                     
                     // Send timer request to avoid duplicate calls
                     if (response.status === 201) {
                         const eventTime = eventTimes[matchingEvent]
                         const response = await axios.post(
                             "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/clear_event_timer", {
-                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     "Origin": ORIGIN,
@@ -223,6 +230,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         }
                     }
                 } catch (err) {
+                    console.log(err)
                     console.log(`Duplicate event - ignoring ${matchingEvent} on ${current_world}`)
                 }
             } else if (!partialMatch) {
@@ -231,6 +239,233 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         }
     }
 }
+
+/**
+ * Initialize the event history update interval.
+ * This creates a single interval that refreshes the time left values every second.
+ */
+export function startEventTimerRefresh(): void {
+    if (!refreshInterval) {
+        refreshInterval = setInterval(() => {
+            updateEventTimers();
+        }, 1000);
+    }
+}
+  
+export function stopEventTimerRefresh(): void {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+  
+
+/**
+ * Add a new event to the history and update storage & UI.
+ */
+function addNewEvent(newEvent: EventRecord): void {
+    eventHistory.push(newEvent);
+    saveEventHistory();
+    // Append the new row instead of re-rendering everything.
+    appendEventRow(newEvent);
+}
+
+/**
+ * Append a single event row to the table and store the time left cell reference.
+ */
+function appendEventRow(event: EventRecord): void {
+    const tbody = document.getElementById("eventHistoryBody");
+    if (!tbody) return;
+    
+    const row = document.createElement("tr");
+
+    const removeTd = document.createElement("td");
+    const now = Date.now();
+    const elapsed = (now - event.timestamp) / 1000;
+    const remaining = event.duration - elapsed;
+  
+    if (remaining <= 0) {
+      // Create a button that fills the cell
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.textContent = "X";
+      removeBtn.title = "Clear this event"
+      
+      // When clicked, remove this event from the table & array
+      removeBtn.addEventListener("click", () => {
+        removeEvent(event);
+      });
+  
+      removeTd.appendChild(removeBtn);
+    }
+    row.appendChild(removeTd);
+    
+    const eventTd = document.createElement("td");
+    eventTd.textContent = event.event;
+    
+    const worldTd = document.createElement("td");
+    worldTd.textContent = event.world;
+    
+    const timeLeftTd = document.createElement("td");
+    timeLeftTd.className = "time-left";
+    timeLeftTd.textContent = formatTimeLeft(event);
+    
+    const reportedByTd = document.createElement("td");
+    reportedByTd.textContent = event.reportedBy || "Unknown";
+    
+    row.appendChild(eventTd);
+    row.appendChild(worldTd);
+    row.appendChild(timeLeftTd);
+    row.appendChild(reportedByTd);
+    
+    // Add new events to the top of the table
+    tbody.insertBefore(row, tbody.firstChild);
+    
+    // Use the event's timestamp as a unique key to store the reference.
+    timeLeftCells.set(event.timestamp, timeLeftTd);
+}
+
+function removeEvent(event: EventRecord): void {
+    // 1) Remove from the array
+    eventHistory = eventHistory.filter(e => e.timestamp !== event.timestamp);
+
+    // 2) Save changes
+    saveEventHistory();
+
+    // Remove just this row from the DOM
+    // find the row in the table
+    const tbody = document.getElementById("eventHistoryBody");
+    if (!tbody) return;
+    const rows = Array.from(tbody.getElementsByTagName("tr"));
+    for (const row of rows) {
+        // Suppose the second cell is 'Event' which must match
+        // or you can store a data attribute for the timestamp
+        const cells = row.getElementsByTagName("td");
+        if (cells.length > 1 && cells[1].textContent === event.event) {
+        tbody.removeChild(row);
+        break;
+        }
+    }
+}
+
+/**
+ * Load event history from localStorage on page load.
+ */
+function loadEventHistory(): void {
+    const stored = localStorage.getItem("eventHistory");
+    if (stored) {
+        try {
+            eventHistory = JSON.parse(stored);
+            renderEventHistory();
+        } catch (e) {
+            console.error("Error parsing eventHistory from localStorage", e);
+            eventHistory = [];
+        }
+    }
+}
+  
+/**
+ * Save the current event history to localStorage.
+ */
+function saveEventHistory(): void {
+    localStorage.setItem("eventHistory", JSON.stringify(eventHistory));
+}
+
+export function clearEventHistory(): void {
+    eventHistory = [];
+    saveEventHistory();
+    renderEventHistory();
+}
+
+/**
+ * Render the event history table.
+ * This function clears the table and re-renders all rows, and rebuilds the cell reference map.
+ */
+export function renderEventHistory(): void {
+    const tbody = document.getElementById("eventHistoryBody");
+    if (!tbody) return;
+    
+    // Clear old rows and cell references.
+    tbody.innerHTML = "";
+    timeLeftCells.clear();
+
+    const hideExpired = (document.getElementById("hideExpiredCheckbox") as HTMLInputElement)?.checked;
+    
+    // Insert a new row for each event.
+    eventHistory.forEach((event) => {
+        const now = Date.now();
+        const elapsed = (now - event.timestamp) / 1000;
+        let remaining = event.duration - elapsed;
+        if (remaining < 0) remaining = 0;
+
+        // Skip events which are Expired
+        if (hideExpired && remaining <= 0) {
+            return;
+        }
+
+        appendEventRow(event);
+    });
+}
+
+
+  
+/**
+ * Update only the "Time Left" cells in the event history.
+ */
+function updateEventTimers(): void {
+    const now = Date.now();
+    eventHistory.forEach((event) => {
+        const elapsed = (now - event.timestamp) / 1000; // in seconds
+        let remaining = event.duration - elapsed;
+        if (remaining < 0) remaining = 0;
+
+        const timeCell = timeLeftCells.get(event.timestamp);
+        if (timeCell) {
+            timeCell.textContent = formatTimeLeftValue(remaining);
+            
+            if (remaining <= 0) {
+                const row = timeCell.parentElement;
+                if (row) {
+                    // Reserved for the button
+                    const clearCell = row.firstElementChild as HTMLElement;
+                    
+                    // Only add the button if it isn't already present
+                    if (clearCell && clearCell.childElementCount === 0) {
+                        const removeBtn = document.createElement("button");
+                        removeBtn.className = "remove-btn";
+                        removeBtn.textContent = "X";
+                        removeBtn.title = "Clear this event"
+                        removeBtn.addEventListener("click", () => removeEvent(event));
+                        clearCell.appendChild(removeBtn);
+                    }
+
+                }
+            }
+        }
+    });
+}
+  
+/**
+ * Helper function to format time left based on an event's stored timestamp.
+ */
+function formatTimeLeft(event: EventRecord): string {
+    const now = Date.now();
+    const elapsed = (now - event.timestamp) / 1000;
+    let remaining = event.duration - elapsed;
+    if (remaining < 0) remaining = 0;
+    return formatTimeLeftValue(remaining);
+  }
+  
+/**
+ * Helper function to format a given number of seconds.
+ */
+function formatTimeLeftValue(seconds: number): string {
+    if (seconds <= 0) return "Expired";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}m ${secs}s`;
+}
+  
 
 /**
  * Find the matching event, partial or exact
