@@ -1,157 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSF Event Tracker</title>
-    <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
-    <style>
-		* {
-			color: black
-		}
-        /* Body styling */
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Tabs navigation */
-        .tabs {
-            display: flex;
-            width: 80%;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-		
-        .tab {
-			flex: 1;
-            padding: 4px 10px;
-            text-align: center;
-            cursor: pointer;
-            background-image: url('https://runeapps.org/nis/alt1-currentskin/tabback.png');
-            background-size: cover;
-			color: white
-        }
-
-		.tab:not(.active) {
-			filter: brightness(50%)
-		}
-
-        .tab.active {
-            color: white;
-        }
-
-        /* Tab content */
-        .tab-content {
-            display: none;
-            padding: 5px;
-            width: 80%;
-            background-color: white;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* General styles */
-        h3 {
-            color: #0077cc;
-            margin-block-start: 0;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .form-group input {
-            width: 80%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        
-        a {
-            text-decoration-color: blue;
-            color: blue
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSF Event Tracker</title>
+  <!-- External CSS -->
+  <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
 </head>
 <body class="nis body" id="body">
 
-    <!-- Tabs Navigation -->
-    <div class="tabs">
-        <div class="tab active" data-tab="mainTab">Main</div>
-        <div class="tab" data-tab="settingsTab">Settings</div>
-        <div class="tab" data-tab="statusTab">Status</div>
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+      <div class="tabs__tab tabs__tab--active" data-tab="mainTab">Main</div>
+      <div class="tabs__tab" data-tab="settingsTab">Settings</div>
+      <div class="tabs__tab" data-tab="scoutsTab">Scouts</div>
+      <div class="tabs__tab" data-tab="statusTab">
+        Status <span id="statusNotification" class="status__notification">!</span>
+      </div>
+  </div>
+
+  <!-- Main Tab Content -->
+  <div id="mainTab" class="tabs__content tabs__content--active">
+      <h2>DSF Event Tracker</h2>
+      <p>Welcome to the DSF Event Tracker!</p>
+      <p>
+          To provide any suggestions, bugs, or feedback, please message in the 
+          <a href="https://discord.com/channels/420803245758480405/1295898952717303848" 
+             target="_blank" title="Join the discussion on Discord">
+             alt1 thread.
+          </a>
+      </p>
+  </div>
+
+  <!-- Settings Tab Content -->
+  <div id="settingsTab" class="tabs__content">
+      <form id="settingsForm">
+          <div class="form__group">
+              <label for="discordID">Discord ID</label>
+              <input type="text" id="discordID" placeholder="Enter Discord ID" maxlength="20", title="Enter your own Discord ID if you want your stats tracking." />
+          </div>
+          <div class="form__group">
+              <label for="rsn">RSN</label>
+              <input type="text", id="rsn", placeholder="Enter RSN", maxlength="12" title="Main character name."/>
+          </div>
+          <div class="form__group">
+              <label for="captureFrequency">Screen Capture Frequency</label>
+              <input type="number", id="captureFrequency", placeholder="Capture frequency (seconds)", max="10", title="Higher number reduces capturing rate, max=10." value="2"/>
+          </div>
+          <div class="form__group">
+              <button type="submit">Save Settings</button>
+          </div>
+      </form>
+  </div>
+
+  <!-- Scouts Tab Content -->
+<div id="scoutsTab" class="tabs__content">
+    <div class="sub-tabs">
+        <div class="sub-tab sub-tab--active" data-subtab="eventHistoryTab">Event History</div>
+        <div class="sub-tab" data-subtab="profileTab">Profile</div>
     </div>
 
-    <!-- Main Tab Content -->
-    <div id="mainTab" class="tab-content active">
-        <h3>DSF Event Tracker</h3>
-        <p>Welcome to the DSF Event Tracker!</p>
-        <p style="margin-block-end:0">To provide any suggestions, bugs, or feedback, please message in the <a href="https://discord.com/channels/420803245758480405/1295898952717303848" target="_blank">alt1 thread</a>.</p>
-    </div>
-
-    <!-- Settings Tab Content -->
-    <div id="settingsTab" class="tab-content">
-        <form id="settingsForm">
-            <div class="form-group">
-                <label for="discordID">Discord ID</label>
-                <input type="text" id="discordID" placeholder="Enter Discord ID">
+  <!-- Event History Sub-Tab -->
+    <div class="sub-tab__content__container">
+        <div id="eventHistoryWrapper" class="event-history-wrapper">
+            <div id="eventHistoryTab" class="sub-tab__content sub-tab__content--active">
+                <div class="table-scroll">
+                    <table class="event-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Event</th>
+                            <th>World</th>
+                            <th>Time Left</th>
+                            <th>Reported By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eventHistoryBody">
+                        <!-- JS will insert rows here -->
+                    </tbody>
+                    </table>
+                </div>
+                <div class="event-footer">
+                    <div class="footer-left">
+                        <label>
+                            <input type="checkbox" id="hideExpiredCheckbox" />
+                            Hide Expired
+                        </label>
+                    </div>
+                    <div class="footer-right">
+                        <button id="clearHistoryBtn">Clear All</button>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <button type="submit">Save Settings</button>
+        </div>
+
+        <!-- Profile Sub-Tab -->
+        <div id="profileTab" class="sub-tab__content">
+            <h3>Your Profile</h3>
+            <div id="profileStats">
+                <!-- For example, show total events reported, etc. -->
+                <p>Total Events Reported: <span id="profileEventsReported">0</span></p>
+                <p>Merch Events: <span id="profileMerchCount">0</span></p>
+                <p>Fisherman Events: <span id="profileFishermanCount">0</span></p>
+                <!-- and so on -->
             </div>
-        </form>
+        </div>
     </div>
+</div>
 
-    <!-- Status Tab Content -->
-    <div id="statusTab" class="tab-content">
-        <h2>Status</h2>
-        <p>Everything seems to be running smoothly. No issues reported.</p>
-    </div>
+  <!-- Status Tab Content -->
+  <div id="statusTab" class="tabs__content">
+      <h2>Status</h2>
+      <div class="status">
+          <span id="statusIcon" class="status__icon">✅</span>
+          <span id="statusMessage">Everything seems to be running smoothly.</span>
+      </div>
+  </div>
 
-    <script>
-        // JavaScript for handling tabs
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove 'active' class from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
-                // Hide all tab contents
-                tabContents.forEach(content => content.classList.remove('active'));
-                
-                // Add 'active' class to the clicked tab and its content
-                tab.classList.add('active');
-                document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
-            });
-        });
-
-        // Load settings from localStorage if available
-        const discordIDInput = document.getElementById('discordID');
-        const saveddiscordID = localStorage.getItem('discordID');
-        if (saveddiscordID) {
-            discordIDInput.value = saveddiscordID;
-        }
-
-        // Handle form submission and save to localStorage
-        const settingsForm = document.getElementById('settingsForm');
-        settingsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const discordID = discordIDInput.value;
-            localStorage.setItem('discordID', discordID);
-            alert('Settings saved successfully!');
-        });
-
-    </script>
-	<script src="./main.js"></script>
+  <!-- External JavaScript -->
+  <script src="./main.js"></script>
 </body>
 </html>
