@@ -37,24 +37,24 @@ a {
     padding: 6px 12px;
     text-align: center;
     cursor: pointer;
-    background: rgba(0, 0, 0, 0.6); /* Slight transparency */
-    border-bottom: 2px solid transparent; /* Prevents jumping effect */
+    background: transparent;          /* Let Alt1's background show */
     color: white;
+    border-bottom: 2px solid transparent; /* Prevents jumping effect */
     transition: all 0.3s ease;
 }
 
 .tabs__tab--active {
     border-bottom: 3px solid #0077cc; /* Highlights active tab */
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .tabs__tab:hover {
-    filter: brightness(120%); /* Hover effect */
+    filter: rgba(255, 255, 255, 0.1);
 }
 
 .tabs__tab:not(.tabs__tab--active) {
-    filter: brightness(50%);
+    filter: none; /* or remove this rule entirely */
 }
 
 /* Tab content */
