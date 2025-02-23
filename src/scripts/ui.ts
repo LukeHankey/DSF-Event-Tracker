@@ -3,6 +3,7 @@ import {
     stopEventTimerRefresh,
     renderEventHistory,
     clearEventHistory,
+    DEBUG,
 } from "./capture";
 import { EventRecord } from "./events";
 import socket from "./ws";
@@ -241,7 +242,7 @@ if (clearAllBtn) {
 
 // When you click the test button, emit the "updateEventHistory" event with your payload.
 const testEventButton = document.getElementById("testWS");
-if (testEventButton) {
+if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const testEvent: EventRecord = {
             event: "Testing",
@@ -251,7 +252,6 @@ if (testEventButton) {
             timestamp: Date.now(),
         };
         console.log("Emitting event_data", testEvent);
-        console.log(socket);
         socket.emit("updateEventHistory", testEvent);
     });
 }

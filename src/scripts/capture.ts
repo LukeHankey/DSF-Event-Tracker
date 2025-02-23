@@ -41,11 +41,10 @@ let eventHistory: EventRecord[] = [];
 const timeLeftCells = new Map<number, HTMLElement>();
 
 // Toggle for debugging
-const DEBUG = false;
-let ORIGIN = document.location.href;
-if (DEBUG) {
-    ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
-}
+export const DEBUG = false;
+let ORIGIN = DEBUG
+    ? document.location.href
+    : "https://lukehankey.github.io/DSF-Event-Tracker/";
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
