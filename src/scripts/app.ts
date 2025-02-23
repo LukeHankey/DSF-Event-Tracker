@@ -13,7 +13,7 @@ import "../index.html";
 import "./ui";
 
 // Our new capture logic
-import { initCapture, startCapturing, stopCapturing } from "./capture";
+import { initCapture, startCapturing } from "./capture";
 
 // If running in Alt1, identify and start capturing
 if (window.alt1) {

@@ -1,5 +1,6 @@
 import { startEventTimerRefresh, stopEventTimerRefresh, renderEventHistory, clearEventHistory } from "./capture";
-
+import { EventRecord } from "./events";
+import socket from "./ws";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -200,4 +201,21 @@ if (hideExpiredCheckbox) {
 const clearAllBtn = document.getElementById("clearHistoryBtn") as HTMLButtonElement | null;
 if (clearAllBtn) {
 	clearAllBtn.addEventListener("click", () => clearEventHistory())
+}
+
+// When you click the test button, emit the "updateEventHistory" event with your payload.
+const testEventButton = document.getElementById("testWS");
+if (testEventButton) {
+    testEventButton.addEventListener("click", () => {
+        const testEvent: EventRecord = {
+            event: "Testing",
+            world: "50",
+            duration: 15,
+            reportedBy: "Test",
+            timestamp: Date.now()
+        };
+        console.log("Emitting event_data", testEvent);
+        console.log(socket)
+        socket.emit("updateEventHistory", testEvent);
+    });
 }
