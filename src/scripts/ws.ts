@@ -2,7 +2,7 @@ import { io, Socket } from "socket.io-client";
 import { EventRecord } from "./events";
 import { addNewEvent, DEBUG } from "./capture";
 
-const socket = null
+let socket: Socket | null = null
 if(DEBUG) {
     // Initialize the socket connection
     const socket: Socket = io("https://localhost:5000", {
