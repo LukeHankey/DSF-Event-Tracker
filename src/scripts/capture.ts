@@ -407,10 +407,26 @@ export function renderEventHistory(): void {
     timeLeftCells.clear();
 
     const hideExpired = (document.getElementById("hideExpiredCheckbox") as HTMLInputElement)?.checked;
-    
+    const now = Date.now();
+
+    const sortedEvents = eventHistory.slice().sort((a, b) => {
+        const elapsedA = (now - a.timestamp) / 1000;
+        const elapsedB = (now - b.timestamp) / 1000;
+        const remainingA = Math.max(0, a.duration - elapsedA);
+        const remainingB = Math.max(0, b.duration - elapsedB);
+
+        // If a is active and b is expired, a comes first.
+        if (remainingA > 0 && remainingB === 0) return 1;
+
+        // If a is expired and b is active, b comes first.
+        if (remainingA === 0 && remainingB > 0) return -1;
+
+        // Otherwise, keep their current order
+        return 0;
+    });
+
     // Insert a new row for each event.
-    eventHistory.forEach((event) => {
-        const now = Date.now();
+    sortedEvents.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
         if (remaining < 0) remaining = 0;
