@@ -203,8 +203,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             debug: DEBUG,
                         }
                     );
-
-                    let rsn = localStorage.getItem("rsn");
+                    
+                    const rsn = localStorage.getItem("rsn");
                     addNewEvent({
                         event: matchingEvent,
                         world: current_world,
@@ -224,7 +224,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                                 },
                                 event: matchingEvent,
                                 world: current_world,
-                                timeout: eventTime
+                                timeout: eventTime,
+                                rsn: rsn,
                             }
                         )
 
