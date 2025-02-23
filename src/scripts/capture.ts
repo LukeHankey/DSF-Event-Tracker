@@ -71,7 +71,6 @@ export function initCapture(): void {
     }
     previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
     loadEventHistory()
-    renderEventHistory(); // Initial render
 
     // Start timer only if event history is visible:
     const eventHistoryTab = document.getElementById("eventHistoryTab");
