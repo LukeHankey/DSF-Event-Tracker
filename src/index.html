@@ -48,8 +48,30 @@
               <input type="number", id="captureFrequency", placeholder="Capture frequency (seconds)", max="10", title="Higher number reduces capturing rate, max=10." value="2"/>
           </div>
           <div class="form__group">
-              <button type="submit">Save Settings</button>
+            <label for="favouriteEvents" title="Select multiple options">Favorite Events (Multi-Select)</label>
+              <select id="favoriteEvents" multiple size="5">
+                <option value="Travelling merchant">Travelling merchant</option>
+                <option value="Whirlpool">Whirlpool</option>
+                <option value="Treasure Turtle">Treasure Turtle</option>
+                <option value="Arkaneo">Arkaneo</option>
+                <option value="Monster">Monster</option>
+                <option value="Jellyfish">Jellyfish</option>
+                <option value="Whale">Whale</option>
+                <option value="Sea Monster">Sea Monster</option>
+             </select>
           </div>
+          <div class="form__group">
+            <label for="favoriteEventsMode">Favorite Events Mode</label>
+            <select id="favoriteEventsMode">
+              <option value="none">None</option>
+              <option value="pin">Pin to top</option>
+              <option value="highlight">Highlight</option>
+              <option value="only">Only show favorites</option>
+            </select>
+          </div>
+        <div class="form__group">
+            <button type="submit">Save Settings</button>
+        </div>
       </form>
   </div>
 
