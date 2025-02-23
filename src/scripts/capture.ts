@@ -41,7 +41,7 @@ let eventHistory: EventRecord[] = [];
 const timeLeftCells = new Map<number, HTMLElement>();
 
 // Toggle for debugging
-const DEBUG = true;
+const DEBUG = false;
 let ORIGIN = document.location.href;
 if (DEBUG) {
     ORIGIN = "https://lukehankey.github.io/DSF-Event-Tracker/";
