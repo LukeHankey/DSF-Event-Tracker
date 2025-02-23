@@ -208,7 +208,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     addNewEvent({
                         event: matchingEvent,
                         world: current_world,
-                        duration: eventTimes[matchingEvent],
+                        duration: eventTimes[matchingEvent] + 6,
                         reportedBy: rsn,
                         timestamp: Date.now()
                     })
