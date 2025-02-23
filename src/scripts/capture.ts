@@ -278,11 +278,13 @@ export function stopEventTimerRefresh(): void {
 /**
  * Add a new event to the history and update storage & UI.
  */
-function addNewEvent(newEvent: EventRecord): void {
+export function addNewEvent(newEvent: EventRecord): void {
     eventHistory.push(newEvent);
     saveEventHistory();
     // Append the new row instead of re-rendering everything.
     appendEventRow(newEvent);
+
+    startEventTimerRefresh();
 }
 
 /**
@@ -421,43 +423,39 @@ export function renderEventHistory(): void {
         appendEventRow(event);
     });
 }
-
-
   
 /**
  * Update only the "Time Left" cells in the event history.
  */
 function updateEventTimers(): void {
     const now = Date.now();
+
+    // Update each event's timer without removing them from eventHistory.
     eventHistory.forEach((event) => {
-        const elapsed = (now - event.timestamp) / 1000; // in seconds
+        const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
         if (remaining < 0) remaining = 0;
 
+        // Update the corresponding time cell, if it exists.
         const timeCell = timeLeftCells.get(event.timestamp);
         if (timeCell) {
             timeCell.textContent = formatTimeLeftValue(remaining);
-            
-            if (remaining <= 0) {
-                const row = timeCell.parentElement;
-                if (row) {
-                    // Reserved for the button
-                    const clearCell = row.firstElementChild as HTMLElement;
-                    
-                    // Only add the button if it isn't already present
-                    if (clearCell && clearCell.childElementCount === 0) {
-                        const removeBtn = document.createElement("button");
-                        removeBtn.className = "remove-btn";
-                        removeBtn.textContent = "X";
-                        removeBtn.title = "Clear this event"
-                        removeBtn.addEventListener("click", () => removeEvent(event));
-                        clearCell.appendChild(removeBtn);
-                    }
-
-                }
-            }
         }
     });
+
+    // Optionally re-render the entire event history table to remove expired rows:
+    renderEventHistory();
+
+    // Check if all events have expired (or if there are no events).
+    const visibleEvents = eventHistory.filter((event) => {
+        const elapsed = (now - event.timestamp) / 1000;
+        let remaining = event.duration - elapsed;
+        return remaining > 0;
+    });
+    if (visibleEvents.length === 0 && refreshInterval) {
+        stopEventTimerRefresh();
+        console.log("Interval has stopped", refreshInterval)
+    }
 }
   
 /**
