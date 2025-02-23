@@ -3,10 +3,10 @@ import {
     stopEventTimerRefresh,
     renderEventHistory,
     clearEventHistory,
-    DEBUG,
 } from "./capture";
 import { EventRecord } from "./events";
 import socket from "./ws";
+import { DEBUG } from "../config"
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";

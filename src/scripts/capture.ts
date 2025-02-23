@@ -5,6 +5,7 @@ import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { Events, EventKeys, events, eventTimes, EventRecord } from "./events";
+import { DEBUG, ORIGIN } from "../config";
 
 /**
  * ChatBoxReader & color definitions
@@ -39,12 +40,6 @@ let worldHopMessage = false;
 let mainboxRect = false;
 let eventHistory: EventRecord[] = [];
 const timeLeftCells = new Map<number, HTMLElement>();
-
-// Toggle for debugging
-export const DEBUG = false;
-let ORIGIN = DEBUG
-    ? document.location.href
-    : "https://lukehankey.github.io/DSF-Event-Tracker/";
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
