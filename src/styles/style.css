@@ -127,7 +127,7 @@ a {
 .sub-tab:hover {
     background: rgba(255,255,255,0.1);
 }
-  
+
 .sub-tab--active {
     background: rgba(255,255,255,0.2);
     border-bottom: 3px solid #0077cc;
@@ -159,7 +159,7 @@ a {
     /* override the default 'display: block' so it can flex */
     display: flex !important;
     flex-direction: column;
-    flex: 1; 
+    flex: 1;
     overflow: hidden;
     /* Now the .table-scroll can fill the space in #eventHistoryTab */
 }
@@ -168,7 +168,7 @@ a {
 .sub-tab__content {
     display: none;
 }
-  
+
 .sub-tab__content--active {
     display: block;
 }
@@ -212,7 +212,7 @@ a {
 .event-table td {
     position: relative; /* so button can fill cell if needed */
 }
-  
+
 .remove-btn {
     width: 100%;
     height: 100%;
@@ -310,12 +310,12 @@ form .form__group:not(:last-of-type) {
     width: 90%;
     margin: auto;             /* keeps the .status box centered on the page */
 }
-  
+
 .status__icon {
     font-size: 24px;
     margin-right: 8px;        /* space between icon and text */
 }
-  
+
 
 /* Modifiers for status color states */
 .status--ok {

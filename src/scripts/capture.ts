@@ -126,7 +126,7 @@ export function stopCapturing(): void {
  */
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
-    
+
     if (!chatData) {
         document.querySelector('#mainTab p').textContent = "Could not find chat box."
         return;
@@ -169,7 +169,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         if (lines.some(line => line.text === "")) lines = lines.filter(line => line.text !== "")
 
         lines.some(line => line.text.includes("Attempting to switch worlds...")) ? worldHopMessage = true : worldHopMessage = false
-        
+
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
         if (lastTimestamp) lines = lines.filter(line => new Date(`${new Date().toLocaleDateString()} ` + line.fragments[1]?.text) >= lastTimestamp)
@@ -179,14 +179,14 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             lastMessage = line.text
             sessionStorage.setItem("lastMessage", lastMessage)
             console.log(line)
-            
+
             const allTextFromLine = line.text
             combinedText = combinedText === "" ? combinedText += allTextFromLine : combinedText + " " + allTextFromLine
-            
+
             if (hasTimestamps && line.fragments.length > 1) recentTimestamp = line.fragments[1].text
             lastTimestamp = new Date(`${new Date().toLocaleDateString()} ` + recentTimestamp) ?? new Date()
             sessionStorage.setItem("lastTimestamp", String(lastTimestamp))
-            
+
             // Check if the text contains any keywords from the 'events' object
             const [partialMatch, matchingEvent] = getMatchingEvent(combinedText, events);
 
@@ -199,7 +199,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     : alt1.currentWorld < 0
                         ? sessionStorage.getItem("currentWorld")
                         : String(alt1.currentWorld)
-                
+
                 if (current_world === null) continue
 
                 try {
@@ -214,7 +214,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             debug: DEBUG,
                         }
                     );
-                    
+
                     const rsn = localStorage.getItem("rsn");
                     addNewEvent({
                         event: matchingEvent,
@@ -223,7 +223,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         reportedBy: rsn,
                         timestamp: Date.now()
                     })
-                    
+
                     // Send timer request to avoid duplicate calls
                     if (response.status === 201) {
                         const eventTime = eventTimes[matchingEvent]
@@ -266,14 +266,14 @@ export function startEventTimerRefresh(): void {
         }, 1000);
     }
 }
-  
+
 export function stopEventTimerRefresh(): void {
     if (refreshInterval) {
         clearInterval(refreshInterval);
         refreshInterval = null;
     }
 }
-  
+
 
 /**
  * Add a new event to the history and update storage & UI.
@@ -293,51 +293,51 @@ export function addNewEvent(newEvent: EventRecord): void {
 function appendEventRow(event: EventRecord): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
-    
+
     const row = document.createElement("tr");
 
     const removeTd = document.createElement("td");
     const now = Date.now();
     const elapsed = (now - event.timestamp) / 1000;
     const remaining = event.duration - elapsed;
-  
+
     if (remaining <= 0) {
       // Create a button that fills the cell
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-btn";
       removeBtn.textContent = "X";
       removeBtn.title = "Clear this event"
-      
+
       // When clicked, remove this event from the table & array
       removeBtn.addEventListener("click", () => {
         removeEvent(event);
       });
-  
+
       removeTd.appendChild(removeBtn);
     }
     row.appendChild(removeTd);
-    
+
     const eventTd = document.createElement("td");
     eventTd.textContent = event.event;
-    
+
     const worldTd = document.createElement("td");
     worldTd.textContent = event.world;
-    
+
     const timeLeftTd = document.createElement("td");
     timeLeftTd.className = "time-left";
     timeLeftTd.textContent = formatTimeLeft(event);
-    
+
     const reportedByTd = document.createElement("td");
     reportedByTd.textContent = event.reportedBy || "Unknown";
-    
+
     row.appendChild(eventTd);
     row.appendChild(worldTd);
     row.appendChild(timeLeftTd);
     row.appendChild(reportedByTd);
-    
+
     // Add new events to the top of the table
     tbody.insertBefore(row, tbody.firstChild);
-    
+
     // Use the event's timestamp as a unique key to store the reference.
     timeLeftCells.set(event.timestamp, timeLeftTd);
 }
@@ -380,7 +380,7 @@ function loadEventHistory(): void {
         }
     }
 }
-  
+
 /**
  * Save the current event history to localStorage.
  */
@@ -401,7 +401,7 @@ export function clearEventHistory(): void {
 export function renderEventHistory(): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
-    
+
     // Clear old rows and cell references.
     tbody.innerHTML = "";
     timeLeftCells.clear();
@@ -439,7 +439,7 @@ export function renderEventHistory(): void {
         appendEventRow(event);
     });
 }
-  
+
 /**
  * Update only the "Time Left" cells in the event history.
  */
@@ -473,7 +473,7 @@ function updateEventTimers(): void {
         console.log("Interval has stopped", refreshInterval)
     }
 }
-  
+
 /**
  * Helper function to format time left based on an event's stored timestamp.
  */
@@ -484,7 +484,7 @@ function formatTimeLeft(event: EventRecord): string {
     if (remaining < 0) remaining = 0;
     return formatTimeLeftValue(remaining);
   }
-  
+
 /**
  * Helper function to format a given number of seconds.
  */
@@ -494,7 +494,7 @@ function formatTimeLeftValue(seconds: number): string {
     const secs = Math.floor(seconds % 60);
     return `${mins}m ${secs}s`;
 }
-  
+
 
 /**
  * Find the matching event, partial or exact
@@ -532,7 +532,7 @@ const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefine
     const imageRef = imgs.runescapeWorldPretext
     const pos = img.findSubimage(imageRef)
     const buffData: ImageData = img.toData();
-    
+
     let worldNumber;
     if(pos.length) {
         for (let match of pos) {
@@ -540,6 +540,6 @@ const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | undefine
             worldNumber = textObj.text.match(/\d{1,3}/)[0]
         }
     }
-    
+
     return worldNumber
 }

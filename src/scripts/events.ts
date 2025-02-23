@@ -99,4 +99,3 @@ export interface EventRecord {
     reportedBy: string;
     timestamp: number; // ISO string or any format you like
   }
-  

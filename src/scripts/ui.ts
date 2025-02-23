@@ -31,7 +31,7 @@ tabs.forEach((tab) => {
 			if (targetElement) {
 				targetElement.classList.add("tabs__content--active");
 			}
-			
+
 			// If the Scouts tab is not active, ensure the event timer is stopped.
 			if (targetTabId !== "scoutsTab") {
 				stopEventTimerRefresh();
@@ -167,16 +167,16 @@ sub_tabs.forEach((subTab) => {
 		if (activeSubTab) {
 			activeSubTab.classList.remove('sub-tab--active');
 		}
-		
+
 		// Hide the currently active sub-tab-content
 		const activeContent = document.querySelector('.sub-tab__content.sub-tab__content--active');
 		if (activeContent) {
 			activeContent.classList.remove('sub-tab__content--active');
 		}
-		
+
 		// Add active state to clicked sub-tab
 		subTab.classList.add('sub-tab--active');
-		
+
 		// Show the corresponding content
 		const targetId = subTab.dataset.subtab;
 		const targetContent = document.getElementById(targetId);
