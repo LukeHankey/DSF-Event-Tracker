@@ -1,10 +1,10 @@
 import { io, Socket } from "socket.io-client";
 import { EventRecord } from "./events";
 import { addNewEvent } from "./capture";
-import { DEBUG } from "../config";
+import { DEBUG, WS } from "../config";
 
 let socket: Socket | null = null;
-if (DEBUG) {
+if (DEBUG && WS) {
     // Initialize the socket connection
     socket = io("https://localhost:5000", {
         transports: ["websocket"],
