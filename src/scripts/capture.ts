@@ -253,6 +253,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 if (current_world === null) continue;
 
                 try {
+                    const rsn = localStorage.getItem("rsn");
                     const response = await axios.post(
                         "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook",
                         {
@@ -263,10 +264,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             event: matchingEvent,
                             world: current_world,
                             debug: DEBUG,
+                            reportedBy: rsn,
                         },
                     );
 
-                    const rsn = localStorage.getItem("rsn");
                     addNewEvent({
                         event: matchingEvent,
                         world: current_world,
