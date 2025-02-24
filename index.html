@@ -6,6 +6,7 @@
   <title>DSF Event Tracker</title>
   <!-- External CSS -->
   <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 </head>
 <body class="nis body" id="body">
 
@@ -24,8 +25,8 @@
       <h2>DSF Event Tracker</h2>
       <p>Welcome to the DSF Event Tracker!</p>
       <p>
-          To provide any suggestions, bugs, or feedback, please message in the 
-          <a href="https://discord.com/channels/420803245758480405/1295898952717303848" 
+          To provide any suggestions, bugs, or feedback, please message in the
+          <a href="https://discord.com/channels/420803245758480405/1295898952717303848"
              target="_blank" title="Join the discussion on Discord">
              alt1 thread.
           </a>
@@ -48,8 +49,30 @@
               <input type="number", id="captureFrequency", placeholder="Capture frequency (seconds)", max="10", title="Higher number reduces capturing rate, max=10." value="2"/>
           </div>
           <div class="form__group">
-              <button type="submit">Save Settings</button>
+            <label for="favoriteEvents" title="Select multiple options">Favorite Events (Multi-Select)</label>
+              <select id="favoriteEvents" multiple size="5">
+                <option value="Travelling merchant">Travelling merchant</option>
+                <option value="Whirlpool">Whirlpool</option>
+                <option value="Treasure Turtle">Treasure Turtle</option>
+                <option value="Arkaneo">Arkaneo</option>
+                <option value="Monster">Monster</option>
+                <option value="Jellyfish">Jellyfish</option>
+                <option value="Whale">Whale</option>
+                <option value="Sea Monster">Sea Monster</option>
+             </select>
           </div>
+          <div class="form__group">
+            <label for="favoriteEventsMode">Favorite Events Mode</label>
+            <select id="favoriteEventsMode">
+              <option value="none">None</option>
+              <option value="pin">Pin to top</option>
+              <option value="highlight">Highlight</option>
+              <option value="only">Only show favorites</option>
+            </select>
+          </div>
+        <div class="form__group">
+            <button type="submit">Save Settings</button>
+        </div>
       </form>
   </div>
 
@@ -85,6 +108,9 @@
                         <label>
                             <input type="checkbox" id="hideExpiredCheckbox" />
                             Hide Expired
+                        </label>
+                        <label id="debugContainer">
+                            <button id="testWS">WS Event</button>
                         </label>
                     </div>
                     <div class="footer-right">
