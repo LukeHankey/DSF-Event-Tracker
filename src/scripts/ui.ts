@@ -3,10 +3,10 @@ import {
     stopEventTimerRefresh,
     renderEventHistory,
     clearEventHistory,
-    DEBUG,
 } from "./capture";
 import { EventRecord } from "./events";
 import socket from "./ws";
+import { DEBUG } from "../config";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -164,26 +164,51 @@ if (captureFrequency && savedCaptureFrequency) {
     captureFrequency.value = savedCaptureFrequency;
 }
 
+const favoriteEventsSelect = document.getElementById(
+    "favoriteEvents",
+) as HTMLSelectElement | null;
+const savedFavoriteEvents = localStorage.getItem("favoriteEvents");
+if (savedFavoriteEvents && favoriteEventsSelect) {
+    const favorites: string[] = JSON.parse(savedFavoriteEvents);
+    // Mark these options as selected
+    Array.from(favoriteEventsSelect.options).forEach((option) => {
+        option.selected = favorites.includes(option.value);
+    });
+}
+
+const favoriteEventsModeSelect = document.getElementById(
+    "favoriteEventsMode",
+) as HTMLSelectElement | null;
+const savedFavMode = localStorage.getItem("favoriteEventsMode");
+if (favoriteEventsModeSelect && savedFavMode) {
+    favoriteEventsModeSelect.value = savedFavMode;
+}
+
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById(
     "settingsForm",
 ) as HTMLFormElement | null;
 settingsForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (discordIDInput) {
-        const discordID = discordIDInput.value;
-        localStorage.setItem("discordID", discordID);
+    if (discordIDInput) localStorage.setItem("discordID", discordIDInput.value);
+
+    if (rsnInput) localStorage.setItem("rsn", rsnInput.value);
+
+    if (captureFrequency)
+        localStorage.setItem("captureFrequency", captureFrequency.value);
+
+    if (favoriteEventsSelect) {
+        const selectedValues = Array.from(
+            favoriteEventsSelect.selectedOptions,
+        ).map((opt) => opt.value);
+        localStorage.setItem("favoriteEvents", JSON.stringify(selectedValues));
     }
 
-    if (rsnInput) {
-        const rsn = rsnInput.value;
-        localStorage.setItem("rsn", rsn);
-    }
-
-    if (captureFrequency) {
-        const intervalFrequency = captureFrequency.value;
-        localStorage.setItem("captureFrequency", intervalFrequency);
-    }
+    if (favoriteEventsModeSelect)
+        localStorage.setItem(
+            "favoriteEventsMode",
+            favoriteEventsModeSelect.value,
+        );
 
     // Show success toast notification
     showToast("✅ Settings saved!");

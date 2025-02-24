@@ -230,6 +230,10 @@ a {
     display: block; /* let it fill the cell if the cell has a fixed height */
 }
 
+.favourite-event {
+    background-color: #ffefc2;
+}
+
 /* -------------------------------------
 3) FORMS
 ------------------------------------- */

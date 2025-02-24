@@ -5,6 +5,7 @@ import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { Events, EventKeys, events, eventTimes, EventRecord } from "./events";
+import { DEBUG, ORIGIN } from "../config";
 
 /**
  * ChatBoxReader & color definitions
@@ -38,13 +39,8 @@ let lastMessage: string;
 let worldHopMessage = false;
 let mainboxRect = false;
 let eventHistory: EventRecord[] = [];
+let expiredEvents: EventRecord[] = [];
 const timeLeftCells = new Map<number, HTMLElement>();
-
-// Toggle for debugging
-export const DEBUG = false;
-let ORIGIN = DEBUG
-    ? document.location.href
-    : "https://lukehankey.github.io/DSF-Event-Tracker/";
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
@@ -274,7 +270,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     addNewEvent({
                         event: matchingEvent,
                         world: current_world,
-                        duration: eventTimes[matchingEvent],
+                        duration: eventTimes[matchingEvent] + 6,
                         reportedBy: rsn,
                         timestamp: Date.now(),
                     });
@@ -340,8 +336,23 @@ export function stopEventTimerRefresh(): void {
 export function addNewEvent(newEvent: EventRecord): void {
     eventHistory.push(newEvent);
     saveEventHistory();
+
+    // Load favorite events and mode from localStorage.
+    const favMode = localStorage.getItem("favoriteEventsMode") || "none";
+    const savedFavourites = localStorage.getItem("favoriteEvents");
+    const favouriteEvents = savedFavourites
+        ? (JSON.parse(savedFavourites) as string[])
+        : [];
+
+    if (favMode === "only" && !favouriteEvents.includes(newEvent.event)) {
+        return;
+    }
+
     // Append the new row instead of re-rendering everything.
-    appendEventRow(newEvent);
+    appendEventRow(
+        newEvent,
+        favMode === "highlight" && favouriteEvents.includes(newEvent.event),
+    );
 
     startEventTimerRefresh();
 }
@@ -349,11 +360,14 @@ export function addNewEvent(newEvent: EventRecord): void {
 /**
  * Append a single event row to the table and store the time left cell reference.
  */
-function appendEventRow(event: EventRecord): void {
+function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
 
     const row = document.createElement("tr");
+    if (highlight) {
+        row.classList.add("favourite-event");
+    }
 
     const removeTd = document.createElement("td");
     const now = Date.now();
@@ -449,6 +463,7 @@ function saveEventHistory(): void {
 
 export function clearEventHistory(): void {
     eventHistory = [];
+    expiredEvents = [];
     saveEventHistory();
     renderEventHistory();
 }
@@ -461,7 +476,7 @@ export function renderEventHistory(): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
 
-    // Clear old rows and cell references.
+    // Clear the existing rows and cell references.
     tbody.innerHTML = "";
     timeLeftCells.clear();
 
@@ -470,34 +485,74 @@ export function renderEventHistory(): void {
     )?.checked;
     const now = Date.now();
 
-    const sortedEvents = eventHistory.slice().sort((a, b) => {
-        const elapsedA = (now - a.timestamp) / 1000;
-        const elapsedB = (now - b.timestamp) / 1000;
-        const remainingA = Math.max(0, a.duration - elapsedA);
-        const remainingB = Math.max(0, b.duration - elapsedB);
+    // Load favorite events and mode from localStorage.
+    const savedFavourites = localStorage.getItem("favoriteEvents");
+    const favouriteEvents = savedFavourites
+        ? (JSON.parse(savedFavourites) as string[])
+        : [];
+    const favMode = localStorage.getItem("favoriteEventsMode") || "none";
 
-        // If a is active and b is expired, a comes first.
-        if (remainingA > 0 && remainingB === 0) return 1;
+    // Start with a copy of the full event history.
+    let eventsToRender = eventHistory.slice();
 
-        // If a is expired and b is active, b comes first.
-        if (remainingA === 0 && remainingB > 0) return -1;
+    // If mode is "only", filter out non-favorites.
+    if (favMode === "only") {
+        eventsToRender = eventsToRender.filter((event) =>
+            favouriteEvents.includes(event.event),
+        );
+    }
 
-        // Otherwise, keep their current order
-        return 0;
+    // Split events into active and expired arrays.
+    const activeEvents: EventRecord[] = [];
+    eventsToRender.forEach((event) => {
+        const elapsed = (now - event.timestamp) / 1000;
+        let remaining = event.duration - elapsed;
+        if (remaining < 0) remaining = 0;
+
+        if (remaining > 0) {
+            activeEvents.push(event);
+        } else {
+            const exists = expiredEvents.some(
+                (e) => e.timestamp === event.timestamp,
+            );
+            if (!exists) {
+                expiredEvents.push(event);
+            }
+        }
     });
 
-    // Insert a new row for each event.
+    // In "pin" mode, sort active events so that favourite events come first.
+    if (favMode === "pin") {
+        activeEvents.sort((a, b) => {
+            const aFav = favouriteEvents.includes(a.event);
+            const bFav = favouriteEvents.includes(b.event);
+            if (aFav && !bFav) return 1;
+            if (!aFav && bFav) return -1;
+            return 0;
+        });
+    }
+
+    let sortedEvents = [...expiredEvents, ...activeEvents];
+
+    // Re-filter in case of switching modes
+    if (favMode === "only") {
+        sortedEvents = sortedEvents.filter((event) =>
+            favouriteEvents.includes(event.event),
+        );
+    }
+
+    // Render active events first.
     sortedEvents.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
         if (remaining < 0) remaining = 0;
 
-        // Skip events which are Expired
-        if (hideExpired && remaining <= 0) {
-            return;
-        }
+        if (hideExpired && remaining === 0) return;
 
-        appendEventRow(event);
+        const isFavourite = favouriteEvents.includes(event.event);
+        const shouldHighlight = favMode === "highlight" && isFavourite;
+
+        appendEventRow(event, shouldHighlight);
     });
 }
 
