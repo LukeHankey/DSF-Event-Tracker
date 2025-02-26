@@ -5,7 +5,7 @@ import {
     clearEventHistory,
 } from "./capture";
 import { EventRecord } from "./events";
-import socket from "./ws";
+import { wsClient } from "./ws";
 import { DEBUG } from "../config";
 
 // You can define a union type for the status if you like:
@@ -277,6 +277,6 @@ if (testEventButton && DEBUG) {
             timestamp: Date.now(),
         };
         console.log("Emitting event_data", testEvent);
-        socket.emit("updateEventHistory", testEvent);
+        wsClient.send(testEvent);
     });
 }
