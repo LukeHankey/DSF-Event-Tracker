@@ -255,7 +255,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 try {
                     const rsn = localStorage.getItem("rsn");
                     const response = await axios.post(
-                        "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/send_webhook",
+                        "https://api.dsfeventtracker.com/send_webhook",
                         {
                             headers: {
                                 "Content-Type": "application/json",
@@ -277,10 +277,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     });
 
                     // Send timer request to avoid duplicate calls
-                    if (response.status === 201) {
+                    if (response.status === 200) {
                         const eventTime = eventTimes[matchingEvent];
                         const response = await axios.post(
-                            "https://i3fhqxgish.execute-api.eu-west-2.amazonaws.com/clear_event_timer",
+                            "https://api.dsfeventtracker.com/clear_event_timer",
                             {
                                 headers: {
                                     "Content-Type": "application/json",
