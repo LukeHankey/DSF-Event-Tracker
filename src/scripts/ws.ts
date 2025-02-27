@@ -1,26 +1,61 @@
-import { io, Socket } from "socket.io-client";
 import { EventRecord } from "./events";
 import { addNewEvent } from "./capture";
-import { DEBUG, WS } from "../config";
 
-let socket: Socket | null = null;
-if (DEBUG && WS) {
-    // Initialize the socket connection
-    socket = io("https://localhost:5000", {
-        transports: ["websocket"],
-    });
+export class WebSocketClient {
+    private socket: WebSocket | null = null;
+    private url: string;
 
-    // Handle connection events
-    socket.on("connect", () => {
-        console.log("Connected, id:", socket.id);
-    });
+    constructor(url: string) {
+        this.url = url;
+    }
 
-    // Handle our custom "event_data" event
-    socket.on("updateEventHistory", (data: EventRecord) => {
-        console.log("Received event_data:", data);
-        addNewEvent(data);
-    });
+    connect(): void {
+        this.socket = new WebSocket(this.url);
+
+        this.socket.onopen = () => {
+            console.log("✅ Connected to WebSocket!");
+        };
+
+        this.socket.onmessage = (event) => {
+            console.log("📨 Received:", event.data);
+            this.handleMessage(event.data);
+        };
+
+        this.socket.onerror = (error) => {
+            console.error("❌ WebSocket Error:", error);
+        };
+
+        this.socket.onclose = (event) => {
+            console.log(
+                `❌ WebSocket Disconnected (code: ${event.code}, reason: ${event.reason})`,
+            );
+            this.reconnect();
+        };
+    }
+
+    handleMessage(data: string): void {
+        try {
+            const newEvent: EventRecord = JSON.parse(data);
+            console.log("Parsed data: ", newEvent);
+            addNewEvent(newEvent);
+        } catch (error) {
+            console.error("⚠️ Failed to parse WebSocket message:", error);
+        }
+    }
+
+    send(data: EventRecord): void {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify(data));
+        } else {
+            console.warn("⚠️ WebSocket is not open. Unable to send message.");
+        }
+    }
+
+    reconnect(): void {
+        console.log("🔄 Reconnecting WebSocket in 5 seconds...");
+        setTimeout(() => this.connect(), 5000);
+    }
 }
 
-// Export the socket so it can be used elsewhere (for example, to emit events)
-export default socket;
+export const wsClient = new WebSocketClient("wss://ws.dsfeventtracker.com/ws");
+wsClient.connect();
