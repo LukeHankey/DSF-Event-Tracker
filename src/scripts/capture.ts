@@ -291,7 +291,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             event: matchingEvent,
                             world: current_world,
                             timeout: eventTime,
-                            rsn: rsn,
                         },
                     );
 
