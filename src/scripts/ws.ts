@@ -43,7 +43,7 @@ export class WebSocketClient {
         }
     }
 
-    send(data: object): void {
+    send(data: EventRecord): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(data));
         } else {

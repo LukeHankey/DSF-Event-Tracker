@@ -6,6 +6,7 @@ import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { Events, EventKeys, events, eventTimes, EventRecord } from "./events";
 import { DEBUG, ORIGIN } from "../config";
+import { wsClient } from "./ws";
 
 /**
  * ChatBoxReader & color definitions
@@ -254,7 +255,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
                 try {
                     const rsn = localStorage.getItem("rsn");
-                    const response = await axios.post(
+                    const sendWebhookResponse = await axios.post(
                         "https://api.dsfeventtracker.com/send_webhook",
                         {
                             headers: {
@@ -277,27 +278,38 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     });
 
                     // Send timer request to avoid duplicate calls
-                    if (response.status === 200) {
-                        const eventTime = eventTimes[matchingEvent];
-                        const response = await axios.post(
-                            "https://api.dsfeventtracker.com/clear_event_timer",
-                            {
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    Origin: ORIGIN,
-                                },
-                                event: matchingEvent,
-                                world: current_world,
-                                timeout: eventTime,
-                                rsn: rsn,
+                    if (sendWebhookResponse.status !== 200) {
+                        console.log("Did not receive the correct response");
+                        continue;
+                    }
+                    const eventTime = eventTimes[matchingEvent];
+                    const clearEventTimerResponse = await axios.post(
+                        "https://api.dsfeventtracker.com/clear_event_timer",
+                        {
+                            headers: {
+                                "Content-Type": "application/json",
+                                Origin: ORIGIN,
                             },
-                        );
+                            event: matchingEvent,
+                            world: current_world,
+                            timeout: eventTime,
+                            rsn: rsn,
+                        },
+                    );
 
-                        if (response.status != 200) {
-                            console.log(
-                                `There was no ${matchingEvent}_${current_world} in the server cache.`,
-                            );
-                        }
+                    // Broadcast to all clients via websockets
+                    if (
+                        clearEventTimerResponse.status === 200 &&
+                        clearEventTimerResponse.data.message ===
+                            "Event successfully removed"
+                    ) {
+                        wsClient.send({
+                            event: matchingEvent,
+                            world: current_world,
+                            duration: eventTime,
+                            reportedBy: rsn,
+                            timestamp: Date.now(),
+                        });
                     }
                 } catch (err) {
                     console.log(err);
