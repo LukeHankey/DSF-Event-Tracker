@@ -242,8 +242,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             );
 
             if (matchingEvent && !partialMatch) {
-                const time = line.fragments[1]?.text ?? recentTimestamp;
-
                 // Send the combined text to the server
                 const current_world = worldHopMessage
                     ? sessionStorage.getItem("previousWorld")
