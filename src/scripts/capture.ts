@@ -387,18 +387,42 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     const remaining = event.duration - elapsed;
 
     if (remaining <= 0) {
-        // Create a button that fills the cell
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "remove-btn";
-        removeBtn.textContent = "X";
-        removeBtn.title = "Clear this event";
+        // Create a container for both buttons
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "action-buttons";
 
-        // When clicked, remove this event from the table & array
+        // Create the first button using the close icon
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "btn-close";
+        removeBtn.title = "Clear this event";
+        // Create an img element for the close icon
+        const closeImg = document.createElement("img");
+        // Adjust the src path according to the dist folder
+        closeImg.src = "./close_button.png"
+        closeImg.alt = "Close event";
+        removeBtn.appendChild(closeImg);
         removeBtn.addEventListener("click", () => {
             removeEvent(event);
         });
 
-        removeTd.appendChild(removeBtn);
+        // Create the second button for an extra action
+        const extraBtn = document.createElement("button");
+        extraBtn.className = "btn-extra";
+        extraBtn.title = "Extra action";
+        const extraImg = document.createElement("img");
+        // Adjust the src path to your second button asset (e.g., edit_button.data.png)
+        extraImg.src = "./edit_button.png";
+        extraImg.alt = "Extra action";
+        extraBtn.appendChild(extraImg);
+        extraBtn.addEventListener("click", () => {
+            // Placeholder for the extra action functionality
+            console.log("Extra button clicked for event", event);
+        });
+
+        // Append both buttons vertically inside the container
+        buttonContainer.appendChild(removeBtn);
+        buttonContainer.appendChild(extraBtn);
+        removeTd.appendChild(buttonContainer);
     }
     row.appendChild(removeTd);
 
