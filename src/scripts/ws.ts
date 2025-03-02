@@ -1,5 +1,6 @@
 import { EventRecord } from "./events";
 import { addNewEvent } from "./capture";
+import { DEBUG } from "../config";
 
 export class WebSocketClient {
     private socket: WebSocket | null = null;
@@ -57,5 +58,8 @@ export class WebSocketClient {
     }
 }
 
-export const wsClient = new WebSocketClient("wss://ws.dsfeventtracker.com/ws");
+export const wsClient = new WebSocketClient(DEBUG
+    ? "wss://ws.dsfeventtracker.com/ws?room=development" 
+    : "wss://ws.dsfeventtracker.com/ws"
+);
 wsClient.connect();

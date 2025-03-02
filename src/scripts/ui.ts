@@ -270,6 +270,7 @@ const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const testEvent: EventRecord = {
+            type: "testing",
             event: "Testing",
             world: "50",
             duration: 15,

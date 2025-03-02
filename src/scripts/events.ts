@@ -16,6 +16,8 @@ export type Events = {
     [key in EventKeys]: string[];
 };
 
+type EventRecordTypes = "addEvent" | "testing"
+
 // Gold text for event arrival is at the start of each value array
 // Fisherman text is at the end of events, if any
 export const events: Events = {
@@ -105,6 +107,7 @@ export const eventTimes: EventTimes = {
 };
 
 export interface EventRecord {
+    type: EventRecordTypes;
     event: string;
     world: string;
     duration: number; // in seconds, or you can use a string if you prefer

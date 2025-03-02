@@ -268,6 +268,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     );
 
                     addNewEvent({
+                        type: "addEvent",
                         event: matchingEvent,
                         world: current_world,
                         duration: eventTimes[matchingEvent] + 6,
@@ -301,6 +302,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             "Event successfully removed"
                     ) {
                         wsClient.send({
+                            type: "addEvent",
                             event: matchingEvent,
                             world: current_world,
                             duration: eventTime,
