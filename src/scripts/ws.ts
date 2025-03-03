@@ -1,5 +1,5 @@
 import { EventRecord } from "./events";
-import { addNewEvent } from "./capture";
+import { addNewEvent, updateEvent } from "./eventHistory";
 import { DEBUG } from "../config";
 
 export class WebSocketClient {
@@ -38,7 +38,11 @@ export class WebSocketClient {
         try {
             const newEvent: EventRecord = JSON.parse(data);
             console.log("Parsed data: ", newEvent);
-            addNewEvent(newEvent);
+            if (["addEvent", "testing"].includes(newEvent.type)) {
+                addNewEvent(newEvent);
+            } else if (newEvent.type === "editEvent") {
+                updateEvent(newEvent);
+            }
         } catch (error) {
             console.error("⚠️ Failed to parse WebSocket message:", error);
         }
@@ -58,8 +62,9 @@ export class WebSocketClient {
     }
 }
 
-export const wsClient = new WebSocketClient(DEBUG
-    ? "wss://ws.dsfeventtracker.com/ws?room=development" 
-    : "wss://ws.dsfeventtracker.com/ws"
+export const wsClient = new WebSocketClient(
+    DEBUG
+        ? "wss://ws.dsfeventtracker.com/ws?room=development"
+        : "wss://ws.dsfeventtracker.com/ws",
 );
 wsClient.connect();

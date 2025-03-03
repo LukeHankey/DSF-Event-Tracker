@@ -3,7 +3,8 @@ import {
     stopEventTimerRefresh,
     renderEventHistory,
     clearEventHistory,
-} from "./capture";
+    updateHideExpiredRows,
+} from "./eventHistory";
 import { EventRecord } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
@@ -204,11 +205,13 @@ settingsForm?.addEventListener("submit", (e) => {
         localStorage.setItem("favoriteEvents", JSON.stringify(selectedValues));
     }
 
-    if (favoriteEventsModeSelect)
+    if (favoriteEventsModeSelect) {
         localStorage.setItem(
             "favoriteEventsMode",
             favoriteEventsModeSelect.value,
         );
+        renderEventHistory();
+    }
 
     // Show success toast notification
     showToast("✅ Settings saved!");
@@ -255,7 +258,9 @@ const hideExpiredCheckbox = document.getElementById(
     "hideExpiredCheckbox",
 ) as HTMLInputElement | null;
 if (hideExpiredCheckbox) {
-    hideExpiredCheckbox.addEventListener("change", () => renderEventHistory());
+    hideExpiredCheckbox.addEventListener("change", () => {
+        updateHideExpiredRows();
+    });
 }
 
 const clearAllBtn = document.getElementById(
@@ -276,6 +281,7 @@ if (testEventButton && DEBUG) {
             duration: 15,
             reportedBy: "Test",
             timestamp: Date.now(),
+            oldEvent: null,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
