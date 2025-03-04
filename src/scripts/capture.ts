@@ -12,7 +12,7 @@ import {
     startEventTimerRefresh,
     addNewEvent,
 } from "./eventHistory";
-import { v7 as uuid } from "uuid";
+import { v4 as uuid } from "uuid";
 
 /**
  * ChatBoxReader & color definitions

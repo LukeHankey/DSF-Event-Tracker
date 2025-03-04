@@ -220,7 +220,6 @@ export function updateEventTimers(): void {
         }
 
         if (remaining < 0) {
-            remaining = 0;
             const alreadyExpired = expiredEvents.some((e) => e.id === event.id);
             if (!alreadyExpired) {
                 expiredEvents.push(event);
@@ -352,7 +351,12 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
         editImg.src = "./edit_button.png";
         editImg.alt = "Edit action";
         editBtn.appendChild(editImg);
-        editBtn.addEventListener("click", () => editEvent(event, editBtn));
+        editBtn.addEventListener("click", () => {
+            const latestEvent = eventHistory.find((e) => e.id === event.id);
+            if (latestEvent) {
+                editEvent(latestEvent, editBtn);
+            }
+        });
         buttonContainer.appendChild(editBtn);
     }
     buttonsTd.appendChild(buttonContainer);
