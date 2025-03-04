@@ -12,6 +12,7 @@ import {
     startEventTimerRefresh,
     addNewEvent,
 } from "./eventHistory";
+import { v7 as uuid } from "uuid";
 
 /**
  * ChatBoxReader & color definitions
@@ -269,6 +270,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     );
 
                     addNewEvent({
+                        id: uuid(),
                         type: "addEvent",
                         event: matchingEvent,
                         world: current_world,
@@ -304,6 +306,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             "Event successfully removed"
                     ) {
                         wsClient.send({
+                            id: uuid(),
                             type: "addEvent",
                             event: matchingEvent,
                             world: current_world,

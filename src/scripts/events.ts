@@ -1,3 +1,5 @@
+import { UUIDTypes } from "uuid";
+
 export type EventKeys =
     | "Travelling merchant"
     | "Jellyfish"
@@ -107,6 +109,7 @@ export const eventTimes: EventTimes = {
 };
 
 export interface EventRecord {
+    id: UUIDTypes;
     type: EventRecordTypes;
     event: string;
     world: string;

@@ -8,6 +8,7 @@ import {
 import { EventRecord } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
+import { v4 as uuid } from "uuid";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -275,6 +276,7 @@ const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const testEvent: EventRecord = {
+            id: uuid(),
             type: "testing",
             event: "Testing",
             world: "50",
