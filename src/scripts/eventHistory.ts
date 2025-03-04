@@ -41,28 +41,34 @@ export function addNewEvent(newEvent: EventRecord): void {
     const favouriteEvents = savedFavourites
         ? (JSON.parse(savedFavourites) as string[])
         : [];
+
     if (favMode === "only" && !favouriteEvents.includes(newEvent.event)) {
         return;
     }
+
     // Append a new row for the event.
     appendEventRow(
         newEvent,
         favMode === "highlight" && favouriteEvents.includes(newEvent.event),
     );
-    startEventTimerRefresh();
+    restartRefreshInterval();
 }
 
 export function updateEvent(event: EventRecord): void {
     const idx = eventHistory.findIndex(
         (e) =>
             checkActive(e) &&
-            e.event === event.event &&
-            e.world === event.world,
+            e.event === event.oldEvent.event &&
+            e.world === event.oldEvent.world,
     );
     if (idx !== -1) {
         eventHistory[idx] = event;
         saveEventHistory();
-        startEventTimerRefresh();
+        if (!timeLeftCells.has(event.timestamp)) {
+            timeLeftCells.set(event.timestamp, timeLeftCells.get(event.oldEvent.timestamp));
+            timeLeftCells.delete(event.oldEvent.timestamp);
+        }
+        restartRefreshInterval();
     }
 }
 
@@ -241,13 +247,15 @@ export function updateEventTimers(): void {
             const row = timeCell.closest("tr") as HTMLTableRowElement;
             if (row && row.classList.contains("editing")) return;
             updateTableRowCells(row, [
+                { cellIndex: 1, newContent: event.event },
+                { cellIndex: 2, newContent: event.world },
                 { cellIndex: 3, newContent: formatTimeLeftValue(remaining) },
+                { cellIndex: 4, newContent: event.reportedBy },
             ]);
         }
     });
 
     if (anyEventExpired) {
-        console.log(1);
         renderEventHistory();
     }
 
@@ -377,7 +385,7 @@ function editEvent(event: EventRecord, button: HTMLButtonElement): void {
     const currentTimestamp = parseInt(row.dataset.timestamp);
     const latestEvent = eventHistory.find(
         (e) => e.timestamp === currentTimestamp,
-    );
+    ) || event;
 
     if (!row.classList.contains("editing")) {
         row.classList.add("editing");
