@@ -63,26 +63,6 @@ export function updateHideExpiredRows(): void {
             row.style.display = "";
         }
     }
-
-    // if (!hideExpired) {
-    //     const now = Date.now();
-    //     eventHistory.forEach((event) => {
-    //         const elapsed = (now - event.timestamp) / 1000;
-    //         let remaining = event.duration - elapsed;
-    //         if (remaining < 0) remaining = 0;
-    //         if (remaining === 0) {
-    //             // Check if there's already a row for this event.
-    //             if (
-    //                 !tbody.querySelector(
-    //                     `tr[data-timestamp="${event.timestamp}"]`,
-    //                 )
-    //             ) {
-    //                 // Append the expired event row.
-    //                 appendEventRow(event, false);
-    //             }
-    //         }
-    //     });
-    // }
 }
 
 export function renderEventHistory(): void {
@@ -230,14 +210,6 @@ export function updateEventTimers(): void {
     eventHistory.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
-        if (remaining < 0) {
-            remaining = 0;
-            const alreadyExpired = expiredEvents.some((e) => e.id === event.id);
-            if (!alreadyExpired) {
-                expiredEvents.push(event);
-                moveExpiredEventBelowActiveEvents(event);
-            }
-        }
 
         const row = rowMap.get(event.id);
         if (row) {
@@ -245,6 +217,15 @@ export function updateEventTimers(): void {
             updateTableRowCells(row, [
                 { cellIndex: 3, newContent: formatTimeLeftValue(remaining) },
             ]);
+        }
+
+        if (remaining < 0) {
+            remaining = 0;
+            const alreadyExpired = expiredEvents.some((e) => e.id === event.id);
+            if (!alreadyExpired) {
+                expiredEvents.push(event);
+                moveExpiredEventBelowActiveEvents(event);
+            }
         }
     });
 
@@ -325,6 +306,9 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
         buttonContainer.appendChild(removeBtn);
         actionCell.appendChild(buttonContainer);
     }
+
+    // Hide expired rows if the checkbox is checked.
+    updateHideExpiredRows();
 }
 
 function restartRefreshInterval(): void {
@@ -349,28 +333,28 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     const buttonContainer = document.createElement("div");
     buttonContainer.className = "action-buttons";
 
-    // if (remaining <= 0) {
-    //     const removeBtn = document.createElement("button");
-    //     removeBtn.className = "btn-close";
-    //     removeBtn.title = "Clear this event";
-    //     const closeImg = document.createElement("img");
-    //     closeImg.src = "./close_button.png";
-    //     closeImg.alt = "Close event";
-    //     removeBtn.appendChild(closeImg);
-    //     removeBtn.addEventListener("click", () => removeEvent(event));
-    //     buttonContainer.appendChild(removeBtn);
-    //     buttonsTd.appendChild(buttonContainer);
-    // } else {
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn-extra";
-    editBtn.title = "Edit event";
-    const editImg = document.createElement("img");
-    editImg.src = "./edit_button.png";
-    editImg.alt = "Edit action";
-    editBtn.appendChild(editImg);
-    editBtn.addEventListener("click", () => editEvent(event, editBtn));
-    buttonContainer.appendChild(editBtn);
-    // }
+    if (remaining <= 0) {
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "btn-close";
+        removeBtn.title = "Clear this event";
+        const closeImg = document.createElement("img");
+        closeImg.src = "./close_button.png";
+        closeImg.alt = "Close event";
+        removeBtn.appendChild(closeImg);
+        removeBtn.addEventListener("click", () => removeEvent(event));
+        buttonContainer.appendChild(removeBtn);
+        buttonsTd.appendChild(buttonContainer);
+    } else {
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn-extra";
+        editBtn.title = "Edit event";
+        const editImg = document.createElement("img");
+        editImg.src = "./edit_button.png";
+        editImg.alt = "Edit action";
+        editBtn.appendChild(editImg);
+        editBtn.addEventListener("click", () => editEvent(event, editBtn));
+        buttonContainer.appendChild(editBtn);
+    }
     buttonsTd.appendChild(buttonContainer);
     row.appendChild(buttonsTd);
 
