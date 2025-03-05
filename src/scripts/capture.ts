@@ -269,8 +269,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                         },
                     );
 
+                    const eventId = uuid();
                     addNewEvent({
-                        id: uuid(),
+                        id: eventId,
                         type: "addEvent",
                         event: matchingEvent,
                         world: current_world,
@@ -306,7 +307,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             "Event successfully removed"
                     ) {
                         wsClient.send({
-                            id: uuid(),
+                            id: eventId,
                             type: "addEvent",
                             event: matchingEvent,
                             world: current_world,
