@@ -417,7 +417,7 @@ function editEvent(event: EventRecord): void {
         row.classList.add("editing");
 
         // Store original values for each editable cell (indexes 1-4).
-        row.dataset.id = event.id.toString();
+        row.dataset.id = String(event.id);
         row.dataset.originalEvent = row.cells[1].textContent || "";
         row.dataset.originalWorld = row.cells[2].textContent || "";
         row.dataset.originalDuration = row.cells[3].textContent || "";
