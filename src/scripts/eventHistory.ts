@@ -266,13 +266,16 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
     for (const r of rows) {
         // Assume the time cell is at index 3.
         const timeText = r.cells[3]?.textContent?.trim();
-        if (timeText === "Expired") {
+        const rowId = r.getAttribute("data-id");
+        if (timeText === "Expired" && rowId !== event.id) {
             firstExpiredRow = r;
             break;
         }
     }
 
+    console.log(firstExpiredRow, event);
     if (firstExpiredRow) {
+        //  && firstExpiredRow.getAttribute("data-id") !== event.id) {
         // Insert our newly expired row above the first expired row.
         tbody.insertBefore(row, firstExpiredRow);
     } else {
@@ -354,7 +357,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
         editBtn.addEventListener("click", () => {
             const latestEvent = eventHistory.find((e) => e.id === event.id);
             if (latestEvent) {
-                editEvent(latestEvent, editBtn);
+                editEvent(latestEvent);
             }
         });
         buttonContainer.appendChild(editBtn);
@@ -407,7 +410,7 @@ function checkActive(event: EventRecord): boolean {
     return remaining > 0;
 }
 
-function editEvent(event: EventRecord, button: HTMLButtonElement): void {
+function editEvent(event: EventRecord): void {
     const row = rowMap.get(event.id);
     if (!row) return;
 
@@ -415,6 +418,7 @@ function editEvent(event: EventRecord, button: HTMLButtonElement): void {
         row.classList.add("editing");
 
         // Store original values for each editable cell (indexes 1-4).
+        row.dataset.id = event.id.toString();
         row.dataset.originalEvent = row.cells[1].textContent || "";
         row.dataset.originalWorld = row.cells[2].textContent || "";
         row.dataset.originalDuration = row.cells[3].textContent || "";
