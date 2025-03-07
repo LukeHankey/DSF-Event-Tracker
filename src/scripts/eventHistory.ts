@@ -1,6 +1,7 @@
 import { UUIDTypes } from "uuid";
-import { EventRecord } from "./events";
+import { EventRecord, EventKeys, events } from "./events";
 import { wsClient } from "./ws";
+import { DEBUG } from "../config";
 
 export let eventHistory: EventRecord[] = [];
 export let expiredEvents: EventRecord[] = [];
@@ -28,9 +29,44 @@ export function updateTableRowCells(
         newStyle?: Partial<CSSStyleDeclaration>;
     }[],
 ): void {
+    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter(
+        (e) => DEBUG || e !== "Testing",
+    );
     updates.forEach((update) => {
         const cell = row.cells[update.cellIndex];
         if (!cell) return;
+
+        if (update.cellIndex === 1) {
+            // Clear the cell
+            cell.innerHTML = "";
+
+            // Create a <select> element
+            const select = document.createElement("select");
+            select.classList.add("event-dropdown");
+            // Populate with known events
+            KNOWN_EVENTS.forEach((eventName) => {
+                const option = document.createElement("option");
+                option.value = eventName;
+                option.textContent = eventName;
+
+                // Mark the current event as selected
+                if (eventName === update.newContent) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            // Append the dropdown to the cell
+            cell.appendChild(select);
+
+            // (Optional) Listen for changes in the dropdown
+            // so you can immediately handle updates if you wish:
+            select.addEventListener("change", () => {
+                console.log("Selected event changed to:", select.value);
+                // e.g., update your local event data or call a function
+            });
+        }
+
         if (update.newContent !== undefined) {
             cell.textContent = update.newContent;
         }
@@ -273,7 +309,6 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
         }
     }
 
-    console.log(firstExpiredRow, event);
     if (firstExpiredRow) {
         // Insert our newly expired row above the first expired row.
         tbody.insertBefore(row, firstExpiredRow);
@@ -412,6 +447,9 @@ function checkActive(event: EventRecord): boolean {
 function editEvent(event: EventRecord): void {
     const row = rowMap.get(event.id);
     if (!row) return;
+    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter(
+        (e) => DEBUG || e !== "Testing",
+    );
 
     if (!row.classList.contains("editing")) {
         row.classList.add("editing");
@@ -425,7 +463,25 @@ function editEvent(event: EventRecord): void {
         row.dataset.timestamp = event.timestamp.toString() || "";
 
         Array.from(row.cells).forEach((cell, index) => {
-            if (index > 0) {
+            if (index === 1) {
+                // Instead of setting contentEditable, replace the cell content with a drop-down.
+                cell.innerHTML = "";
+                const select = document.createElement("select");
+                select.classList.add("event-dropdown");
+
+                // Populate the dropdown with the known event names.
+                KNOWN_EVENTS.forEach((eventName) => {
+                    const option = document.createElement("option");
+                    option.value = eventName;
+                    option.textContent = eventName;
+                    if (eventName === row.dataset.originalEvent) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                cell.appendChild(select);
+                cell.style.border = "1px dashed #ccc";
+            } else if (index > 0) {
                 cell.contentEditable = "true";
                 cell.style.border = "1px dashed #ccc";
             }
@@ -433,10 +489,16 @@ function editEvent(event: EventRecord): void {
     } else {
         row.classList.remove("editing");
         Array.from(row.cells).forEach((cell, index) => {
-            if (index > 0) {
+            if (index === 1) {
+                // For cell 1, if it contains a dropdown, replace it with its selected value.
+                const select = cell.querySelector("select");
+                if (select) {
+                    cell.textContent = select.value;
+                }
+            } else if (index > 0) {
                 cell.contentEditable = "false";
-                cell.style.border = "none";
             }
+            cell.style.border = "none";
         });
 
         const unchanged =
