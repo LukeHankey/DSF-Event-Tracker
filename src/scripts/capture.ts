@@ -1,5 +1,5 @@
 import * as a1lib from "alt1";
-import ChatBoxReader from "alt1/chatbox";
+import ChatBoxReader, { ChatLine } from "alt1/chatbox";
 import * as OCR from "alt1/ocr";
 import axios from "axios";
 import { webpackImages } from "alt1/base";
@@ -45,57 +45,35 @@ let lastMessage: string;
 let worldHopMessage = false;
 let mainboxRect = false;
 
-// When the page loads, hide the debug container if not in debug mode.
-window.addEventListener("DOMContentLoaded", () => {
-    const debugContainer = document.getElementById("debugContainer");
-    if (debugContainer) {
-        if (!DEBUG) {
-            debugContainer.style.display = "none";
-        } else {
-            debugContainer.style.display = ""; // or "block"
-        }
-    }
-});
-
-/**
- * Initialize capture logic
- * - Store initial main content
- * - Load and render event history
- * - Set up one refresh interval for updating timers
- */
-export function initCapture(): void {
-    if (localStorage.getItem("captureFrequency") == null) {
-        localStorage.setItem("captureFrequency", "2");
-    }
-    previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
-    loadEventHistory();
-
-    // Start timer only if event history is visible:
-    const eventHistoryTab = document.getElementById("eventHistoryTab");
-    if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
-        startEventTimerRefresh();
+function updateMainTab(message: string): void {
+    const mainTabParagraph = document.querySelector("#mainTab p");
+    if (mainTabParagraph) {
+        mainTabParagraph.textContent = message;
     }
 }
 
-/**
- * Capture the screen with alt1
- */
-export function capture(): void {
+function checkPermissions(): boolean {
     if (!window.alt1) {
-        document.querySelector("#mainTab p")!.textContent =
-            "You need to run this page in alt1 to capture the screen.";
-        return;
+        updateMainTab(
+            "You need to run this page in alt1 to capture the screen.",
+        );
+        return false;
     }
     if (
         !alt1.permissionPixel ||
         !alt1.permissionGameState ||
         !alt1.permissionOverlay
     ) {
-        document.querySelector("#mainTab p")!.textContent =
-            "Page is not installed as an app or permissions are not correct.";
-        return;
+        updateMainTab(
+            "Page is not installed as an app or permissions are not correct.",
+        );
+        return false;
     }
+    return true;
+}
 
+export function capture(): void {
+    if (!checkPermissions()) return;
     try {
         const img = a1lib.captureHoldFullRs();
         readChatFromImage(img);
@@ -104,20 +82,29 @@ export function capture(): void {
     }
 }
 
-/**
- * Continuously capture the screen every second
- */
-export function startCapturing(): void {
-    if (captureInterval) return; // already running
-    captureInterval = setInterval(
-        capture,
-        (parseInt(localStorage.getItem("captureFrequency")) || 2) * 1000,
-    );
+function getCaptureFrequency(): number {
+    const freq = localStorage.getItem("captureFrequency");
+    return freq ? parseInt(freq) || 2 : 2;
 }
 
-/**
- * Stop capturing
- */
+export function initCapture(): void {
+    if (localStorage.getItem("captureFrequency") == null) {
+        localStorage.setItem("captureFrequency", "2");
+    }
+    previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
+    loadEventHistory();
+
+    const eventHistoryTab = document.getElementById("eventHistoryTab");
+    if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
+        startEventTimerRefresh();
+    }
+}
+
+export function startCapturing(): void {
+    if (captureInterval) return; // already running
+    captureInterval = setInterval(capture, getCaptureFrequency() * 1000);
+}
+
 export function stopCapturing(): void {
     if (captureInterval) {
         clearInterval(captureInterval);
@@ -125,9 +112,115 @@ export function stopCapturing(): void {
     }
 }
 
-/**
- * Read lines from the captured chat image
- */
+function detectTimestamps(lines: any[]): boolean {
+    return lines.some(
+        (line) =>
+            line.fragments.length > 1 &&
+            /\d\d:\d\d:\d\d/.test(line.fragments[1].text),
+    );
+}
+
+function processLine(
+    line: ChatLine,
+    combinedText: string,
+    hasTimestamps: boolean,
+): {
+    newCombinedText: string;
+    updatedTimestamp: Date;
+    updatedLastMessage: string;
+} {
+    // Append current line text to combinedText
+    const newCombinedText =
+        combinedText === "" ? line.text : combinedText + " " + line.text;
+    let updatedTimestamp = new Date();
+    if (hasTimestamps && line.fragments.length > 1) {
+        const recentTimestamp = line.fragments[1].text;
+        updatedTimestamp = new Date(
+            `${new Date().toLocaleDateString()} ${recentTimestamp}`,
+        );
+    }
+    return {
+        newCombinedText,
+        updatedTimestamp,
+        updatedLastMessage: line.text,
+    };
+}
+
+async function reportEvent(
+    matchingEvent: EventKeys,
+    current_world: string,
+): Promise<void> {
+    try {
+        const rsn = localStorage.getItem("rsn");
+        const sendWebhookResponse = await axios.post(
+            "https://api.dsfeventtracker.com/send_webhook",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: ORIGIN,
+                },
+                event: matchingEvent,
+                world: current_world,
+                debug: DEBUG,
+                reportedBy: rsn,
+            },
+        );
+
+        const eventId = uuid();
+        addNewEvent({
+            id: eventId,
+            type: "addEvent",
+            event: matchingEvent,
+            world: current_world,
+            duration: eventTimes[matchingEvent] + 6,
+            reportedBy: rsn,
+            timestamp: Date.now(),
+            oldEvent: null,
+        });
+
+        if (sendWebhookResponse.status !== 200) {
+            console.log("Did not receive the correct response");
+            return;
+        }
+
+        const eventTime = eventTimes[matchingEvent];
+        const clearEventTimerResponse = await axios.post(
+            "https://api.dsfeventtracker.com/clear_event_timer",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: ORIGIN,
+                },
+                event: matchingEvent,
+                world: current_world,
+                timeout: eventTime,
+            },
+        );
+
+        if (
+            clearEventTimerResponse.status === 200 &&
+            clearEventTimerResponse.data.message ===
+                "Event successfully removed"
+        ) {
+            wsClient.send({
+                id: eventId,
+                type: "addEvent",
+                event: matchingEvent,
+                world: current_world,
+                duration: eventTime,
+                reportedBy: rsn,
+                timestamp: Date.now(),
+                oldEvent: null,
+            });
+        }
+    } catch (err) {
+        console.log(err);
+        console.log(
+            `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
+        );
+    }
+}
+
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
 
@@ -167,6 +260,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             )) ||
         worldHopMessage
     ) {
+        // Only happens when there has been a world hop
         let worldNumber = await findWorldNumber(img);
         if (!worldNumber) {
             console.log(
@@ -182,17 +276,12 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         }
         worldHopMessage = false;
     }
-    if (!hasTimestamps)
-        lines.some(
-            (line) =>
-                line.fragments.length > 1 &&
-                /\d\d:\d\d:\d\d/.test(line.fragments[1].text),
-        )
-            ? (hasTimestamps = true)
-            : (hasTimestamps = false);
+
+    // Checks on every image captured whether there are timestamps in chat
+    // Every image capture in case a user decides to turn it on/off
+    hasTimestamps = detectTimestamps(lines);
 
     let combinedText = "";
-    let recentTimestamp: null | string = null;
     lastTimestamp = new Date(sessionStorage.getItem("lastTimestamp"));
     lastMessage = sessionStorage.getItem("lastMessage");
     if (lines?.length) {
@@ -219,22 +308,14 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
         for (const line of lines) {
             if (line.text === lastMessage) continue;
-            lastMessage = line.text;
+            const { newCombinedText, updatedTimestamp, updatedLastMessage } =
+                processLine(line, combinedText, hasTimestamps);
+            combinedText = newCombinedText;
+            lastMessage = updatedLastMessage;
             sessionStorage.setItem("lastMessage", lastMessage);
             console.log(line);
 
-            const allTextFromLine = line.text;
-            combinedText =
-                combinedText === ""
-                    ? (combinedText += allTextFromLine)
-                    : combinedText + " " + allTextFromLine;
-
-            if (hasTimestamps && line.fragments.length > 1)
-                recentTimestamp = line.fragments[1].text;
-            lastTimestamp =
-                new Date(
-                    `${new Date().toLocaleDateString()} ` + recentTimestamp,
-                ) ?? new Date();
+            lastTimestamp = updatedTimestamp;
             sessionStorage.setItem("lastTimestamp", String(lastTimestamp));
 
             // Check if the text contains any keywords from the 'events' object
@@ -252,77 +333,13 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                       : String(alt1.currentWorld);
 
                 if (current_world === null) continue;
-
-                try {
-                    const rsn = localStorage.getItem("rsn");
-                    const sendWebhookResponse = await axios.post(
-                        "https://api.dsfeventtracker.com/send_webhook",
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                                Origin: ORIGIN,
-                            },
-                            event: matchingEvent,
-                            world: current_world,
-                            debug: DEBUG,
-                            reportedBy: rsn,
-                        },
-                    );
-
-                    const eventId = uuid();
-                    addNewEvent({
-                        id: eventId,
-                        type: "addEvent",
-                        event: matchingEvent,
-                        world: current_world,
-                        duration: eventTimes[matchingEvent] + 6,
-                        reportedBy: rsn,
-                        timestamp: Date.now(),
-                        oldEvent: null,
-                    });
-
-                    // Send timer request to avoid duplicate calls
-                    if (sendWebhookResponse.status !== 200) {
-                        console.log("Did not receive the correct response");
-                        continue;
-                    }
-                    const eventTime = eventTimes[matchingEvent];
-                    const clearEventTimerResponse = await axios.post(
-                        "https://api.dsfeventtracker.com/clear_event_timer",
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                                Origin: ORIGIN,
-                            },
-                            event: matchingEvent,
-                            world: current_world,
-                            timeout: eventTime,
-                        },
-                    );
-
-                    // Broadcast to all clients via websockets
-                    if (
-                        clearEventTimerResponse.status === 200 &&
-                        clearEventTimerResponse.data.message ===
-                            "Event successfully removed"
-                    ) {
-                        wsClient.send({
-                            id: eventId,
-                            type: "addEvent",
-                            event: matchingEvent,
-                            world: current_world,
-                            duration: eventTime,
-                            reportedBy: rsn,
-                            timestamp: Date.now(),
-                            oldEvent: null,
-                        });
-                    }
-                } catch (err) {
-                    console.log(err);
-                    console.log(
-                        `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
-                    );
-                }
+                console.log(
+                    `'Current world': ${current_world}`,
+                    `Previous world: ${sessionStorage.getItem("previousWorld")}`,
+                    `Alt1 detected world: ${alt1.currentWorld}`,
+                    `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
+                );
+                await reportEvent(matchingEvent, current_world);
             } else if (!partialMatch) {
                 combinedText = "";
             }
