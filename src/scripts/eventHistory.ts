@@ -196,6 +196,10 @@ export function clearEventHistory(): void {
 }
 
 export function addNewEvent(newEvent: EventRecord): void {
+    if (eventHistory.some((event) => event.id === newEvent.id)) {
+        console.log("Skipping duplicate event: ", newEvent.id);
+        return;
+    }
     eventHistory.push(newEvent);
     saveEventHistory();
 

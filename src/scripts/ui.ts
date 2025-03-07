@@ -275,6 +275,13 @@ if (clearAllBtn) {
 const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
+        const lastEvent = JSON.parse(
+            localStorage.getItem("eventHistory"),
+        ).slice(-1)[0] as EventRecord;
+        const lastEventTimestamp = lastEvent?.timestamp || 0;
+        const lastEventId = lastEvent?.id;
+        wsClient.sendSync(lastEventTimestamp, lastEventId);
+
         const testEvent: EventRecord = {
             id: uuid(),
             type: "testing",

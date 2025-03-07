@@ -1,6 +1,7 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
 import { DEBUG } from "../config";
+import { UUIDTypes } from "uuid";
 
 export class WebSocketClient {
     private socket: WebSocket | null = null;
@@ -15,6 +16,14 @@ export class WebSocketClient {
 
         this.socket.onopen = () => {
             console.log("✅ Connected to WebSocket!");
+            // Send a SYNC message with the last known event timestamp
+            const lastEvent = JSON.parse(
+                localStorage.getItem("eventHistory"),
+            ).slice(-1)[0] as EventRecord;
+            const lastEventTimestamp = lastEvent?.timestamp;
+            const lastEventId = lastEvent?.id;
+            const lastTimestamp = lastEventTimestamp || 0;
+            this.sendSync(lastTimestamp, lastEventId);
         };
 
         this.socket.onmessage = (event) => {
@@ -36,15 +45,40 @@ export class WebSocketClient {
 
     handleMessage(data: string): void {
         try {
-            const newEvent: EventRecord = JSON.parse(data);
-            console.log("Parsed data: ", newEvent);
-            if (["addEvent", "testing"].includes(newEvent.type)) {
-                addNewEvent(newEvent);
-            } else if (newEvent.type === "editEvent") {
-                updateEvent(newEvent);
+            const parsedData = JSON.parse(data);
+            // If the sync message returns an array of events, process each one.
+            if (Array.isArray(parsedData)) {
+                parsedData.forEach((eventObj) => this.processEvent(eventObj));
+            } else {
+                this.processEvent(parsedData);
             }
         } catch (error) {
             console.error("⚠️ Failed to parse WebSocket message:", error);
+        }
+    }
+
+    processEvent(eventData: EventRecord): void {
+        console.log("Parsed data: ", eventData);
+        if (["addEvent", "testing"].includes(eventData.type)) {
+            addNewEvent(eventData);
+        } else if (eventData.type === "editEvent") {
+            console.log("Editting: ", eventData);
+            updateEvent(eventData);
+        }
+    }
+
+    sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes): void {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            const syncMessage = {
+                type: "SYNC",
+                lastEventTimestamp,
+                lastEventId,
+            };
+            this.socket.send(JSON.stringify(syncMessage));
+        } else {
+            console.warn(
+                "⚠️ WebSocket is not open. Unable to send SYNC message.",
+            );
         }
     }
 
