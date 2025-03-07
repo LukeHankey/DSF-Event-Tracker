@@ -91,7 +91,9 @@
                     <table class="event-table">
                     <thead>
                         <tr>
-                            <th></th>
+                            <th>
+                                <button id="infoButton" class="info-button" title="Click for info">ℹ️</button>
+                            </th>
                             <th>Event</th>
                             <th>World</th>
                             <th>Time Left</th>
@@ -142,6 +144,35 @@
           <span id="statusMessage">Everything seems to be running smoothly.</span>
       </div>
   </div>
+
+<!-- Modal for displaying button info -->
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" title="Close">&times;</span>
+      <h2>Tracker Information</h2>
+      <p>Buttons:</p>
+      <ul>
+        <li>
+          <img
+            src="./close_button.png"
+            alt="Close Button"
+            class="button-icon"
+          />
+          Removes the expired event.
+        </li>
+        <li>
+          <img
+            src="./edit_button.png"
+            alt="Edit Event Button"
+            class="button-icon"
+          />
+          Allows you to update or correct an existing event. Available only to Scouters.
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  
 
   <!-- External JavaScript -->
   <script src="./main.js"></script>

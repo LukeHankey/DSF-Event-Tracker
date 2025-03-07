@@ -289,3 +289,35 @@ if (testEventButton && DEBUG) {
         wsClient.send(testEvent);
     });
 }
+
+// When the page loads, hide the debug container if not in debug mode.
+window.addEventListener("DOMContentLoaded", () => {
+    const debugContainer = document.getElementById("debugContainer");
+    if (debugContainer) {
+        if (!DEBUG) {
+            debugContainer.style.display = "none";
+        } else {
+            debugContainer.style.display = ""; // or "block"
+        }
+    }
+    const infoButton = document.getElementById("infoButton");
+    const modal = document.getElementById("infoModal");
+    const closeModal = modal.querySelector(".close");
+
+    // Show the modal when the info button is clicked
+    infoButton.addEventListener("click", function () {
+        modal.style.display = "block";
+    });
+
+    // Hide the modal when the close button (×) is clicked
+    closeModal.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+
+    // Hide the modal when clicking outside of the modal content
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+});
