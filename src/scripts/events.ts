@@ -1,3 +1,5 @@
+import { UUIDTypes } from "uuid";
+
 export type EventKeys =
     | "Travelling merchant"
     | "Jellyfish"
@@ -15,6 +17,8 @@ type EventTimes = {
 export type Events = {
     [key in EventKeys]: string[];
 };
+
+type EventRecordTypes = "addEvent" | "editEvent" | "testing";
 
 // Gold text for event arrival is at the start of each value array
 // Fisherman text is at the end of events, if any
@@ -105,9 +109,12 @@ export const eventTimes: EventTimes = {
 };
 
 export interface EventRecord {
+    id: UUIDTypes;
+    type: EventRecordTypes;
     event: string;
     world: string;
     duration: number; // in seconds, or you can use a string if you prefer
     reportedBy: string;
     timestamp: number; // ISO string or any format you like
+    oldEvent: EventRecord | null;
 }

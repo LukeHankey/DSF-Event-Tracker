@@ -3,10 +3,12 @@ import {
     stopEventTimerRefresh,
     renderEventHistory,
     clearEventHistory,
-} from "./capture";
+    updateHideExpiredRows,
+} from "./eventHistory";
 import { EventRecord } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
+import { v4 as uuid } from "uuid";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -204,11 +206,13 @@ settingsForm?.addEventListener("submit", (e) => {
         localStorage.setItem("favoriteEvents", JSON.stringify(selectedValues));
     }
 
-    if (favoriteEventsModeSelect)
+    if (favoriteEventsModeSelect) {
         localStorage.setItem(
             "favoriteEventsMode",
             favoriteEventsModeSelect.value,
         );
+        renderEventHistory();
+    }
 
     // Show success toast notification
     showToast("✅ Settings saved!");
@@ -255,7 +259,9 @@ const hideExpiredCheckbox = document.getElementById(
     "hideExpiredCheckbox",
 ) as HTMLInputElement | null;
 if (hideExpiredCheckbox) {
-    hideExpiredCheckbox.addEventListener("change", () => renderEventHistory());
+    hideExpiredCheckbox.addEventListener("change", () => {
+        updateHideExpiredRows();
+    });
 }
 
 const clearAllBtn = document.getElementById(
@@ -270,11 +276,14 @@ const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const testEvent: EventRecord = {
+            id: uuid(),
+            type: "testing",
             event: "Testing",
             world: "50",
             duration: 15,
             reportedBy: "Test",
             timestamp: Date.now(),
+            oldEvent: null,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);

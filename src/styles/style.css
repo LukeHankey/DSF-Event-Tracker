@@ -217,17 +217,18 @@ a {
     position: relative; /* so button can fill cell if needed */
 }
 
-.remove-btn {
-    width: 100%;
-    height: 100%;
-    background: red;
-    color: white;
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Adjust spacing as needed */
+    align-items: center;
+}
+
+.action-buttons button {
+    background: transparent;
     border: none;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 1em; /* adjust as needed */
-    padding: 0; /* remove default button padding */
-    display: block; /* let it fill the cell if the cell has a fixed height */
+    padding: 0;
 }
 
 .favourite-event {
