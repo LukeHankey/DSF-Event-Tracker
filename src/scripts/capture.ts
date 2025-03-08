@@ -297,13 +297,14 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
+        // Keeps messages which are cut onto 2 lines
         if (lastTimestamp)
             lines = lines.filter(
                 (line) =>
                     new Date(
                         `${new Date().toLocaleDateString()} ` +
                             line.fragments[1]?.text,
-                    ) >= lastTimestamp,
+                    ) >= lastTimestamp || line.fragments[1]?.text === undefined,
             );
 
         for (const line of lines) {
