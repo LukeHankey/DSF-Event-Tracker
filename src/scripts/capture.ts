@@ -176,6 +176,7 @@ async function reportEvent(
             reportedBy: rsn,
             timestamp: Date.now(),
             oldEvent: null,
+            token: null,
         });
 
         if (sendWebhookResponse.status !== 200) {
@@ -211,6 +212,7 @@ async function reportEvent(
                 reportedBy: rsn,
                 timestamp: Date.now(),
                 oldEvent: null,
+                token: null,
             });
         }
     } catch (err) {
