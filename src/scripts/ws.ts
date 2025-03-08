@@ -62,7 +62,6 @@ export class WebSocketClient {
         if (["addEvent", "testing"].includes(eventData.type)) {
             addNewEvent(eventData);
         } else if (eventData.type === "editEvent") {
-            console.log("Editting: ", eventData);
             updateEvent(eventData);
         }
     }

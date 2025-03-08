@@ -243,9 +243,8 @@ export function updateEvent(event: EventRecord): void {
                 { cellIndex: 3, newContent: formatTimeLeft(event) },
                 { cellIndex: 4, newContent: event.reportedBy },
             ]);
-
-            restartRefreshInterval();
         }
+        restartRefreshInterval();
     }
 }
 
