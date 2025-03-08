@@ -391,6 +391,75 @@ small {
 
 
 /* -------------------------------------
+4) INFO MODAL
+------------------------------------- */
+/* Info button style */
+.info-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+/* The Modal (hidden by default) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+/* Modal content box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% from the top, centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Adjust as needed */
+    border-radius: 4px;
+}
+
+/* The close button inside the modal */
+.modal-content .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.modal-content .close:hover,
+.modal-content .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content ul {
+    /* This reduces the default left padding/indent of the list items */
+    margin-left: 0; 
+    padding-left: 1.2rem; /* Adjust to your liking */
+  }
+  
+.modal-content li {
+    margin-bottom: 0.5rem; /* Spacing between items */
+}
+  
+  /* Ensure images line up well with text */
+.button-icon {
+    vertical-align: middle; 
+    width: 16px; /* Adjust as needed */
+    height: 16px; /* Adjust as needed */
+    margin-right: 8px; /* Space between the icon and the text */
+}
+  
+
+
+/* -------------------------------------
 4) TOAST NOTIFICATION
 ------------------------------------- */
 .toast {
