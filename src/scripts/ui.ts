@@ -159,9 +159,9 @@ if (rsnInput && savedRSN) {
 }
 
 const captureFrequency = document.getElementById(
-    "rsn",
+    "captureFrequency",
 ) as HTMLInputElement | null;
-const savedCaptureFrequency = localStorage.getItem("rsn");
+const savedCaptureFrequency = localStorage.getItem("captureFrequency");
 if (captureFrequency && savedCaptureFrequency) {
     captureFrequency.value = savedCaptureFrequency;
 }
@@ -186,32 +186,39 @@ if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
 }
 
+function updateIfChanged(key: string, currentValue: string): void {
+    const savedValue = localStorage.getItem(key);
+    if (savedValue !== currentValue) {
+        localStorage.setItem(key, currentValue);
+        if (key === "favoriteEventsMode") renderEventHistory();
+    }
+}
+
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById(
     "settingsForm",
 ) as HTMLFormElement | null;
 settingsForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (discordIDInput) localStorage.setItem("discordID", discordIDInput.value);
-
-    if (rsnInput) localStorage.setItem("rsn", rsnInput.value);
-
-    if (captureFrequency)
-        localStorage.setItem("captureFrequency", captureFrequency.value);
+    if (discordIDInput) {
+        updateIfChanged("discordID", discordIDInput.value);
+    }
+    if (rsnInput) {
+        updateIfChanged("rsn", rsnInput.value);
+    }
+    if (captureFrequency) {
+        updateIfChanged("captureFrequency", captureFrequency.value);
+    }
 
     if (favoriteEventsSelect) {
         const selectedValues = Array.from(
             favoriteEventsSelect.selectedOptions,
         ).map((opt) => opt.value);
-        localStorage.setItem("favoriteEvents", JSON.stringify(selectedValues));
+        updateIfChanged("favoriteEvents", JSON.stringify(selectedValues));
     }
 
     if (favoriteEventsModeSelect) {
-        localStorage.setItem(
-            "favoriteEventsMode",
-            favoriteEventsModeSelect.value,
-        );
-        renderEventHistory();
+        updateIfChanged("favoriteEventsMode", favoriteEventsModeSelect.value);
     }
 
     // Show success toast notification
@@ -275,6 +282,13 @@ if (clearAllBtn) {
 const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
+        const lastEvent = JSON.parse(
+            localStorage.getItem("eventHistory"),
+        ).slice(-1)[0] as EventRecord;
+        const lastEventTimestamp = lastEvent?.timestamp || 0;
+        const lastEventId = lastEvent?.id;
+        wsClient.sendSync(lastEventTimestamp, lastEventId);
+
         const testEvent: EventRecord = {
             id: uuid(),
             type: "testing",
@@ -289,3 +303,35 @@ if (testEventButton && DEBUG) {
         wsClient.send(testEvent);
     });
 }
+
+// When the page loads, hide the debug container if not in debug mode.
+window.addEventListener("DOMContentLoaded", () => {
+    const debugContainer = document.getElementById("debugContainer");
+    if (debugContainer) {
+        if (!DEBUG) {
+            debugContainer.style.display = "none";
+        } else {
+            debugContainer.style.display = ""; // or "block"
+        }
+    }
+    const infoButton = document.getElementById("infoButton");
+    const modal = document.getElementById("infoModal");
+    const closeModal = modal.querySelector(".close");
+
+    // Show the modal when the info button is clicked
+    infoButton.addEventListener("click", function () {
+        modal.style.display = "block";
+    });
+
+    // Hide the modal when the close button (×) is clicked
+    closeModal.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+
+    // Hide the modal when clicking outside of the modal content
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+});
