@@ -38,8 +38,23 @@
       <form id="settingsForm">
           <div class="form__group">
               <label for="discordID">Discord ID</label>
-              <input type="text" id="discordID" placeholder="Enter Discord ID" maxlength="20", title="Enter your own Discord ID if you want your stats tracking." />
+              <div class="input-group">
+                <input type="text" id="discordID" placeholder="Enter Discord ID" maxlength="20", title="Enter your own Discord ID if you want your stats tracking." />
+                <button type="button" id="validateDiscordID" class="validate-btn">Validate</button>
+              </div>
+              <small id="validationMessage"></small>
           </div>
+
+          <!-- Hidden verification code input (shown after first validation step) -->
+          <div class="form__group" id="verificationSection" style="display: none;">
+            <label for="verificationCode">Enter Verification Code</label>
+            <div class="input-group">
+                <input type="text" id="verificationCode" placeholder="Enter Code" maxlength="6" />
+                <button type="button" id="submitVerificationCode" class="validate-btn">✔</button>
+            </div>
+            <small id="verificationMessage"></small>
+          </div>
+
           <div class="form__group">
               <label for="rsn">RSN</label>
               <input type="text", id="rsn", placeholder="Enter RSN", maxlength="12" title="Main character name."/>

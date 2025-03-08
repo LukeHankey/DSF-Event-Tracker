@@ -284,6 +284,43 @@ form .form__group:not(:last-of-type) {
     margin-top: 10px;
 }
 
+#verificationSection {
+    margin-top: 10px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+#discordID {
+    flex: 1;
+    padding-right: 40px; /* Adjust spacing for button */
+}
+
+.validate-btn {
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+.validate-btn:hover {
+    background-color: #005fa3;
+}
+
+small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+
 /* -------------------------------------
 4) INFO MODAL
 ------------------------------------- */

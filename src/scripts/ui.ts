@@ -225,6 +225,93 @@ settingsForm?.addEventListener("submit", (e) => {
     showToast("✅ Settings saved!");
 });
 
+document
+    .getElementById("validateDiscordID")
+    ?.addEventListener("click", async () => {
+        const discordID = (
+            document.getElementById("discordID") as HTMLInputElement
+        ).value;
+        const validationMessage = document.getElementById("validationMessage");
+
+        if (!discordID.match(/^\d{17,20}$/)) {
+            validationMessage!.textContent = "Invalid Discord ID format.";
+            validationMessage!.style.color = "red";
+            return;
+        }
+
+        // Send request to backend for validation
+        // Check for scout profile with the discord id and add an attribute
+        // alt1Validation: pending
+        // const response = await fetch("https://your-backend.com/validate-discord", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({ discord_id: discordID })
+        // });
+
+        // const data = await response.json();
+        const data = { exists: true };
+
+        if (data.exists) {
+            validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
+            validationMessage!.style.display = "block";
+            validationMessage!.style.color = "green";
+            updateIfChanged("discordID", discordID);
+            document.getElementById("verificationSection")!.style.display =
+                "block";
+        }
+    });
+
+// Step 2: Handle verification code input
+document
+    .getElementById("submitVerificationCode")
+    ?.addEventListener("click", async () => {
+        const discordID = (
+            document.getElementById("discordID") as HTMLInputElement
+        ).value;
+        const verificationCode = (
+            document.getElementById("verificationCode") as HTMLInputElement
+        ).value;
+        const verificationSection = document.getElementById(
+            "verificationSection",
+        );
+        const verificationMessage = document.getElementById(
+            "verificationMessage",
+        );
+
+        const validationMessage = document.getElementById("validationMessage");
+
+        if (!verificationCode.match(/^\d{6}$/)) {
+            verificationMessage!.textContent = "Invalid verification code.";
+            verificationMessage!.style.display = "block";
+            verificationMessage!.style.color = "red";
+            return;
+        }
+
+        // Send verification code to backend
+        // const response = await fetch("https://your-backend.com/verify-code", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({ discord_id: discordID, code: verificationCode })
+        // });
+
+        // const data = await response.json();
+
+        const data = { verified: true };
+
+        if (data.verified) {
+            // Hide verification section
+            verificationSection!.style.display = "none";
+            validationMessage!.style.display = "none";
+            verificationMessage!.style.display = "none";
+
+            // Show success toast
+            showToast("✅ Verified successfully!");
+        } else {
+            validationMessage!.textContent = "❌ Incorrect verification code.";
+            validationMessage!.style.color = "red";
+        }
+    });
+
 // Sub-tab switching inside #scoutsTab
 const sub_tabs = document.querySelectorAll<HTMLElement>(".sub-tab");
 sub_tabs.forEach((subTab) => {
