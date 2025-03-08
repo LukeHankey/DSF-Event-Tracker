@@ -102,6 +102,11 @@ export function updateHideExpiredRows(): void {
 }
 
 export function renderEventHistory(): void {
+    const tbody = document.getElementById("eventHistoryBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
     const now = Date.now();
     const savedFavourites = localStorage.getItem("favoriteEvents");
     const favouriteEvents = savedFavourites

@@ -159,9 +159,9 @@ if (rsnInput && savedRSN) {
 }
 
 const captureFrequency = document.getElementById(
-    "rsn",
+    "captureFrequency",
 ) as HTMLInputElement | null;
-const savedCaptureFrequency = localStorage.getItem("rsn");
+const savedCaptureFrequency = localStorage.getItem("captureFrequency");
 if (captureFrequency && savedCaptureFrequency) {
     captureFrequency.value = savedCaptureFrequency;
 }
@@ -186,32 +186,39 @@ if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
 }
 
+function updateIfChanged(key: string, currentValue: string): void {
+    const savedValue = localStorage.getItem(key);
+    if (savedValue !== currentValue) {
+        localStorage.setItem(key, currentValue);
+        if (key === "favoriteEventsMode") renderEventHistory();
+    }
+}
+
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById(
     "settingsForm",
 ) as HTMLFormElement | null;
 settingsForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (discordIDInput) localStorage.setItem("discordID", discordIDInput.value);
-
-    if (rsnInput) localStorage.setItem("rsn", rsnInput.value);
-
-    if (captureFrequency)
-        localStorage.setItem("captureFrequency", captureFrequency.value);
+    if (discordIDInput) {
+        updateIfChanged("discordID", discordIDInput.value);
+    }
+    if (rsnInput) {
+        updateIfChanged("rsn", rsnInput.value);
+    }
+    if (captureFrequency) {
+        updateIfChanged("captureFrequency", captureFrequency.value);
+    }
 
     if (favoriteEventsSelect) {
         const selectedValues = Array.from(
             favoriteEventsSelect.selectedOptions,
         ).map((opt) => opt.value);
-        localStorage.setItem("favoriteEvents", JSON.stringify(selectedValues));
+        updateIfChanged("favoriteEvents", JSON.stringify(selectedValues));
     }
 
     if (favoriteEventsModeSelect) {
-        localStorage.setItem(
-            "favoriteEventsMode",
-            favoriteEventsModeSelect.value,
-        );
-        renderEventHistory();
+        updateIfChanged("favoriteEventsMode", favoriteEventsModeSelect.value);
     }
 
     // Show success toast notification
