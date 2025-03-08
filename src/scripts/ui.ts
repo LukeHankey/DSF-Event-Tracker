@@ -7,8 +7,9 @@ import {
 } from "./eventHistory";
 import { EventRecord } from "./events";
 import { wsClient } from "./ws";
-import { DEBUG } from "../config";
+import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -239,25 +240,31 @@ document
             return;
         }
 
-        // Send request to backend for validation
-        // Check for scout profile with the discord id and add an attribute
-        // alt1Validation: pending
-        // const response = await fetch("https://your-backend.com/validate-discord", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ discord_id: discordID })
-        // });
+        try {
+            const response = await axios.post(
+                "https://api.dsfeventtracker.com/validate_discord_id",
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: ORIGIN,
+                    },
+                    discord_id: discordID,
+                },
+            );
 
-        // const data = await response.json();
-        const data = { exists: true };
-
-        if (data.exists) {
-            validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
-            validationMessage!.style.display = "block";
-            validationMessage!.style.color = "green";
-            updateIfChanged("discordID", discordID);
-            document.getElementById("verificationSection")!.style.display =
-                "block";
+            if (response.status === 200 && response.data.exists) {
+                validationMessage!.textContent =
+                    "✅ Run /alt1 verify in Discord.";
+                validationMessage!.style.display = "block";
+                validationMessage!.style.color = "green";
+                updateIfChanged("discordID", discordID);
+                document.getElementById("verificationSection")!.style.display =
+                    "block";
+            }
+        } catch (err) {
+            console.error("Error validating Discord ID:", err);
+            validationMessage!.textContent = "❌ Error validating Discord ID.";
+            validationMessage!.style.color = "red";
         }
     });
 
@@ -280,35 +287,40 @@ document
 
         const validationMessage = document.getElementById("validationMessage");
 
-        if (!verificationCode.match(/^\d{6}$/)) {
+        if (!verificationCode.match(/^\d{8}$/)) {
             verificationMessage!.textContent = "Invalid verification code.";
             verificationMessage!.style.display = "block";
             verificationMessage!.style.color = "red";
             return;
         }
 
-        // Send verification code to backend
-        // const response = await fetch("https://your-backend.com/verify-code", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ discord_id: discordID, code: verificationCode })
-        // });
+        const response = await axios.post(
+            "https://api.dsfeventtracker.com/verify_code",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: ORIGIN,
+                },
+                discord_id: discordID,
+                code: verificationCode,
+            },
+        );
 
-        // const data = await response.json();
-
-        const data = { verified: true };
-
-        if (data.verified) {
+        if (response.data.verified && response.data.refresh_token) {
             // Hide verification section
             verificationSection!.style.display = "none";
             validationMessage!.style.display = "none";
             verificationMessage!.style.display = "none";
 
+            localStorage.setItem("refreshToken", response.data.refresh_token);
+            localStorage.setItem("accessToken", response.data.access_token);
+
             // Show success toast
             showToast("✅ Verified successfully!");
         } else {
-            validationMessage!.textContent = "❌ Incorrect verification code.";
-            validationMessage!.style.color = "red";
+            verificationMessage!.textContent =
+                "❌ Incorrect verification code.";
+            verificationMessage!.style.color = "red";
         }
     });
 
@@ -385,6 +397,7 @@ if (testEventButton && DEBUG) {
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
+            token: null,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);

@@ -2,6 +2,42 @@ import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
 import { DEBUG } from "../config";
 import { UUIDTypes } from "uuid";
+import axios from "axios";
+
+async function refreshToken(): Promise<string | null> {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!refreshToken) {
+        console.error("No refresh token found, user needs to re-authenticate.");
+        return null;
+    }
+
+    try {
+        const response = await axios.post(
+            "https://api.dsfeventtracker.com/refresh_token",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                refresh_token: refreshToken,
+            },
+        );
+
+        if (response.data.access_token) {
+            console.log("🔄 Token refreshed successfully");
+            localStorage.setItem("accessToken", response.data.access_token);
+            return response.data.access_token; // ✅ Return new token for immediate use
+        } else {
+            console.error(
+                "⚠️ Failed to refresh token, user must re-authenticate.",
+            );
+            return null;
+        }
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        return null;
+    }
+}
 
 export class WebSocketClient {
     private socket: WebSocket | null = null;
@@ -26,9 +62,9 @@ export class WebSocketClient {
             this.sendSync(lastTimestamp, lastEventId);
         };
 
-        this.socket.onmessage = (event) => {
+        this.socket.onmessage = async (event) => {
             console.log("📨 Received:", event.data);
-            this.handleMessage(event.data);
+            await this.handleMessage(event.data);
         };
 
         this.socket.onerror = (error) => {
@@ -43,12 +79,26 @@ export class WebSocketClient {
         };
     }
 
-    handleMessage(data: string): void {
+    async handleMessage(data: string): Promise<void> {
         try {
             const parsedData = JSON.parse(data);
             // If the sync message returns an array of events, process each one.
             if (Array.isArray(parsedData)) {
                 parsedData.forEach((eventObj) => this.processEvent(eventObj));
+            } else if (parsedData.error) {
+                console.error("WebSocket Error: ", parsedData.error);
+                if (parsedData.action === "refresh_token") {
+                    console.warn("Token expired, requesting a new one...");
+
+                    const newToken = await refreshToken();
+                    if (newToken && parsedData.event_data) {
+                        console.log(
+                            "🔄 Resending event after token refresh...",
+                        );
+                        parsedData.event_data.token = newToken; // ✅ Update the token
+                        this.send(parsedData.event_data as EventRecord); // ✅ Resend the event
+                    }
+                }
             } else {
                 this.processEvent(parsedData);
             }

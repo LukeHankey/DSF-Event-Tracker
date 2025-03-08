@@ -2,6 +2,7 @@ import { UUIDTypes } from "uuid";
 import { EventRecord, EventKeys, events } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
+import { userHasRequiredRole } from "./permissions";
 
 export let eventHistory: EventRecord[] = [];
 export let expiredEvents: EventRecord[] = [];
@@ -377,6 +378,9 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     const buttonContainer = document.createElement("div");
     buttonContainer.className = "action-buttons";
 
+    const allowedRoles = ["775940649802793000"]  // Scouter role
+    const hasEditPermission = userHasRequiredRole(allowedRoles);
+
     if (remaining <= 0) {
         const removeBtn = document.createElement("button");
         removeBtn.className = "btn-close";
@@ -389,20 +393,22 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
         buttonContainer.appendChild(removeBtn);
         buttonsTd.appendChild(buttonContainer);
     } else {
-        const editBtn = document.createElement("button");
-        editBtn.className = "btn-extra";
-        editBtn.title = "Edit event";
-        const editImg = document.createElement("img");
-        editImg.src = "./edit_button.png";
-        editImg.alt = "Edit action";
-        editBtn.appendChild(editImg);
-        editBtn.addEventListener("click", () => {
-            const latestEvent = eventHistory.find((e) => e.id === event.id);
-            if (latestEvent) {
-                editEvent(latestEvent);
-            }
-        });
-        buttonContainer.appendChild(editBtn);
+        if (hasEditPermission) {
+            const editBtn = document.createElement("button");
+            editBtn.className = "btn-extra";
+            editBtn.title = "Edit event";
+            const editImg = document.createElement("img");
+            editImg.src = "./edit_button.png";
+            editImg.alt = "Edit action";
+            editBtn.appendChild(editImg);
+            editBtn.addEventListener("click", () => {
+                const latestEvent = eventHistory.find((e) => e.id === event.id);
+                if (latestEvent) {
+                    editEvent(latestEvent);
+                }
+            });
+            buttonContainer.appendChild(editBtn);
+        }
     }
     buttonsTd.appendChild(buttonContainer);
     row.appendChild(buttonsTd);
@@ -533,6 +539,7 @@ function editEvent(event: EventRecord): void {
                 ? event.timestamp
                 : Date.now();
 
+        const token = localStorage.getItem("accessToken");
         const updatedEvent: EventRecord = {
             id: event.id,
             type: "editEvent",
@@ -542,6 +549,7 @@ function editEvent(event: EventRecord): void {
             reportedBy: row.cells[4].textContent?.trim() || "",
             timestamp: newTimestamp,
             oldEvent: event,
+            token: token,
         };
 
         rowMap.set(event.id, row);
