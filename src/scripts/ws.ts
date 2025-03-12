@@ -55,7 +55,7 @@ export class WebSocketClient {
             // Send a SYNC message with the last known event timestamp
             const lastEvent = JSON.parse(
                 localStorage.getItem("eventHistory"),
-            ).slice(-1)[0] as EventRecord;
+            )?.slice(-1)[0] as EventRecord | undefined;
             const lastEventTimestamp = lastEvent?.timestamp;
             const lastEventId = lastEvent?.id;
             const lastTimestamp = lastEventTimestamp || 0;
@@ -116,7 +116,7 @@ export class WebSocketClient {
         }
     }
 
-    sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes): void {
+    sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const syncMessage = {
                 type: "SYNC",
