@@ -379,7 +379,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     const buttonContainer = document.createElement("div");
     buttonContainer.className = "action-buttons";
 
-    const allowedRoles = ["775940649802793000"]  // Scouter role
+    const allowedRoles = ["775940649802793000"]; // Scouter role
     const hasEditPermission = userHasRequiredRole(allowedRoles);
 
     if (remaining <= 0) {

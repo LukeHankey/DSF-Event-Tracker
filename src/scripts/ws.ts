@@ -116,7 +116,10 @@ export class WebSocketClient {
         }
     }
 
-    sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
+    sendSync(
+        lastEventTimestamp: number,
+        lastEventId: UUIDTypes | undefined,
+    ): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const syncMessage = {
                 type: "SYNC",
