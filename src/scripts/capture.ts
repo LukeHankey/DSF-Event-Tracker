@@ -151,7 +151,7 @@ async function reportEvent(
     current_world: string,
 ): Promise<void> {
     try {
-        const rsn = localStorage.getItem("rsn");
+        const rsn = localStorage.getItem("rsn") ?? "";
         const sendWebhookResponse = await axios.post(
             "https://api.dsfeventtracker.com/send_webhook",
             {
@@ -227,14 +227,14 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
 
     if (!chatData) {
-        document.querySelector("#mainTab p").textContent =
+        document.querySelector("#mainTab p")!.textContent =
             "Could not find chat box.";
         return;
     }
 
     // Highlight the main chatbox
     if (!mainboxRect) {
-        const { x, y, width, height } = chatbox.pos.mainbox.rect;
+        const { x, y, width, height } = chatbox.pos!.mainbox.rect;
         alt1.overLayRect(
             a1lib.mixColor(255, 0, 0),
             x,
@@ -248,13 +248,13 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     }
 
     if (
-        document.querySelector("#mainTab p").textContent ===
+        document.querySelector("#mainTab p")!.textContent ===
         "Could not find chat box."
     ) {
-        document.querySelector("#mainTab p").innerHTML = previousMainContent;
+        document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines = chatbox.read(); // Read lines from the detected chat box
+    let lines = chatbox.read() as ChatLine[]; // Read lines from the detected chat box
     if (
         (lines.length > 1 &&
             lines.some((line) =>
@@ -272,7 +272,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             // Save the previous world just in case
             const previousWorld = sessionStorage.getItem("currentWorld");
             if (previousWorld !== worldNumber) {
-                sessionStorage.setItem("previousWorld", previousWorld);
+                sessionStorage.setItem("previousWorld", previousWorld ?? "");
                 sessionStorage.setItem("currentWorld", worldNumber);
             }
         }
@@ -284,8 +284,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     hasTimestamps = detectTimestamps(lines);
 
     let combinedText = "";
-    lastTimestamp = new Date(sessionStorage.getItem("lastTimestamp"));
-    lastMessage = sessionStorage.getItem("lastMessage");
+    lastTimestamp = new Date(
+        sessionStorage.getItem("lastTimestamp") ?? Date.now(),
+    );
+    lastMessage = sessionStorage.getItem("lastMessage") ?? "";
     if (lines?.length) {
         // Remove blank lines
         if (lines.some((line) => line.text === ""))
@@ -406,7 +408,7 @@ const findWorldNumber = async (
                 match.x + 5,
                 match.y + 2,
             );
-            worldNumber = textObj.text.match(/\d{1,3}/)[0];
+            worldNumber = textObj.text.match(/\d{1,3}/)![0];
         }
     }
 
