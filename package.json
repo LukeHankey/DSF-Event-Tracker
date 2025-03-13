@@ -8,6 +8,7 @@
     "dependencies": {
         "alt1": "^0.1.0",
         "axios": "^1.7.7",
+        "fuse.js": "^7.1.0",
         "uuid": "^11.1.0"
     },
     "devDependencies": {
