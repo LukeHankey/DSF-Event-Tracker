@@ -4,7 +4,7 @@ import * as OCR from "alt1/ocr";
 import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
-import { Events, EventKeys, events, eventTimes } from "./events";
+import { EventKeys, events, eventTimes } from "./events";
 import { DEBUG, ORIGIN } from "../config";
 import { wsClient } from "./ws";
 import {
@@ -13,6 +13,7 @@ import {
     addNewEvent,
 } from "./eventHistory";
 import { v4 as uuid } from "uuid";
+import Fuse from "fuse.js";
 
 /**
  * ChatBoxReader & color definitions
@@ -112,7 +113,7 @@ export function stopCapturing(): void {
     }
 }
 
-function detectTimestamps(lines: any[]): boolean {
+function detectTimestamps(lines: ChatLine[]): boolean {
     return lines.some(
         (line) =>
             line.fragments.length > 1 &&
@@ -122,16 +123,11 @@ function detectTimestamps(lines: any[]): boolean {
 
 function processLine(
     line: ChatLine,
-    combinedText: string,
     hasTimestamps: boolean,
 ): {
-    newCombinedText: string;
     updatedTimestamp: Date;
     updatedLastMessage: string;
 } {
-    // Append current line text to combinedText
-    const newCombinedText =
-        combinedText === "" ? line.text : combinedText + " " + line.text;
     let updatedTimestamp = new Date();
     if (hasTimestamps && line.fragments.length > 1) {
         const recentTimestamp = line.fragments[1].text;
@@ -140,7 +136,6 @@ function processLine(
         );
     }
     return {
-        newCombinedText,
         updatedTimestamp,
         updatedLastMessage: line.text,
     };
@@ -254,7 +249,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines = chatbox.read() as ChatLine[]; // Read lines from the detected chat box
+    let lines = (chatbox.read() as ChatLine[]) ?? []; // Read lines from the detected chat box
     if (
         (lines.length > 1 &&
             lines.some((line) =>
@@ -269,12 +264,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 "Unable to capture world number from Friends List. Make sure the interface is viewable on screen.",
             );
         } else {
-            // Save the previous world just in case
-            const previousWorld = sessionStorage.getItem("currentWorld");
-            if (previousWorld !== worldNumber) {
-                sessionStorage.setItem("previousWorld", previousWorld ?? "");
-                sessionStorage.setItem("currentWorld", worldNumber);
-            }
+            sessionStorage.setItem("currentWorld", worldNumber);
         }
         worldHopMessage = false;
     }
@@ -283,9 +273,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     // Every image capture in case a user decides to turn it on/off
     hasTimestamps = detectTimestamps(lines);
 
-    let combinedText = "";
+    // For fresh client, capture first new message within 3 seconds
     lastTimestamp = new Date(
-        sessionStorage.getItem("lastTimestamp") ?? Date.now(),
+        sessionStorage.getItem("lastTimestamp") ?? Date.now() - 3_000,
     );
     lastMessage = sessionStorage.getItem("lastMessage") ?? "";
     if (lines?.length) {
@@ -302,7 +292,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
         // Keeps messages which are cut onto 2 lines
-        if (lastTimestamp)
+        if (lastTimestamp) {
             lines = lines.filter(
                 (line) =>
                     new Date(
@@ -310,12 +300,15 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                             line.fragments[1]?.text,
                     ) >= lastTimestamp || line.fragments[1]?.text === undefined,
             );
+        }
 
         for (const line of lines) {
             if (line.text === lastMessage) continue;
-            const { newCombinedText, updatedTimestamp, updatedLastMessage } =
-                processLine(line, combinedText, hasTimestamps);
-            combinedText = newCombinedText;
+            const { updatedTimestamp, updatedLastMessage } = processLine(
+                line,
+                hasTimestamps,
+            );
+
             lastMessage = updatedLastMessage;
             sessionStorage.setItem("lastMessage", lastMessage);
             console.log(line);
@@ -323,69 +316,74 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             lastTimestamp = updatedTimestamp;
             sessionStorage.setItem("lastTimestamp", String(lastTimestamp));
 
-            // Check if the text contains any keywords from the 'events' object
-            const [partialMatch, matchingEvent] = getMatchingEvent(
-                combinedText,
-                events,
-            );
-
-            if (matchingEvent && !partialMatch) {
-                // Send the combined text to the server
-                const current_world = worldHopMessage
-                    ? sessionStorage.getItem("previousWorld")
-                    : alt1.currentWorld < 0
+            // Match the event with tolerance. Should work for lines with at least 15 characters
+            const matchingEvent = getMatchingEvent(line.text);
+            if (matchingEvent) {
+                let current_world = alt1.currentWorld < 0
                       ? sessionStorage.getItem("currentWorld")
                       : String(alt1.currentWorld);
 
-                if (current_world === null) continue;
                 console.log(
                     `'Current world': ${current_world}`,
                     `Previous world: ${sessionStorage.getItem("previousWorld")}`,
                     `Alt1 detected world: ${alt1.currentWorld}`,
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
                 );
+                if (current_world === null || current_world === "null") {
+                    console.log("Attempting to find world number from Friends List...")
+                    const potentialWorldNumber = await findWorldNumber(img)
+                    if (!potentialWorldNumber) {
+                        console.log("Unable to find world number. Please open your Friends List.")
+                        continue;
+                    }
+                    console.log(`Found world number to be ${potentialWorldNumber}.`)
+                    current_world = potentialWorldNumber
+                }
                 await reportEvent(matchingEvent, current_world);
-            } else if (!partialMatch) {
-                combinedText = "";
             }
         }
     }
 }
 
-/**
- * Find the matching event, partial or exact
- */
-// Helper function to check if the line contains a keyword from the events object
-function getMatchingEvent(
-    lineText: string,
-    events: Events,
-): [boolean, EventKeys | null] {
-    // Define the regex pattern to match the time format and remove it if present
+// Convert events object into an array for Fuse.js
+const eventEntries = Object.entries(events).flatMap(([event, texts]) =>
+    texts.map((text) => ({ event, text })),
+);
+
+// Initialize Fuse.js
+const fuse = new Fuse(eventEntries, {
+    keys: ["text"],
+    includeScore: true,
+    threshold: 0.3, // Adjust for fuzzy tolerance
+});
+
+function getMatchingEvent(lineText: string): EventKeys | null {
+    // Remove timestamps if present
     const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
     lineText = lineText.replace(timeRegex, "");
 
-    // Define allowed prefixes and remove them if present
-    const prefixes = ["Misty: ", "Fisherman: ", "Guys: "];
+    // Remove certain prefixes if present
+    const prefixes = ["Misty: ", "Fisherman: ", "Guys: ", "5FTx: "];
     const matchingPrefix = prefixes.find((prefix) =>
         lineText.startsWith(prefix),
     );
-    if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
 
-    // Accepted: Misty: something -> something \\ Match "something" in the event values
-    // Declined: FooBar: something -> FooBar: something \\ Match "FooBar: something" in the event values
-
-    // Check if the lineText matches a phrase in any event
-    for (const [eventKey, phrases] of Object.entries(events)) {
-        const exactMatch = phrases.find((phrase) => lineText === phrase);
-        if (exactMatch) return [false, eventKey as EventKeys];
-
-        const partialMatch = phrases.find((phrase) =>
-            phrase.includes(lineText),
-        );
-        if (partialMatch) return [true, eventKey as EventKeys];
+    if (matchingPrefix) {
+        lineText = lineText.slice(matchingPrefix.length);
+    } else {
+        // No need to further process if no matching prefix
+        return null;
     }
 
-    return [false, null]; // No match found
+    // Run fuzzy search
+    const results = fuse.search(lineText);
+
+    if (results.length > 0) {
+        const bestMatch = results[0];
+        return bestMatch.item.event as EventKeys;
+    }
+
+    return null; // No match found
 }
 
 /**
