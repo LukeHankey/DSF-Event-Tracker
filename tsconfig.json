@@ -4,6 +4,13 @@
         // Settings to make typescript play nice with webpack
         "resolvePackageJsonExports": true,
         "moduleResolution": "bundler",
-        "module": "ESNext"
+        "module": "ESNext",
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true
     }
 }
