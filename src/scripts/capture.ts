@@ -261,7 +261,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             console.log(
                 "Unable to capture world number from Friends List. Make sure the interface is viewable on screen.",
             );
-            sessionStorage.removeItem("currentWorld")
+            sessionStorage.removeItem("currentWorld");
         } else {
             sessionStorage.setItem("currentWorld", worldNumber);
         }
@@ -318,9 +318,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             // Match the event with tolerance. Should work for lines with at least 15 characters
             const matchingEvent = getMatchingEvent(line.text);
             if (matchingEvent) {
-                let current_world = alt1.currentWorld < 0
-                      ? sessionStorage.getItem("currentWorld")
-                      : String(alt1.currentWorld);
+                let current_world =
+                    alt1.currentWorld < 0
+                        ? sessionStorage.getItem("currentWorld")
+                        : String(alt1.currentWorld);
 
                 console.log(
                     `'Current world': ${current_world}`,
@@ -328,14 +329,20 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
                 );
                 if (current_world === null || current_world === "null") {
-                    console.log("Attempting to find world number from Friends List...")
-                    const potentialWorldNumber = await findWorldNumber(img)
+                    console.log(
+                        "Attempting to find world number from Friends List...",
+                    );
+                    const potentialWorldNumber = await findWorldNumber(img);
                     if (!potentialWorldNumber) {
-                        console.log("Unable to find world number. Please open your Friends List.")
+                        console.log(
+                            "Unable to find world number. Please open your Friends List.",
+                        );
                         continue;
                     }
-                    console.log(`Found world number to be ${potentialWorldNumber}.`)
-                    current_world = potentialWorldNumber
+                    console.log(
+                        `Found world number to be ${potentialWorldNumber}.`,
+                    );
+                    current_world = potentialWorldNumber;
                 }
                 await reportEvent(matchingEvent, current_world);
             }
