@@ -394,6 +394,7 @@ if (testEventButton && DEBUG) {
                 reportedBy: "Me",
                 timestamp: Date.now(),
                 oldEvent: null,
+                token: null,
             };
             localStorage.setItem(
                 "eventHistory",
