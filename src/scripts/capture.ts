@@ -4,7 +4,7 @@ import * as OCR from "alt1/ocr";
 import axios from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
-import { EventKeys, events, eventTimes } from "./events";
+import { EventKeys, events, eventTimes, firstEventTexts } from "./events";
 import { DEBUG, ORIGIN } from "../config";
 import { wsClient } from "./ws";
 import {
@@ -261,6 +261,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             console.log(
                 "Unable to capture world number from Friends List. Make sure the interface is viewable on screen.",
             );
+            sessionStorage.removeItem("currentWorld")
         } else {
             sessionStorage.setItem("currentWorld", worldNumber);
         }
@@ -323,7 +324,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
                 console.log(
                     `'Current world': ${current_world}`,
-                    `Previous world: ${sessionStorage.getItem("previousWorld")}`,
                     `Alt1 detected world: ${alt1.currentWorld}`,
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
                 );
@@ -353,6 +353,8 @@ const fuse = new Fuse(eventEntries, {
     keys: ["text"],
     includeScore: true,
     threshold: 0.3, // Adjust for fuzzy tolerance
+    ignoreLocation: true,
+    minMatchCharLength: 10,
 });
 
 function getMatchingEvent(lineText: string): EventKeys | null {
@@ -365,12 +367,10 @@ function getMatchingEvent(lineText: string): EventKeys | null {
     const matchingPrefix = prefixes.find((prefix) =>
         lineText.startsWith(prefix),
     );
+    if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
 
-    if (matchingPrefix) {
-        lineText = lineText.slice(matchingPrefix.length);
-    } else {
-        // No need to further process if no matching prefix
-        return null;
+    if (!matchingPrefix && !firstEventTexts.has(lineText)) {
+        return null; // Ignore non-valid starting lines
     }
 
     // Run fuzzy search
