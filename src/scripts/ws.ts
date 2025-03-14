@@ -1,7 +1,7 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
 import { DEBUG } from "../config";
-import { UUIDTypes } from "uuid";
+import { UUIDTypes, v4 as uuid } from "uuid";
 
 export class WebSocketClient {
     private socket: WebSocket | null = null;
@@ -18,10 +18,10 @@ export class WebSocketClient {
             console.log("✅ Connected to WebSocket!");
             // Send a SYNC message with the last known event timestamp
             const lastEvent = JSON.parse(
-                localStorage.getItem("eventHistory"),
+                localStorage.getItem("eventHistory") ?? "[]",
             ).slice(-1)[0] as EventRecord;
             const lastEventTimestamp = lastEvent?.timestamp;
-            const lastEventId = lastEvent?.id;
+            const lastEventId = lastEvent?.id || uuid();
             const lastTimestamp = lastEventTimestamp || 0;
             this.sendSync(lastTimestamp, lastEventId);
         };
