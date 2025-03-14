@@ -357,6 +357,18 @@ const fuse = new Fuse(eventEntries, {
     minMatchCharLength: 10,
 });
 
+function isLikelyEventStart(lineText: string): Boolean {
+    const firstTextFuse = new Fuse(firstEventTexts, {
+        includeScore: true,
+        threshold: 0.3, // Allow minor OCR errors
+        ignoreLocation: true,
+        minMatchCharLength: 10,
+    });
+
+    const results = firstTextFuse.search(lineText);
+    return results.length > 0 && results[0].score! <= 0.3; // Acceptable match
+}
+
 function getMatchingEvent(lineText: string): EventKeys | null {
     // Remove timestamps if present
     const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
@@ -369,7 +381,7 @@ function getMatchingEvent(lineText: string): EventKeys | null {
     );
     if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
 
-    if (!matchingPrefix && !firstEventTexts.has(lineText)) {
+    if (!matchingPrefix && !isLikelyEventStart(lineText)) {
         return null; // Ignore non-valid starting lines
     }
 

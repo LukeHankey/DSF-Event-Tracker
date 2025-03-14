@@ -94,9 +94,7 @@ export const events: Events = {
     ],
 };
 
-export const firstEventTexts = new Set(
-    Object.values(events).map((texts) => texts[0]) // First entry for each event
-);
+export const firstEventTexts = Object.values(events).map((texts) => texts[0]);
 
 const ONE_MINUTE = 60;
 
