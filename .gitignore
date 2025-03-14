@@ -6,3 +6,4 @@ venv
 .env
 requirements.txt
 test_server.js
+.vscode/
