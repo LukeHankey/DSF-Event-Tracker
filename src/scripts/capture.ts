@@ -14,6 +14,7 @@ import {
 } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
+import { decodeJWT } from "./permissions"
 
 /**
  * ChatBoxReader & color definitions
@@ -143,6 +144,7 @@ function processLine(
 
 async function reportEvent(
     matchingEvent: EventKeys,
+    isFirstEvent: Boolean,
     current_world: string,
 ): Promise<void> {
     try {
@@ -161,6 +163,41 @@ async function reportEvent(
             },
         );
 
+        // Check that the event is seen spawning and they have verified discord ID
+        // May change in future to add another setting to track count but for now
+        // I will track all that have been verified
+        const token = localStorage.getItem("refreshToken")
+        if (isFirstEvent && token) {
+            const discordID = decodeJWT(token)?.discord_id
+            const addCountResponse = await axios.patch(
+                `https://api.dsfeventtracker.com/profiles/${discordID}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: ORIGIN,
+                    },
+                    key: "alt1",
+                    event: matchingEvent
+                }
+            )
+
+            if (addCountResponse.status === 200) {
+                console.log(`${matchingEvent} has been added to call count.`)
+                // Update profile tab to reflect new count
+            }
+        }
+
+        if (sendWebhookResponse.status !== 200) {
+            if (sendWebhookResponse.status === 409) {
+                console.log(
+                    `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
+                );
+                return
+            }
+            console.log("Did not receive the correct response");
+            return;
+        }
+
         const eventId = uuid();
         addNewEvent({
             id: eventId,
@@ -172,11 +209,6 @@ async function reportEvent(
             timestamp: Date.now(),
             oldEvent: null,
         });
-
-        if (sendWebhookResponse.status !== 200) {
-            console.log("Did not receive the correct response");
-            return;
-        }
 
         const eventTime = eventTimes[matchingEvent];
         const clearEventTimerResponse = await axios.post(
@@ -210,9 +242,6 @@ async function reportEvent(
         }
     } catch (err) {
         console.log(err);
-        console.log(
-            `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
-        );
     }
 }
 
@@ -316,7 +345,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             sessionStorage.setItem("lastTimestamp", String(lastTimestamp));
 
             // Match the event with tolerance. Should work for lines with at least 15 characters
-            const matchingEvent = getMatchingEvent(line.text);
+            const [matchingEvent, isFirstEvent] = getMatchingEvent(line.text);
             if (matchingEvent) {
                 let current_world =
                     alt1.currentWorld < 0
@@ -344,7 +373,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     );
                     current_world = potentialWorldNumber;
                 }
-                await reportEvent(matchingEvent, current_world);
+                await reportEvent(matchingEvent, isFirstEvent, current_world);
             }
         }
     }
@@ -376,7 +405,7 @@ function isLikelyEventStart(lineText: string): Boolean {
     return results.length > 0 && results[0].score! <= 0.3; // Acceptable match
 }
 
-function getMatchingEvent(lineText: string): EventKeys | null {
+function getMatchingEvent(lineText: string): [EventKeys | null, Boolean] {
     // Remove timestamps if present
     const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
     lineText = lineText.replace(timeRegex, "");
@@ -389,7 +418,7 @@ function getMatchingEvent(lineText: string): EventKeys | null {
     if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
 
     if (!matchingPrefix && !isLikelyEventStart(lineText)) {
-        return null; // Ignore non-valid starting lines
+        return [null, false]; // Ignore non-valid starting lines
     }
 
     // Run fuzzy search
@@ -397,10 +426,10 @@ function getMatchingEvent(lineText: string): EventKeys | null {
 
     if (results.length > 0) {
         const bestMatch = results[0];
-        return bestMatch.item.event as EventKeys;
+        return [bestMatch.item.event as EventKeys, firstEventTexts.includes(bestMatch.item.text)];
     }
 
-    return null; // No match found
+    return [null, false]; // No match found
 }
 
 /**
