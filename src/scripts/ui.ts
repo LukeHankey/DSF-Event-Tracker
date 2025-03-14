@@ -49,18 +49,20 @@ tabs.forEach((tab) => {
             if (targetTabId !== "scoutsTab") {
                 stopEventTimerRefresh();
             } else {
-                // If Scouts is active, check the currently active sub-tab.
-                const activeSubTab = targetElement.querySelector(
-                    ".sub-tab.sub-tab--active",
-                );
-                if (
-                    activeSubTab &&
-                    activeSubTab.getAttribute("data-subtab") ===
-                        "eventHistoryTab"
-                ) {
-                    startEventTimerRefresh();
-                } else {
-                    stopEventTimerRefresh();
+                if (targetElement) {
+                    // If Scouts is active, check the currently active sub-tab.
+                    const activeSubTab = targetElement.querySelector(
+                        ".sub-tab.sub-tab--active",
+                    );
+                    if (
+                        activeSubTab &&
+                        activeSubTab.getAttribute("data-subtab") ===
+                            "eventHistoryTab"
+                    ) {
+                        startEventTimerRefresh();
+                    } else {
+                        stopEventTimerRefresh();
+                    }
                 }
             }
         }
@@ -346,7 +348,7 @@ sub_tabs.forEach((subTab) => {
         subTab.classList.add("sub-tab--active");
 
         // Show the corresponding content
-        const targetId = subTab.dataset.subtab;
+        const targetId = subTab.dataset.subtab as string;
         const targetContent = document.getElementById(targetId);
         if (targetContent) {
             targetContent.classList.add("sub-tab__content--active");
@@ -381,8 +383,25 @@ if (clearAllBtn) {
 const testEventButton = document.getElementById("testWS");
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
+        const eventHistory = localStorage.getItem("eventHistory");
+        if (!eventHistory) {
+            const addTestEvent: EventRecord = {
+                id: uuid(),
+                type: "testing",
+                event: "Testing",
+                world: "105",
+                duration: 15,
+                reportedBy: "Me",
+                timestamp: Date.now(),
+                oldEvent: null,
+            };
+            localStorage.setItem(
+                "eventHistory",
+                JSON.stringify([addTestEvent]),
+            );
+        }
         const lastEvent = JSON.parse(
-            localStorage.getItem("eventHistory"),
+            localStorage.getItem("eventHistory")!,
         ).slice(-1)[0] as EventRecord;
         const lastEventTimestamp = lastEvent?.timestamp || 0;
         const lastEventId = lastEvent?.id;
@@ -414,9 +433,9 @@ window.addEventListener("DOMContentLoaded", () => {
             debugContainer.style.display = ""; // or "block"
         }
     }
-    const infoButton = document.getElementById("infoButton");
-    const modal = document.getElementById("infoModal");
-    const closeModal = modal.querySelector(".close");
+    const infoButton = document.getElementById("infoButton") as HTMLElement;
+    const modal = document.getElementById("infoModal") as HTMLElement;
+    const closeModal = modal.querySelector(".close") as Element;
 
     // Show the modal when the info button is clicked
     infoButton.addEventListener("click", function () {
