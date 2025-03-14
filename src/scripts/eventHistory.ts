@@ -318,7 +318,6 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
         }
     }
 
-    console.log(firstExpiredRow, event);
     if (firstExpiredRow) {
         // Insert our newly expired row above the first expired row.
         tbody.insertBefore(row, firstExpiredRow);

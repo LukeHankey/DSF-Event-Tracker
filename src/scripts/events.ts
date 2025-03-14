@@ -24,13 +24,13 @@ type EventRecordTypes = "addEvent" | "editEvent" | "testing";
 // Fisherman text is at the end of events, if any
 export const events: Events = {
     "Travelling merchant": [
-        "The travelling merchant has arrived at the hub!",
+        "The travelling merchant has arrived at the hub!",  // First spawn
         "I wonder what they've got for sale today?",
         "I've seen them sell some really sweet items before.",
         "They don't come around these parts too often, so make sure you check them out!",
     ],
     Jellyfish: [
-        "A giant jellyfish has appeared!",
+        "A giant jellyfish has appeared!",  // First spawn
         "Jellyfish invasion inbound, get ready!", // Start
         "Another wave of jellyifsh just hopped onto the deck, get rid of them!", // Second round
         "Get them off the deck!", // Randomly
@@ -40,7 +40,7 @@ export const events: Events = {
         "They're messing up the deck, get rid of 'em!", // Randomly
     ],
     Arkaneo: [
-        "The sailfish, Arkaneo, has appeared!",
+        "The sailfish, Arkaneo, has appeared!",  // First spawn
         "I've heard stories of an angler named Tavia who managed to take a chunk out of him once.",
         "Look at how fast he is!",
         "It's Arkaneo!",
@@ -48,7 +48,7 @@ export const events: Events = {
         "No one has ever been able to catch this one.",
     ],
     "Sea Monster": [
-        "A sea monster has appeared!",
+        "A sea monster has appeared!",  // First spawn
         "Ahh! The sea monster is back, get some rotten food from those barrels!", // Rotten fish
         "Oh no, it's hungry! Start throwing any raw food you've got at it", // Raw fish
         "Come on, throw him some fish!", // Randomly
@@ -60,7 +60,7 @@ export const events: Events = {
         "Throw him some fish!", // Randomly
     ],
     "Treasure Turtle": [
-        "A treasure turtle has appeared at the hub!",
+        "A treasure turtle has appeared at the hub!",  // First spawn
         "Check him out, don't miss your chance!",
         "I bet that chest is full of treasure.",
         "Lovely, lovely treasure...",
@@ -68,7 +68,7 @@ export const events: Events = {
         "These treasure turtles are awfully rare I'll have you know.",
     ],
     Whale: [
-        "A whale has appeared at the hub!",
+        "A whale has appeared at the hub!",  // First spawn
         "Captain, there be whales here!",
         "Don't fall in. You wouldn't want to get swallowed by that one!",
         "His mouth is full of fish, cast your lines!",
@@ -80,7 +80,7 @@ export const events: Events = {
         "AHHHHHHHHHH! It's REALLY wet in here!",
     ],
     Whirlpool: [
-        "A whirlpool has appeared at the hub!",
+        "A whirlpool has appeared at the hub!",  // First spawn
         "Don't fall in. You don't want to get sucked in by that!",
         "If you throw coins in and the whirlpool glows, that's when you know we're in for a treat!",
         "Sometimes we're rewarded for being generous, when throwing coins into the water.",
@@ -93,6 +93,10 @@ export const events: Events = {
         "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123",
     ],
 };
+
+export const firstEventTexts = new Set(
+    Object.values(events).map((texts) => texts[0]) // First entry for each event
+);
 
 const ONE_MINUTE = 60;
 
