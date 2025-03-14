@@ -4,16 +4,16 @@ interface AccessToken {
     exp: number;
     iat: number;
     type: "access";
-  }
-  
-  interface RefreshToken {
+}
+
+interface RefreshToken {
     discord_id: string;
     exp: number;
     iat: number;
     type: "refresh";
-  }
-  
-  export type Token = AccessToken | RefreshToken;
+}
+
+export type Token = AccessToken | RefreshToken;
 
 export function decodeJWT(token: string): Token | null {
     try {
@@ -32,7 +32,12 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
 
     const decodedToken = decodeJWT(token);
     console.log(decodedToken, requiredRoles);
-    if (!decodedToken || decodedToken.type !== "access" || !decodedToken.role_ids) return false;
+    if (
+        !decodedToken ||
+        decodedToken.type !== "access" ||
+        !decodedToken.role_ids
+    )
+        return false;
 
     return decodedToken.role_ids.some((roleId: string) =>
         requiredRoles.includes(roleId),

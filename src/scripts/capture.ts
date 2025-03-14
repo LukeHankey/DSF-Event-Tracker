@@ -14,7 +14,7 @@ import {
 } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
-import { decodeJWT } from "./permissions"
+import { decodeJWT } from "./permissions";
 
 /**
  * ChatBoxReader & color definitions
@@ -166,9 +166,9 @@ async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        const token = localStorage.getItem("refreshToken")
+        const token = localStorage.getItem("refreshToken");
         if (isFirstEvent && token) {
-            const discordID = decodeJWT(token)?.discord_id
+            const discordID = decodeJWT(token)?.discord_id;
             const addCountResponse = await axios.patch(
                 `https://api.dsfeventtracker.com/profiles/${discordID}`,
                 {
@@ -177,12 +177,12 @@ async function reportEvent(
                         Origin: ORIGIN,
                     },
                     key: "alt1",
-                    event: matchingEvent
-                }
-            )
+                    event: matchingEvent,
+                },
+            );
 
             if (addCountResponse.status === 200) {
-                console.log(`${matchingEvent} has been added to call count.`)
+                console.log(`${matchingEvent} has been added to call count.`);
                 // Update profile tab to reflect new count
             }
         }
@@ -192,7 +192,7 @@ async function reportEvent(
                 console.log(
                     `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
                 );
-                return
+                return;
             }
             console.log("Did not receive the correct response");
             return;
@@ -426,7 +426,10 @@ function getMatchingEvent(lineText: string): [EventKeys | null, Boolean] {
 
     if (results.length > 0) {
         const bestMatch = results[0];
-        return [bestMatch.item.event as EventKeys, firstEventTexts.includes(bestMatch.item.text)];
+        return [
+            bestMatch.item.event as EventKeys,
+            firstEventTexts.includes(bestMatch.item.text),
+        ];
     }
 
     return [null, false]; // No match found
