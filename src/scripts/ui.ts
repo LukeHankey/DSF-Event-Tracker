@@ -7,8 +7,9 @@ import {
 } from "./eventHistory";
 import { EventRecord } from "./events";
 import { wsClient } from "./ws";
-import { DEBUG } from "../config";
+import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -227,6 +228,104 @@ settingsForm?.addEventListener("submit", (e) => {
     showToast("✅ Settings saved!");
 });
 
+document
+    .getElementById("validateDiscordID")
+    ?.addEventListener("click", async () => {
+        const discordID = (
+            document.getElementById("discordID") as HTMLInputElement
+        ).value;
+        const validationMessage = document.getElementById("validationMessage");
+
+        if (!discordID.match(/^\d{17,20}$/)) {
+            validationMessage!.textContent = "Invalid Discord ID format.";
+            validationMessage!.style.color = "red";
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                "https://api.dsfeventtracker.com/validate_discord_id",
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: ORIGIN,
+                    },
+                    discord_id: discordID,
+                },
+            );
+
+            if (response.status === 200 && response.data.exists) {
+                validationMessage!.textContent =
+                    "✅ Run /alt1 verify in Discord.";
+                validationMessage!.style.display = "block";
+                validationMessage!.style.color = "green";
+                updateIfChanged("discordID", discordID);
+                document.getElementById("verificationSection")!.style.display =
+                    "block";
+            }
+        } catch (err) {
+            console.error("Error validating Discord ID:", err);
+            validationMessage!.textContent = "❌ Error validating Discord ID.";
+            validationMessage!.style.color = "red";
+        }
+    });
+
+// Step 2: Handle verification code input
+document
+    .getElementById("submitVerificationCode")
+    ?.addEventListener("click", async () => {
+        const discordID = (
+            document.getElementById("discordID") as HTMLInputElement
+        ).value;
+        const verificationCode = (
+            document.getElementById("verificationCode") as HTMLInputElement
+        ).value;
+        const verificationSection = document.getElementById(
+            "verificationSection",
+        );
+        const verificationMessage = document.getElementById(
+            "verificationMessage",
+        );
+
+        const validationMessage = document.getElementById("validationMessage");
+
+        if (!verificationCode.match(/^\d{8}$/)) {
+            verificationMessage!.textContent = "Invalid verification code.";
+            verificationMessage!.style.display = "block";
+            verificationMessage!.style.color = "red";
+            return;
+        }
+
+        const response = await axios.post(
+            "https://api.dsfeventtracker.com/verify_code",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: ORIGIN,
+                },
+                discord_id: discordID,
+                code: verificationCode,
+            },
+        );
+
+        if (response.data.verified && response.data.refresh_token) {
+            // Hide verification section
+            verificationSection!.style.display = "none";
+            validationMessage!.style.display = "none";
+            verificationMessage!.style.display = "none";
+
+            localStorage.setItem("refreshToken", response.data.refresh_token);
+            localStorage.setItem("accessToken", response.data.access_token);
+
+            // Show success toast
+            showToast("✅ Verified successfully!");
+        } else {
+            verificationMessage!.textContent =
+                "❌ Incorrect verification code.";
+            verificationMessage!.style.color = "red";
+        }
+    });
+
 // Sub-tab switching inside #scoutsTab
 const sub_tabs = document.querySelectorAll<HTMLElement>(".sub-tab");
 sub_tabs.forEach((subTab) => {
@@ -295,6 +394,7 @@ if (testEventButton && DEBUG) {
                 reportedBy: "Me",
                 timestamp: Date.now(),
                 oldEvent: null,
+                token: null,
             };
             localStorage.setItem(
                 "eventHistory",
@@ -317,6 +417,7 @@ if (testEventButton && DEBUG) {
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
+            token: null,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);

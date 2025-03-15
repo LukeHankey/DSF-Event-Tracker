@@ -208,6 +208,7 @@ async function reportEvent(
             reportedBy: rsn,
             timestamp: Date.now(),
             oldEvent: null,
+            token: null,
         });
 
         const eventTime = eventTimes[matchingEvent];
@@ -238,6 +239,7 @@ async function reportEvent(
                 reportedBy: rsn,
                 timestamp: Date.now(),
                 oldEvent: null,
+                token: null,
             });
         }
     } catch (err) {
