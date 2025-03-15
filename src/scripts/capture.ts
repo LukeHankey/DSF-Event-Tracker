@@ -150,7 +150,7 @@ async function reportEvent(
     try {
         const rsn = localStorage.getItem("rsn") ?? "";
         const sendWebhookResponse = await axios.post(
-            "https://api.dsfeventtracker.com/send_webhook",
+            "https://api.dsfeventtracker.com/events/webhook",
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -212,15 +212,14 @@ async function reportEvent(
         });
 
         const eventTime = eventTimes[matchingEvent];
+        const eventWorld = `${matchingEvent}_${current_world}`;
         const clearEventTimerResponse = await axios.post(
-            "https://api.dsfeventtracker.com/clear_event_timer",
+            `https://api.dsfeventtracker.com/events/${eventWorld}/clear_timer`,
             {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
                 },
-                event: matchingEvent,
-                world: current_world,
                 timeout: eventTime,
             },
         );

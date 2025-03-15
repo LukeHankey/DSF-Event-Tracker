@@ -1,8 +1,16 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
-import { DEBUG } from "../config";
+import { DEBUG, ORIGIN } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
+import { decodeJWT, ExpiredTokenRecord } from "./permissions";
+import { updateProfileCounters, ProfileRecord } from "./profile";
+
+type ReceivedData =
+    | EventRecord
+    | ProfileRecord
+    | ExpiredTokenRecord
+    | EventRecord[];
 
 async function refreshToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem("refreshToken");
@@ -14,10 +22,11 @@ async function refreshToken(): Promise<string | null> {
 
     try {
         const response = await axios.post(
-            "https://api.dsfeventtracker.com/refresh_token",
+            "https://api.dsfeventtracker.com/auth/refresh/",
             {
                 headers: {
                     "Content-Type": "application/json",
+                    Origin: ORIGIN,
                 },
                 refresh_token: refreshToken,
             },
@@ -81,13 +90,13 @@ export class WebSocketClient {
 
     async handleMessage(data: string): Promise<void> {
         try {
-            const parsedData = JSON.parse(data);
+            const parsedData = JSON.parse(data) as ReceivedData;
             // If the sync message returns an array of events, process each one.
             if (Array.isArray(parsedData)) {
                 parsedData.forEach((eventObj) => this.processEvent(eventObj));
-            } else if (parsedData.error) {
+            } else if ("error" in parsedData) {
                 console.error("WebSocket Error: ", parsedData.error);
-                if (parsedData.action === "refresh_token") {
+                if (parsedData.type === "refresh_token") {
                     console.warn("Token expired, requesting a new one...");
 
                     const newToken = await refreshToken();
@@ -99,12 +108,18 @@ export class WebSocketClient {
                         this.send(parsedData.event_data as EventRecord); // ✅ Resend the event
                     }
                 }
+            } else if (parsedData.type === "clientProfileUpdate") {
+                this.processProfileUpdate(parsedData);
             } else {
                 this.processEvent(parsedData);
             }
         } catch (error) {
             console.error("⚠️ Failed to parse WebSocket message:", error);
         }
+    }
+
+    processProfileUpdate(updateData: ProfileRecord): void {
+        updateProfileCounters(updateData.updateFields);
     }
 
     processEvent(eventData: EventRecord): void {
@@ -148,9 +163,13 @@ export class WebSocketClient {
     }
 }
 
+const token = localStorage.getItem("accessToken") ?? "";
+const decoded = token ? decodeJWT(token) : null;
+const discordID = decoded ? decoded.discord_id : null;
+
 export const wsClient = new WebSocketClient(
     DEBUG
-        ? "wss://ws.dsfeventtracker.com/ws?room=development"
-        : "wss://ws.dsfeventtracker.com/ws",
+        ? `wss://ws.dsfeventtracker.com/ws?room=development&discord_id=${discordID}`
+        : `wss://ws.dsfeventtracker.com/ws?room=production&discord_id=${discordID}`,
 );
 wsClient.connect();

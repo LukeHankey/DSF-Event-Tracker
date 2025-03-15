@@ -1,3 +1,5 @@
+import { EventRecord } from "./events";
+
 interface AccessToken {
     discord_id: string;
     role_ids: string[];
@@ -11,6 +13,12 @@ interface RefreshToken {
     exp: number;
     iat: number;
     type: "refresh";
+}
+
+export interface ExpiredTokenRecord {
+    error: string;
+    type: "refresh_token";
+    event_data: EventRecord;
 }
 
 export type Token = AccessToken | RefreshToken;
