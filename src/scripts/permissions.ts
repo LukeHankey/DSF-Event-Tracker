@@ -1,4 +1,21 @@
-function decodeJWT(token: string) {
+interface AccessToken {
+    discord_id: string;
+    role_ids: string[];
+    exp: number;
+    iat: number;
+    type: "access";
+}
+
+interface RefreshToken {
+    discord_id: string;
+    exp: number;
+    iat: number;
+    type: "refresh";
+}
+
+export type Token = AccessToken | RefreshToken;
+
+export function decodeJWT(token: string): Token | null {
     try {
         const base64Url = token.split(".")[1]; // Get payload
         const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -14,7 +31,13 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
     if (!token) return false;
 
     const decodedToken = decodeJWT(token);
-    if (!decodedToken || !decodedToken.role_ids) return false;
+    console.log(decodedToken, requiredRoles);
+    if (
+        !decodedToken ||
+        decodedToken.type !== "access" ||
+        !decodedToken.role_ids
+    )
+        return false;
 
     return decodedToken.role_ids.some((roleId: string) =>
         requiredRoles.includes(roleId),
