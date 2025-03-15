@@ -1,8 +1,9 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
-import { DEBUG } from "../config";
+import { DEBUG, ORIGIN } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
+import { decodeJWT } from "./permissions";
 
 async function refreshToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem("refreshToken");
@@ -14,10 +15,11 @@ async function refreshToken(): Promise<string | null> {
 
     try {
         const response = await axios.post(
-            "https://api.dsfeventtracker.com/refresh_token",
+            "https://api.dsfeventtracker.com/auth/refresh/",
             {
                 headers: {
                     "Content-Type": "application/json",
+                    Origin: ORIGIN,
                 },
                 refresh_token: refreshToken,
             },
@@ -148,9 +150,13 @@ export class WebSocketClient {
     }
 }
 
+const token = localStorage.getItem("accessToken") ?? "";
+const decoded = token ? decodeJWT(token) : null;
+const discordID = decoded ? decoded.discord_id : null;
+
 export const wsClient = new WebSocketClient(
     DEBUG
-        ? "wss://ws.dsfeventtracker.com/ws?room=development"
-        : "wss://ws.dsfeventtracker.com/ws",
+        ? `wss://ws.dsfeventtracker.com/ws?room=development&discord_id=${discordID}`
+        : `wss://ws.dsfeventtracker.com/ws?room=production&discord_id=${discordID}`,
 );
 wsClient.connect();
