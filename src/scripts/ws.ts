@@ -4,7 +4,11 @@ import { DEBUG, ORIGIN } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
-import { updateProfileCounters, ProfileRecord } from "./profile";
+import {
+    updateProfileCounters,
+    ProfileRecord,
+    getEventCountData,
+} from "./profile";
 
 type ReceivedData =
     | EventRecord
@@ -59,7 +63,7 @@ export class WebSocketClient {
     connect(): void {
         this.socket = new WebSocket(this.url);
 
-        this.socket.onopen = () => {
+        this.socket.onopen = async () => {
             console.log("✅ Connected to WebSocket!");
             // Send a SYNC message with the last known event timestamp
             const lastEvent = JSON.parse(
@@ -69,6 +73,12 @@ export class WebSocketClient {
             const lastEventId = lastEvent?.id || uuid();
             const lastTimestamp = lastEventTimestamp || 0;
             this.sendSync(lastTimestamp, lastEventId);
+
+            const token = localStorage.getItem("accessToken");
+            if (token) {
+                const eventCounts = (await getEventCountData()) ?? {};
+                updateProfileCounters(eventCounts);
+            }
         };
 
         this.socket.onmessage = async (event) => {

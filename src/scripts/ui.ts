@@ -10,6 +10,7 @@ import { wsClient } from "./ws";
 import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import { populateRoles } from "./profile";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -354,8 +355,12 @@ sub_tabs.forEach((subTab) => {
 
         // If the event history sub-tab is active, start the timer, otherwise stop it.
         if (targetId === "eventHistoryTab") {
+            document.getElementById("eventHistoryWrapper")!.style.display =
+                "flex";
             startEventTimerRefresh();
         } else {
+            document.getElementById("eventHistoryWrapper")!.style.display =
+                "none";
             stopEventTimerRefresh();
         }
     });
