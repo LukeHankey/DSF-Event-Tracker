@@ -297,13 +297,12 @@ document
         }
 
         const response = await axios.post(
-            `https://api.dsfeventtracker.com/auth/verify/${discordID}`,
+            `https://api.dsfeventtracker.com/auth/verify/${discordID}?code=${verificationCode}`,
             {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
                 },
-                code: verificationCode,
             },
         );
 

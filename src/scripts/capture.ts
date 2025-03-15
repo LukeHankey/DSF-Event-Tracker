@@ -214,13 +214,12 @@ async function reportEvent(
         const eventTime = eventTimes[matchingEvent];
         const eventWorld = `${matchingEvent}_${current_world}`;
         const clearEventTimerResponse = await axios.post(
-            `https://api.dsfeventtracker.com/events/${eventWorld}/clear_timer`,
+            `https://api.dsfeventtracker.com/events/clear_timer?event_world=${eventWorld}&timeout=${eventTime}`,
             {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
                 },
-                timeout: eventTime,
             },
         );
 
