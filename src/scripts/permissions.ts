@@ -39,7 +39,6 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
     if (!token) return false;
 
     const decodedToken = decodeJWT(token);
-    console.log(decodedToken, requiredRoles);
     if (
         !decodedToken ||
         decodedToken.type !== "access" ||
