@@ -14,7 +14,6 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
     if (!token) return false;
 
     const decodedToken = decodeJWT(token);
-    console.log(decodedToken, requiredRoles);
     if (!decodedToken || !decodedToken.role_ids) return false;
 
     return decodedToken.role_ids.some((roleId: string) =>
