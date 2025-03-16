@@ -189,7 +189,7 @@ async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        await addEventCount(matchingEvent, isFirstEvent)
+        await addEventCount(matchingEvent, isFirstEvent);
 
         if (sendWebhookResponse.status !== 200) {
             console.log("Did not receive the correct response");
@@ -245,7 +245,10 @@ async function reportEvent(
                 `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
             );
             if (error.response?.data.is_first_event) {
-                await addEventCount(matchingEvent, error.response?.data.is_first_event)
+                await addEventCount(
+                    matchingEvent,
+                    error.response?.data.is_first_event,
+                );
             }
             return;
         }

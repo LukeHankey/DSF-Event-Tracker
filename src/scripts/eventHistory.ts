@@ -161,7 +161,7 @@ export function renderEventHistory(): void {
     const hideExpired = hideExpiredCheckbox
         ? hideExpiredCheckbox.checked
         : false;
-    
+
     sortedEvents.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
@@ -248,8 +248,8 @@ export function updateEvent(event: EventRecord): void {
         }
         restartRefreshInterval();
     } else {
-        addNewEvent(event.oldEvent!)
-        updateEvent(event)
+        addNewEvent(event.oldEvent!);
+        updateEvent(event);
     }
 }
 
