@@ -167,7 +167,7 @@ async function reportEvent(
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
         const token = localStorage.getItem("refreshToken");
-        if (isFirstEvent && token) {
+        if (token) {
             const discordID = decodeJWT(token)?.discord_id;
             const addCountResponse = await axios.patch(
                 `https://api.dsfeventtracker.com/profiles/${discordID}`,
@@ -176,14 +176,13 @@ async function reportEvent(
                         "Content-Type": "application/json",
                         Origin: ORIGIN,
                     },
-                    key: "alt1",
+                    key: isFirstEvent ? "alt1First" : "alt1",
                     event: matchingEvent,
                 },
             );
 
             if (addCountResponse.status === 200) {
                 console.log(`${matchingEvent} has been added to call count.`);
-                // Update profile tab to reflect new count
             }
         }
 

@@ -6,6 +6,8 @@ let previousEventCounts: UpdateFields = {};
 interface UpdateFields {
     "alt1.merchantCount"?: number;
     "alt1.otherCount"?: number;
+    "alt1First.merchantCount"?: number;
+    "alt1First.otherCount"?: number;
     count?: number;
     otherCount?: number;
 }
@@ -14,6 +16,9 @@ export interface ProfileRecord {
     type: "clientProfileUpdate";
     updateFields: UpdateFields;
 }
+
+// Store the last known database values to prevent overwriting
+const lastKnownCounts: Record<string, number> = {};
 
 /**
  * Updates the profile counters in the UI.
@@ -25,58 +30,108 @@ export interface ProfileRecord {
  * - totalEvents
  *
  * @param updateFields An object with optional keys:
- *   "count", "otherCount", "alt1.merchantCount", "alt1.otherCount"
+ *   "count", "otherCount", "alt1.merchantCount", "alt1.otherCount", "alt1First.merchantCount", "alt1First.otherCount"
  */
 export function updateProfileCounters(updateFields: UpdateFields): void {
     // Get the DOM elements for each counter
-    const merchantEl = document.getElementById("merchantEvents");
-    const alt1MerchantEl = document.getElementById("alt1Merchant");
-    const otherEl = document.getElementById("otherEvents");
-    const alt1OtherEl = document.getElementById("alt1Other");
-    const totalEl = document.getElementById("totalEvents");
+    const merchantEl = document.getElementById("merchantEvents")!;
+    const alt1MerchantEl = document.getElementById("alt1Merchant")!;
+    const otherEl = document.getElementById("otherEvents")!;
+    const alt1OtherEl = document.getElementById("alt1Other")!;
+    const totalEl = document.getElementById("totalEvents")!;
 
-    // Parse current values (or default to 0)
-    let merchant = merchantEl ? parseInt(merchantEl.textContent || "0", 10) : 0;
-    let alt1Merchant = alt1MerchantEl
-        ? parseInt(alt1MerchantEl.textContent || "0", 10)
-        : 0;
-    let other = otherEl ? parseInt(otherEl.textContent || "0", 10) : 0;
-    let alt1Other = alt1OtherEl
-        ? parseInt(alt1OtherEl.textContent || "0", 10)
-        : 0;
+    const alt1MerchantFirstEl = document.getElementById("alt1MerchantFirst")!;
+    const alt1OtherFirstEl = document.getElementById("alt1OtherFirst")!;
 
-    // Update values if provided in the updateFields payload
+    // ✅ Extract numerical values safely
+    const extractFirstNumber = (text: string | null): number => {
+        if (!text) return 0;
+        const match = text.match(/^(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+    };
+
+    // ✅ Get previous stored values or initialize them
+    let merchant =
+        lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
+    let alt1Merchant =
+        lastKnownCounts["alt1.merchantCount"] ??
+        extractFirstNumber(alt1MerchantEl?.textContent);
+    let other =
+        lastKnownCounts["otherCount"] ??
+        extractFirstNumber(otherEl?.textContent);
+    let alt1Other =
+        lastKnownCounts["alt1.otherCount"] ??
+        extractFirstNumber(alt1OtherEl?.textContent);
+
+    let alt1MerchantFirst =
+        lastKnownCounts["alt1First.merchantCount"] ??
+        extractFirstNumber(alt1MerchantFirstEl?.textContent);
+    let alt1OtherFirst =
+        lastKnownCounts["alt1First.otherCount"] ??
+        extractFirstNumber(alt1OtherFirstEl?.textContent);
+
+    // ✅ Update values correctly (only add the difference)
     if (updateFields["count"] !== undefined) {
-        merchant = updateFields["count"];
-        if (merchantEl) {
-            merchantEl.textContent = merchant.toString();
-        }
+        const diff =
+            updateFields["count"] - (lastKnownCounts["count"] ?? merchant);
+        merchant += diff;
+        lastKnownCounts["count"] = updateFields["count"];
+        merchantEl.textContent = merchant.toString();
     }
     if (updateFields["alt1.merchantCount"] !== undefined) {
-        alt1Merchant = updateFields["alt1.merchantCount"];
-        if (alt1MerchantEl) {
-            alt1MerchantEl.textContent = alt1Merchant.toString();
-        }
+        const diff =
+            updateFields["alt1.merchantCount"] -
+            (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
+        alt1Merchant += diff;
+        lastKnownCounts["alt1.merchantCount"] =
+            updateFields["alt1.merchantCount"];
     }
+    if (updateFields["alt1First.merchantCount"] !== undefined) {
+        const diff =
+            updateFields["alt1First.merchantCount"] -
+            (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
+        alt1MerchantFirst += diff;
+        lastKnownCounts["alt1First.merchantCount"] =
+            updateFields["alt1First.merchantCount"];
+    }
+
+    // ✅ Now Alt1 Merchant includes First Found count
+    const totalAlt1Merchant = alt1Merchant + alt1MerchantFirst;
+    alt1MerchantEl.textContent = `${totalAlt1Merchant} (First: ${alt1MerchantFirst})`;
+
     if (updateFields["otherCount"] !== undefined) {
-        other = updateFields["otherCount"];
-        if (otherEl) {
-            otherEl.textContent = other.toString();
-        }
+        const diff =
+            updateFields["otherCount"] -
+            (lastKnownCounts["otherCount"] ?? other);
+        other += diff;
+        lastKnownCounts["otherCount"] = updateFields["otherCount"];
+        otherEl.textContent = other.toString();
     }
     if (updateFields["alt1.otherCount"] !== undefined) {
-        alt1Other = updateFields["alt1.otherCount"];
-        if (alt1OtherEl) {
-            alt1OtherEl.textContent = alt1Other.toString();
-        }
+        const diff =
+            updateFields["alt1.otherCount"] -
+            (lastKnownCounts["alt1.otherCount"] ?? alt1Other);
+        alt1Other += diff;
+        lastKnownCounts["alt1.otherCount"] = updateFields["alt1.otherCount"];
+    }
+    if (updateFields["alt1First.otherCount"] !== undefined) {
+        const diff =
+            updateFields["alt1First.otherCount"] -
+            (lastKnownCounts["alt1First.otherCount"] ?? alt1OtherFirst);
+        alt1OtherFirst += diff;
+        lastKnownCounts["alt1First.otherCount"] =
+            updateFields["alt1First.otherCount"];
     }
 
-    // Calculate total events as the sum of all counters
-    const total = merchant + alt1Merchant + other + alt1Other;
-    if (totalEl) {
-        totalEl.textContent = total.toString();
-    }
+    // ✅ Now Alt1 Other includes First Found count
+    const totalAlt1Other = alt1Other + alt1OtherFirst;
+    alt1OtherEl.textContent = `${totalAlt1Other} (First: ${alt1OtherFirst})`;
 
+    // ✅ Calculate total events correctly (including First Found counts)
+    const total = merchant + other + totalAlt1Merchant + totalAlt1Other;
+    totalEl.textContent = total.toString();
+
+    // ✅ Update roles based on new event counts
     populateRoles(updateFields);
 }
 
