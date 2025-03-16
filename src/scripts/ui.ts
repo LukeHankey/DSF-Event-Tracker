@@ -5,7 +5,7 @@ import {
     clearEventHistory,
     updateHideExpiredRows,
 } from "./eventHistory";
-import { EventRecord } from "./events";
+import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
@@ -194,7 +194,8 @@ function updateIfChanged(key: string, currentValue: string): void {
     const savedValue = localStorage.getItem(key);
     if (savedValue !== currentValue) {
         localStorage.setItem(key, currentValue);
-        if (key === "favoriteEventsMode") renderEventHistory();
+        if (key === "favoriteEventsMode" || key === "favoriteEvents")
+            renderEventHistory();
     }
 }
 

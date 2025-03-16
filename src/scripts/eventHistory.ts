@@ -102,6 +102,21 @@ export function updateHideExpiredRows(): void {
     }
 }
 
+const sortPinnedEvents = (
+    activeEvents: EventRecord[],
+    favouriteEvents: EventKeys[],
+): EventRecord[] => {
+    return activeEvents.sort((x, y) => {
+        const xPriority = favouriteEvents.includes(x.event);
+        const yPriority = favouriteEvents.includes(y.event);
+
+        if (xPriority && yPriority) return 0; // Keep relative order of priority elements
+        if (xPriority) return 1; // Move x to the end
+        if (yPriority) return -1; // Move y to the end
+        return 0; // Keep original order otherwise
+    });
+};
+
 export function renderEventHistory(): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
@@ -111,7 +126,7 @@ export function renderEventHistory(): void {
     const now = Date.now();
     const savedFavourites = localStorage.getItem("favoriteEvents");
     const favouriteEvents = savedFavourites
-        ? (JSON.parse(savedFavourites) as string[])
+        ? (JSON.parse(savedFavourites) as EventKeys[])
         : [];
 
     const favMode = localStorage.getItem("favoriteEventsMode") || "none";
@@ -123,7 +138,7 @@ export function renderEventHistory(): void {
         );
     }
 
-    const activeEvents: EventRecord[] = [];
+    let activeEvents: EventRecord[] = [];
     eventsToRender.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         let remaining = event.duration - elapsed;
@@ -138,13 +153,7 @@ export function renderEventHistory(): void {
     });
 
     if (favMode === "pin") {
-        activeEvents.sort((a, b) => {
-            const aFav = favouriteEvents.includes(a.event);
-            const bFav = favouriteEvents.includes(b.event);
-            if (aFav && !bFav) return 1;
-            if (!aFav && bFav) return -1;
-            return 0;
-        });
+        activeEvents = sortPinnedEvents(activeEvents, favouriteEvents);
     }
 
     // On initial render, sort active events to the top of the table
@@ -170,7 +179,8 @@ export function renderEventHistory(): void {
         if (hideExpired && remaining === 0) return;
         const isFavourite = favouriteEvents.includes(event.event);
         const shouldHighlight = favMode === "highlight" && isFavourite;
-        appendEventRow(event, shouldHighlight);
+        const pin = favMode === "pin" && isFavourite;
+        appendEventRow(event, shouldHighlight, pin);
     });
 }
 
@@ -224,6 +234,7 @@ export function addNewEvent(newEvent: EventRecord): void {
     appendEventRow(
         newEvent,
         favMode === "highlight" && favouriteEvents.includes(newEvent.event),
+        favMode === "pin" && favouriteEvents.includes(newEvent.event),
     );
     restartRefreshInterval();
 }
@@ -365,7 +376,11 @@ function restartRefreshInterval(): void {
     startEventTimerRefresh();
 }
 
-function appendEventRow(event: EventRecord, highlight: boolean = false): void {
+function appendEventRow(
+    event: EventRecord,
+    highlight: boolean = false,
+    pin: boolean = false,
+): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
 
@@ -434,7 +449,59 @@ function appendEventRow(event: EventRecord, highlight: boolean = false): void {
     row.appendChild(createCell(formatTimeLeft(event), "time-left"));
     row.appendChild(createCell(event.reportedBy || "Unknown"));
 
-    tbody.insertBefore(row, tbody.firstChild);
+    // If pinned event, add it to the top
+    if (pin) {
+        tbody.insertBefore(row, tbody.firstChild);
+        rowMap.set(event.id, row);
+        return;
+    }
+
+    // Get saved favorites
+    const savedFavourites = localStorage.getItem("favoriteEvents");
+    const favouriteEvents = savedFavourites
+        ? (JSON.parse(savedFavourites) as string[])
+        : [];
+
+    // Get all active event rows
+    const activeEventIds = eventHistory
+        .filter(checkActive)
+        .map((event) => event.id);
+    const activeTableRows = activeEventIds
+        .map((id) => rowMap.get(id))
+        .filter((row) => row !== undefined) as HTMLTableRowElement[];
+
+    // Track the last favorite event row and the first non-favorite row
+    let lastPinnedRow: HTMLTableRowElement | null = null;
+    let firstNonFavoriteRow: HTMLTableRowElement | null = null;
+
+    for (const tableRow of activeTableRows) {
+        const eventName = tableRow.cells[1].textContent?.trim(); // Get event name from column index 1
+
+        if (favouriteEvents.includes(eventName ?? "")) {
+            lastPinnedRow = tableRow; // Keep track of the last favorite event
+            break;
+        }
+    }
+
+    for (const tableRow of activeTableRows) {
+        const eventName = tableRow.cells[1].textContent?.trim();
+        if (!favouriteEvents.includes(eventName ?? "")) {
+            firstNonFavoriteRow = tableRow;
+            break; // Stop at the first non-favorite row
+        }
+    }
+
+    // 📌 Insertion Logic
+    if (lastPinnedRow && tbody.contains(lastPinnedRow)) {
+        // If there are active pinned events, insert AFTER the LAST pinned event
+        tbody.insertBefore(row, lastPinnedRow.nextSibling);
+    } else if (firstNonFavoriteRow && tbody.contains(firstNonFavoriteRow)) {
+        // If there are no pinned events but there are non-favorite events, insert BEFORE them
+        tbody.insertBefore(row, firstNonFavoriteRow);
+    } else {
+        // If no other rows exist, insert at the top
+        tbody.insertBefore(row, tbody.firstChild);
+    }
     rowMap.set(event.id, row);
 }
 
@@ -547,7 +614,7 @@ function editEvent(event: EventRecord): void {
         const updatedEvent: EventRecord = {
             id: event.id,
             type: "editEvent",
-            event: row.cells[1].textContent?.trim() || "",
+            event: row.cells[1].textContent?.trim() as EventKeys,
             world: row.cells[2].textContent?.trim() || "",
             duration: newDuration,
             reportedBy: row.cells[4].textContent?.trim() || "",

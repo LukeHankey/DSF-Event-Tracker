@@ -113,7 +113,7 @@ export const eventTimes: EventTimes = {
 export interface EventRecord {
     id: UUIDTypes;
     type: EventRecordTypes;
-    event: string;
+    event: EventKeys;
     world: string;
     duration: number; // in seconds, or you can use a string if you prefer
     reportedBy: string;
