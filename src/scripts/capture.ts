@@ -1,7 +1,7 @@
 import * as a1lib from "alt1";
 import ChatBoxReader, { ChatLine } from "alt1/chatbox";
 import * as OCR from "alt1/ocr";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { EventKeys, events, eventTimes, firstEventTexts } from "./events";
@@ -122,6 +122,28 @@ function detectTimestamps(lines: ChatLine[]): boolean {
     );
 }
 
+async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
+    const token = localStorage.getItem("refreshToken");
+    if (token) {
+        const discordID = decodeJWT(token)?.discord_id;
+        const addCountResponse = await axios.patch(
+            `https://api.dsfeventtracker.com/profiles/${discordID}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: ORIGIN,
+                },
+                key: isFirstEvent ? "alt1First" : "alt1",
+                event: matchingEvent,
+            },
+        );
+
+        if (addCountResponse.status === 200) {
+            console.log(`${matchingEvent} has been added to call count.`);
+        }
+    }
+}
+
 function processLine(
     line: ChatLine,
     hasTimestamps: boolean,
@@ -144,7 +166,7 @@ function processLine(
 
 async function reportEvent(
     matchingEvent: EventKeys,
-    isFirstEvent: Boolean,
+    isFirstEvent: boolean,
     current_world: string,
 ): Promise<void> {
     try {
@@ -157,6 +179,7 @@ async function reportEvent(
                     Origin: ORIGIN,
                 },
                 event: matchingEvent,
+                isFirstEvent,
                 world: current_world,
                 debug: DEBUG,
                 reportedBy: rsn,
@@ -166,33 +189,9 @@ async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        const token = localStorage.getItem("refreshToken");
-        if (token) {
-            const discordID = decodeJWT(token)?.discord_id;
-            const addCountResponse = await axios.patch(
-                `https://api.dsfeventtracker.com/profiles/${discordID}`,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Origin: ORIGIN,
-                    },
-                    key: isFirstEvent ? "alt1First" : "alt1",
-                    event: matchingEvent,
-                },
-            );
-
-            if (addCountResponse.status === 200) {
-                console.log(`${matchingEvent} has been added to call count.`);
-            }
-        }
+        await addEventCount(matchingEvent, isFirstEvent)
 
         if (sendWebhookResponse.status !== 200) {
-            if (sendWebhookResponse.status === 409) {
-                console.log(
-                    `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
-                );
-                return;
-            }
             console.log("Did not receive the correct response");
             return;
         }
@@ -240,6 +239,16 @@ async function reportEvent(
             });
         }
     } catch (err) {
+        if ((err as AxiosError).status === 409) {
+            const error = err as AxiosError<{ is_first_event?: boolean }>;
+            console.log(
+                `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
+            );
+            if (error.response?.data.is_first_event) {
+                await addEventCount(matchingEvent, error.response?.data.is_first_event)
+            }
+            return;
+        }
         console.log(err);
     }
 }
@@ -404,13 +413,13 @@ function isLikelyEventStart(lineText: string): Boolean {
     return results.length > 0 && results[0].score! <= 0.3; // Acceptable match
 }
 
-function getMatchingEvent(lineText: string): [EventKeys | null, Boolean] {
+function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
     // Remove timestamps if present
     const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
     lineText = lineText.replace(timeRegex, "");
 
     // Remove certain prefixes if present
-    const prefixes = ["Misty: ", "Fisherman: ", "Guys: ", "5FTx: "];
+    const prefixes = ["Misty: ", "Fisherman: ", "Guys: ", "5Ftx: "];
     const matchingPrefix = prefixes.find((prefix) =>
         lineText.startsWith(prefix),
     );
