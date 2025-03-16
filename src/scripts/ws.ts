@@ -26,7 +26,7 @@ async function refreshToken(): Promise<string | null> {
 
     try {
         const response = await axios.post(
-            `https://api.dsfeventtracker.com/auth/refresh?refresh_token=${refreshToken}`,
+            `https://api.dsfeventtracker.com/auth/refresh?token=${refreshToken}`,
             {
                 headers: {
                     "Content-Type": "application/json",
