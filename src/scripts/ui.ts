@@ -10,7 +10,7 @@ import { wsClient } from "./ws";
 import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { getEventCountData, updateProfileCounters } from "./profile";
+import { showToast } from "./notifications";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -69,26 +69,6 @@ tabs.forEach((tab) => {
         }
     });
 });
-
-// Function to show toast notification using new BEM modifier for "show"
-function showToast(message: string): void {
-    const toast = document.createElement("div");
-    toast.classList.add("toast");
-    toast.textContent = message;
-
-    document.body.appendChild(toast);
-
-    // Show toast after a brief delay using the BEM modifier
-    setTimeout(() => {
-        toast.classList.add("toast--show");
-    }, 100);
-
-    // Hide toast after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove("toast--show");
-        setTimeout(() => toast.remove(), 500); // Remove from DOM
-    }, 3000);
-}
 
 // Query the status tab and notification
 const statusTab = document.querySelector<HTMLElement>('[data-tab="statusTab"]');

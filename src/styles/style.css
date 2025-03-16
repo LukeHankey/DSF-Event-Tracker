@@ -528,6 +528,11 @@ small {
     transform: translateX(0); /* Slide in */
 }
 
+.toast--error {
+    background-color: #dc3545; /* red for error */
+}
+
+
 /* -------------------------------------
 6) STATUS
 ------------------------------------- */
