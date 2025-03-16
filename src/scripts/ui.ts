@@ -316,7 +316,7 @@ document
             localStorage.setItem("accessToken", response.data.access_token);
 
             // Update discord_id to websocket and load profile
-            wsClient.reconnect()
+            wsClient.reconnect();
 
             // Show success toast
             showToast("✅ Verified successfully!");

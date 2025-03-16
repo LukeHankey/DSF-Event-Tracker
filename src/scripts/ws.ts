@@ -56,7 +56,16 @@ export class WebSocketClient {
     private url: string;
 
     constructor(url: string) {
+        url = `${url}&discord_id=${this.discordID}`;
         this.url = url;
+    }
+
+    get discordID(): string | null {
+        const token = localStorage.getItem("accessToken") ?? "";
+        const decoded = token ? decodeJWT(token) : null;
+        const discordID = decoded ? decoded.discord_id : null;
+
+        return discordID;
     }
 
     connect(): void {
@@ -168,17 +177,17 @@ export class WebSocketClient {
 
     reconnect(): void {
         console.log("🔄 Reconnecting WebSocket in 5 seconds...");
+        this.url = this.url.replace(
+            /discord_id=[^&\s]*/,
+            `discord_id=${this.discordID}`,
+        );
         setTimeout(() => this.connect(), 5000);
     }
 }
 
-const token = localStorage.getItem("accessToken") ?? "";
-const decoded = token ? decodeJWT(token) : null;
-const discordID = decoded ? decoded.discord_id : null;
-
 export const wsClient = new WebSocketClient(
     DEBUG
-        ? `wss://ws.dsfeventtracker.com/ws?room=development&discord_id=${discordID}`
-        : `wss://ws.dsfeventtracker.com/ws?room=production&discord_id=${discordID}`,
+        ? "wss://ws.dsfeventtracker.com/ws?room=development"
+        : "wss://ws.dsfeventtracker.com/ws?room=production",
 );
 wsClient.connect();
