@@ -315,8 +315,8 @@ document
             localStorage.setItem("refreshToken", response.data.refresh_token);
             localStorage.setItem("accessToken", response.data.access_token);
 
-            const eventCounts = (await getEventCountData()) ?? {};
-            updateProfileCounters(eventCounts);
+            // Update discord_id to websocket and load profile
+            wsClient.reconnect()
 
             // Show success toast
             showToast("✅ Verified successfully!");
