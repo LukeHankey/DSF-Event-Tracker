@@ -10,7 +10,7 @@ import { wsClient } from "./ws";
 import { DEBUG, ORIGIN } from "../config";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { populateRoles } from "./profile";
+import { getEventCountData, updateProfileCounters } from "./profile";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -314,6 +314,9 @@ document
 
             localStorage.setItem("refreshToken", response.data.refresh_token);
             localStorage.setItem("accessToken", response.data.access_token);
+
+            const eventCounts = (await getEventCountData()) ?? {};
+            updateProfileCounters(eventCounts);
 
             // Show success toast
             showToast("✅ Verified successfully!");
