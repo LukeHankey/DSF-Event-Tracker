@@ -124,6 +124,7 @@ export class WebSocketClient {
                         );
                         parsedData.event_data.token = newToken; // ✅ Update the token
                         this.send(parsedData.event_data as EventRecord); // ✅ Resend the event
+                        console.log("✅ Event sent successfully");
                     }
                 }
             } else if (parsedData.type === "clientProfileUpdate") {
