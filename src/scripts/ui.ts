@@ -386,6 +386,9 @@ if (clearAllBtn) {
 
 // When you click the test button, emit the "updateEventHistory" event with your payload.
 const testEventButton = document.getElementById("testWS");
+const eventSelect = document.getElementById(
+    "testEventSelect",
+) as HTMLSelectElement; // Dropdown for event selection
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const eventHistory = localStorage.getItem("eventHistory");
@@ -413,12 +416,17 @@ if (testEventButton && DEBUG) {
         const lastEventId = lastEvent?.id;
         wsClient.sendSync(lastEventTimestamp, lastEventId);
 
+        // Get user-selected event
+        const selectedEvent = (eventSelect.value as EventKeys) || "Testing";
+        const eventDuration = eventTimes[selectedEvent] ?? 15; // Default to 15 if not found
+        const randomWorld = String(Math.floor(Math.random() * 150) + 1);
+
         const testEvent: EventRecord = {
             id: uuid(),
             type: "testing",
-            event: "Testing",
-            world: "50",
-            duration: 15,
+            event: selectedEvent,
+            world: randomWorld,
+            duration: eventDuration,
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
@@ -426,6 +434,20 @@ if (testEventButton && DEBUG) {
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
+    });
+}
+
+function populateEventDropdown() {
+    const eventSelect = document.getElementById(
+        "testEventSelect",
+    ) as HTMLSelectElement;
+    if (!eventSelect) return;
+
+    Object.entries(eventTimes).forEach(([eventName, duration]) => {
+        const option = document.createElement("option");
+        option.value = eventName;
+        option.textContent = `${eventName} (${duration / 60}m)`;
+        eventSelect.appendChild(option);
     });
 }
 
@@ -437,6 +459,7 @@ window.addEventListener("DOMContentLoaded", () => {
             debugContainer.style.display = "none";
         } else {
             debugContainer.style.display = ""; // or "block"
+            populateEventDropdown();
         }
     }
     const infoButton = document.getElementById("infoButton") as HTMLElement;
