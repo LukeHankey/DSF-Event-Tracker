@@ -247,6 +247,9 @@ export function updateEvent(event: EventRecord): void {
             ]);
         }
         restartRefreshInterval();
+    } else {
+        addNewEvent(event.oldEvent!)
+        updateEvent(event)
     }
 }
 
