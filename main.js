@@ -802,7 +802,7 @@ eval("module.exports=(__webpack_require__(/*! alt1/base */ \"../node_modules/alt
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   DEBUG: () => (/* binding */ DEBUG),\n/* harmony export */   ORIGIN: () => (/* binding */ ORIGIN)\n/* harmony export */ });\nconst DEBUG = true;\nconst ORIGIN = DEBUG\n    ? document.location.href\n    : \"https://lukehankey.github.io/DSF-Event-Tracker/\";\n\n\n//# sourceURL=webpack://TestApp/./config.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   DEBUG: () => (/* binding */ DEBUG),\n/* harmony export */   ORIGIN: () => (/* binding */ ORIGIN)\n/* harmony export */ });\nconst DEBUG = false;\nconst ORIGIN = DEBUG\n    ? document.location.href\n    : \"https://lukehankey.github.io/DSF-Event-Tracker/\";\n\n\n//# sourceURL=webpack://TestApp/./config.ts?");
 
 /***/ }),
 
