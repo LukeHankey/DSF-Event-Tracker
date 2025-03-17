@@ -122,7 +122,11 @@ function detectTimestamps(lines: ChatLine[]): boolean {
     );
 }
 
-async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
+async function addEventCount(
+    matchingEvent: EventKeys,
+    worldNumber: string,
+    isFirstEvent: boolean,
+) {
     const token = localStorage.getItem("refreshToken");
     if (token) {
         const discordID = decodeJWT(token)?.discord_id;
@@ -135,11 +139,16 @@ async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
                 },
                 key: isFirstEvent ? "alt1First" : "alt1",
                 event: matchingEvent,
+                world: worldNumber,
             },
         );
 
         if (addCountResponse.status === 200) {
             console.log(`${matchingEvent} has been added to call count.`);
+        } else {
+            console.error(
+                `Status not 200 for adding event count: ${addCountResponse}`,
+            );
         }
     }
 }
@@ -189,7 +198,7 @@ async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        await addEventCount(matchingEvent, isFirstEvent);
+        await addEventCount(matchingEvent, current_world, isFirstEvent);
 
         if (sendWebhookResponse.status !== 200) {
             console.log("Did not receive the correct response");
@@ -244,9 +253,12 @@ async function reportEvent(
             console.log(
                 `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
             );
+            // Happens if there are multiple people on same world. Only one will send the webhook
+            // Others will get a 409.
             if (error.response?.data.is_first_event) {
                 await addEventCount(
                     matchingEvent,
+                    current_world,
                     error.response?.data.is_first_event,
                 );
             }
