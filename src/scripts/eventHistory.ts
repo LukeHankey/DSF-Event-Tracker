@@ -548,8 +548,9 @@ function appendEventRow(
     row.appendChild(createCell(formatTimeLeft(event), "time-left"));
     row.appendChild(createCell(event.reportedBy || "Unknown"));
 
-    // If pinned event, add it to the top
-    if (pin) {
+    // If current event is a pinned event or the event mode is not set to pin, add it to the top
+    const favMode = localStorage.getItem("favoriteEventsMode");
+    if (pin || favMode !== "pin") {
         tbody.insertBefore(row, tbody.firstChild);
         rowMap.set(event.id, row);
         return;
