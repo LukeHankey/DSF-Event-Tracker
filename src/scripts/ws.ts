@@ -16,6 +16,36 @@ type ReceivedData =
     | ExpiredTokenRecord
     | EventRecord[];
 
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+
+console.log = (...args: unknown[]) => {
+    // Call original console.log
+    originalConsoleLog(...args);
+    wsClient.log("info", prepareLog(args));
+};
+
+console.error = (...args: unknown[]) => {
+    // Call original console.log
+    originalConsoleError(...args);
+    wsClient.log("error", prepareLog(args));
+};
+
+console.warn = (...args: unknown[]) => {
+    // Call original console.log
+    originalConsoleWarn(...args);
+    wsClient.log("warn", prepareLog(args));
+};
+
+const prepareLog = (args: unknown[]): string => {
+    return args
+        .map((arg) =>
+            typeof arg === "object" ? JSON.stringify(arg) : String(arg),
+        )
+        .join(" ");
+};
+
 async function refreshToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -66,6 +96,19 @@ export class WebSocketClient {
         const discordID = decoded ? decoded.discord_id : null;
 
         return discordID;
+    }
+
+    log(level: "info" | "warn" | "error", message: string): void {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(
+                JSON.stringify({
+                    type: "log",
+                    level,
+                    message,
+                    discordID: this.discordID,
+                }),
+            );
+        }
     }
 
     connect(): void {
