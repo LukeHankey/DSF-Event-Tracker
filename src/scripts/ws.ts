@@ -84,12 +84,12 @@ async function refreshToken(): Promise<string | null> {
 export class WebSocketClient {
     private socket: WebSocket | null = null;
     private url: string;
-    private session_id: UUIDTypes;
+    private sessionID: UUIDTypes;
 
     constructor(url: string) {
         url = `${url}&discord_id=${this.discordID}`;
         this.url = url;
-        this.session_id = uuid();
+        this.sessionID = uuid();
     }
 
     get discordID(): string | null {
@@ -105,7 +105,7 @@ export class WebSocketClient {
             this.socket.send(
                 JSON.stringify({
                     type: "log",
-                    sessio_id: this.session_id,
+                    sessionID: this.sessionID,
                     level,
                     message,
                     discordID: this.discordID,
