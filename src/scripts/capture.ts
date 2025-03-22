@@ -5,7 +5,7 @@ import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { EventKeys, events, eventTimes, firstEventTexts } from "./events";
-import { DEBUG, ORIGIN } from "../config";
+import { DEBUG, ORIGIN, API_URL } from "../config";
 import { wsClient } from "./ws";
 import {
     loadEventHistory,
@@ -131,7 +131,7 @@ async function addEventCount(
     if (token) {
         const discordID = decodeJWT(token)?.discord_id;
         const addCountResponse = await axios.patch(
-            `https://api.dsfeventtracker.com/profiles/${discordID}`,
+            `${API_URL}/profiles/${discordID}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -181,7 +181,7 @@ async function reportEvent(
     try {
         const rsn = localStorage.getItem("rsn") ?? "";
         const sendWebhookResponse = await axios.post(
-            "https://api.dsfeventtracker.com/events/webhook",
+            `${API_URL}/events/webhook`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -221,7 +221,7 @@ async function reportEvent(
         const eventTime = eventTimes[matchingEvent];
         const eventWorld = `${matchingEvent}_${current_world}`;
         const clearEventTimerResponse = await axios.post(
-            `https://api.dsfeventtracker.com/events/clear_timer?event_world=${eventWorld}&timeout=${eventTime}`,
+            `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventTime}`,
             {
                 headers: {
                     "Content-Type": "application/json",

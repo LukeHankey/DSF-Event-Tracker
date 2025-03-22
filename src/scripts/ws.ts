@@ -1,6 +1,6 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent } from "./eventHistory";
-import { DEBUG, ORIGIN } from "../config";
+import { DEBUG, ORIGIN, API_URL } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
@@ -56,7 +56,7 @@ async function refreshToken(): Promise<string | null> {
 
     try {
         const response = await axios.post(
-            `https://api.dsfeventtracker.com/auth/refresh?token=${refreshToken}`,
+            `${API_URL}/auth/refresh?token=${refreshToken}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -234,7 +234,7 @@ export class WebSocketClient {
 
 export const wsClient = new WebSocketClient(
     DEBUG
-        ? "wss://ws.dsfeventtracker.com/ws?room=development"
+        ? "ws://localhost:8000/ws?room=development"
         : "wss://ws.dsfeventtracker.com/ws?room=production",
 );
 wsClient.connect();

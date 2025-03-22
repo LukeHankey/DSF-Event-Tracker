@@ -7,7 +7,7 @@ import {
 } from "./eventHistory";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient } from "./ws";
-import { DEBUG, ORIGIN } from "../config";
+import { DEBUG, ORIGIN, API_URL } from "../config";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
@@ -226,7 +226,7 @@ document
 
         try {
             const response = await axios.post(
-                `https://api.dsfeventtracker.com/auth/validate/${discordID}`,
+                `${API_URL}/auth/validate/${discordID}`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -278,7 +278,7 @@ document
         }
 
         const response = await axios.post(
-            `https://api.dsfeventtracker.com/auth/verify/${discordID}?code=${verificationCode}`,
+            `${API_URL}/auth/verify/${discordID}?code=${verificationCode}`,
             {
                 headers: {
                     "Content-Type": "application/json",

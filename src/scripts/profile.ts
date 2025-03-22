@@ -1,5 +1,6 @@
 import { decodeJWT } from "./permissions";
 import axios from "axios";
+import { API_URL } from "../config";
 
 let previousEventCounts: UpdateFields = {};
 
@@ -213,7 +214,7 @@ export async function getEventCountData(): Promise<UpdateFields | null> {
     if (!discordID) return null;
 
     const response = await axios.get(
-        `https://api.dsfeventtracker.com/profiles/${discordID}`,
+        `${API_URL}/profiles/${discordID}`,
         {
             headers: {
                 "Content-Type": "application/json",
