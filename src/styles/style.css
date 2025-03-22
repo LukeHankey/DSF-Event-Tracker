@@ -330,6 +330,7 @@ a {
     border-radius: 4px;
     font-size: 0.8rem;
     white-space: nowrap;
+    margin: .2rem;
 }
 .progress-bar {
     background: #e0e0e0;
