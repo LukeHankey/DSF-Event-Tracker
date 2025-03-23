@@ -498,6 +498,7 @@ function appendEventRow(
 
     const allowedRoles = ["775940649802793000"]; // Scouter role
     const hasEditPermission = userHasRequiredRole(allowedRoles);
+    row.dataset.id = String(event.id);
 
     if (remaining <= 0) {
         const removeBtn = document.createElement("button");
@@ -640,7 +641,6 @@ function editEvent(event: EventRecord): void {
         row.classList.add("editing");
 
         // Store original values for each editable cell (indexes 1-4).
-        row.dataset.id = String(event.id);
         row.dataset.originalEvent = row.cells[1].textContent || "";
         row.dataset.originalWorld = row.cells[2].textContent || "";
         row.dataset.originalDuration = row.cells[3].textContent || "";
