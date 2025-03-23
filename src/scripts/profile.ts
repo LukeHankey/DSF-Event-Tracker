@@ -213,14 +213,11 @@ export async function getEventCountData(): Promise<UpdateFields | null> {
     const discordID = localStorage.getItem("discordID");
     if (!discordID) return null;
 
-    const response = await axios.get(
-        `${API_URL}/profiles/${discordID}`,
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
+    const response = await axios.get(`${API_URL}/profiles/${discordID}`, {
+        headers: {
+            "Content-Type": "application/json",
         },
-    );
+    });
 
     if (response.data.count_data) {
         console.log("Received event counts");

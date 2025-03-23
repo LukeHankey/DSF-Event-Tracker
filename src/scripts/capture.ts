@@ -4,7 +4,13 @@ import * as OCR from "alt1/ocr";
 import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
-import { EventKeys, events, eventTimes, firstEventTexts } from "./events";
+import {
+    EventKeys,
+    events,
+    eventTimes,
+    firstEventTexts,
+    eventExpiredText,
+} from "./events";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { wsClient } from "./ws";
 import {
@@ -268,6 +274,8 @@ async function reportEvent(
     }
 }
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
 
@@ -299,25 +307,41 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines = (chatbox.read() as ChatLine[]) ?? []; // Read lines from the detected chat box
-    if (
-        (lines.length > 1 &&
-            lines.some((line) =>
-                line.text.includes("Attempting to switch worlds..."),
-            )) ||
-        worldHopMessage
-    ) {
+    let lines =
+        (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
+    const worldHopIncluded = lines.some((line) =>
+        line.text.includes("Attempting to switch worlds..."),
+    );
+    if (worldHopIncluded || worldHopMessage) {
+        await delay(2000);
         // Only happens when there has been a world hop
-        let worldNumber = await findWorldNumber(img);
-        if (!worldNumber) {
+        const worldNumber =
+            alt1.currentWorld > 0
+                ? alt1.currentWorld
+                : await findWorldNumber(img);
+
+        if (worldNumber && Number(worldNumber) > 0) {
             console.log(
-                "Unable to capture world number from Friends List. Make sure the interface is viewable on screen.",
+                "World hop message detected and found world number: ",
+                worldNumber,
             );
-            sessionStorage.removeItem("currentWorld");
+            sessionStorage.setItem("currentWorld", String(worldNumber));
         } else {
-            sessionStorage.setItem("currentWorld", worldNumber);
+            console.log("Unable to capture world number.");
+            sessionStorage.removeItem("currentWorld");
         }
+
         worldHopMessage = false;
+    }
+
+    const hasEventEnded = lines.some((line) => matchesEventEnd(line.text));
+    if (hasEventEnded) {
+        // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
+        const lastGameTimestamp = lines.slice(-1)[0].fragments[1].text;
+        lastTimestamp = new Date(
+            `${new Date().toLocaleDateString()} ${lastGameTimestamp}`,
+        );
+        return;
     }
 
     // Checks on every image captured whether there are timestamps in chat
@@ -456,6 +480,32 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
     }
 
     return [null, false]; // No match found
+}
+
+const expiredEntries = Object.entries(eventExpiredText).flatMap(
+    ([event, texts]) => texts.map((text) => ({ event, text })),
+);
+
+const expiredFuse = new Fuse(expiredEntries, {
+    keys: ["text"],
+    includeScore: true,
+    threshold: 0.3,
+    ignoreLocation: true,
+    minMatchCharLength: 10,
+});
+
+function matchesEventEnd(lineText: string): boolean {
+    // Strip timestamp from beginning if present
+    const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
+    lineText = lineText.replace(timeRegex, "");
+
+    const results = expiredFuse.search(lineText);
+
+    if (results.length > 0 && results[0].score! <= 0.3) {
+        return true;
+    }
+
+    return false;
 }
 
 /**

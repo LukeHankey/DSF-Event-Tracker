@@ -94,6 +94,17 @@ export const events: Events = {
     ],
 };
 
+export const eventExpiredText: Events = {
+    "Travelling merchant": ["The travelling merchant has departed..."],
+    Jellyfish: ["The giant jellyfish has departed..."],
+    Arkaneo: ["The sailfish, Arkaneo, has departed..."],
+    "Sea Monster": ["The sea monster has departed..."],
+    "Treasure Turtle": ["The treasure turtle has departed..."],
+    Whale: ["The whale has departed..."],
+    Whirlpool: ["The whirlpool has disappeared..."],
+    Testing: ["test"],
+};
+
 export const firstEventTexts = Object.values(events).map((texts) => texts[0]);
 
 const ONE_MINUTE = 60;
