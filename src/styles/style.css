@@ -198,6 +198,10 @@ a {
     text-align: center;
 }
 
+.event-table tr.editing td {
+    border: 1px dashed #ccc;
+}
+
 .table-scroll {
     flex: 1;
     overflow: auto;

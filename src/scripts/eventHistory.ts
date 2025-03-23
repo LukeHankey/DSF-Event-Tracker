@@ -665,10 +665,8 @@ function editEvent(event: EventRecord): void {
                     select.appendChild(option);
                 });
                 cell.appendChild(select);
-                cell.style.border = "1px dashed #ccc";
             } else if (index > 0) {
                 cell.contentEditable = "true";
-                cell.style.border = "1px dashed #ccc";
             }
         });
     } else {
@@ -683,7 +681,6 @@ function editEvent(event: EventRecord): void {
             } else if (index > 0) {
                 cell.contentEditable = "false";
             }
-            cell.style.border = "none";
         });
 
         const unchanged =
