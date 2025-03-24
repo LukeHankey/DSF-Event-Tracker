@@ -212,7 +212,7 @@ async function reportEvent(
         }
 
         const eventId = uuid();
-        addNewEvent({
+        wsClient.send({
             id: eventId,
             type: "addEvent",
             event: matchingEvent,
@@ -241,17 +241,7 @@ async function reportEvent(
             clearEventTimerResponse.data.message ===
                 "Event successfully removed"
         ) {
-            wsClient.send({
-                id: eventId,
-                type: "addEvent",
-                event: matchingEvent,
-                world: current_world,
-                duration: eventTime,
-                reportedBy: rsn,
-                timestamp: Date.now(),
-                oldEvent: null,
-                token: null,
-            });
+            console.log(`${matchingEvent} on world ${current_world} has been queued for ${eventTime} seconds.`)
         }
     } catch (err) {
         if ((err as AxiosError).status === 409) {
