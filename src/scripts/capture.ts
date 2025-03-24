@@ -13,11 +13,7 @@ import {
 } from "./events";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { wsClient } from "./ws";
-import {
-    loadEventHistory,
-    startEventTimerRefresh,
-    addNewEvent,
-} from "./eventHistory";
+import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
@@ -49,6 +45,7 @@ let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
+let currentWorld = "null";
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -182,7 +179,7 @@ function processLine(
 async function reportEvent(
     matchingEvent: EventKeys,
     isFirstEvent: boolean,
-    current_world: string,
+    currentWorld: string,
 ): Promise<void> {
     try {
         const rsn = localStorage.getItem("rsn") ?? "";
@@ -195,7 +192,7 @@ async function reportEvent(
                 },
                 event: matchingEvent,
                 isFirstEvent,
-                world: current_world,
+                world: currentWorld,
                 debug: DEBUG,
                 reportedBy: rsn,
             },
@@ -204,7 +201,7 @@ async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        await addEventCount(matchingEvent, current_world, isFirstEvent);
+        await addEventCount(matchingEvent, currentWorld, isFirstEvent);
 
         if (sendWebhookResponse.status !== 200) {
             console.log("Did not receive the correct response");
@@ -216,7 +213,7 @@ async function reportEvent(
             id: eventId,
             type: "addEvent",
             event: matchingEvent,
-            world: current_world,
+            world: currentWorld,
             duration: eventTimes[matchingEvent] + 6,
             reportedBy: rsn,
             timestamp: Date.now(),
@@ -225,7 +222,7 @@ async function reportEvent(
         });
 
         const eventTime = eventTimes[matchingEvent];
-        const eventWorld = `${matchingEvent}_${current_world}`;
+        const eventWorld = `${matchingEvent}_${currentWorld}`;
         const clearEventTimerResponse = await axios.post(
             `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventTime}`,
             {
@@ -241,20 +238,22 @@ async function reportEvent(
             clearEventTimerResponse.data.message ===
                 "Event successfully removed"
         ) {
-            console.log(`${matchingEvent} on world ${current_world} has been queued for ${eventTime} seconds.`)
+            console.log(
+                `${matchingEvent} on world ${currentWorld} has been queued for ${eventTime} seconds.`,
+            );
         }
     } catch (err) {
         if ((err as AxiosError).status === 409) {
             const error = err as AxiosError<{ is_first_event?: boolean }>;
             console.log(
-                `Duplicate event - ignoring ${matchingEvent} on ${current_world}`,
+                `Duplicate event - ignoring ${matchingEvent} on ${currentWorld}`,
             );
             // Happens if there are multiple people on same world. Only one will send the webhook
             // Others will get a 409.
             if (error.response?.data.is_first_event) {
                 await addEventCount(
                     matchingEvent,
-                    current_world,
+                    currentWorld,
                     error.response?.data.is_first_event,
                 );
             }
@@ -270,8 +269,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const chatData = chatbox.find(img); // Find chat boxes in the image
 
     if (!chatData) {
-        document.querySelector("#mainTab p")!.textContent =
-            "Could not find chat box.";
+        updateMainTab("Could not find chat box.");
         return;
     }
 
@@ -288,6 +286,17 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             3,
         );
         mainboxRect = true;
+
+        // Get current world when alt1 app first loads
+        currentWorld =
+            alt1.currentWorld > 0
+                ? String(alt1.currentWorld)
+                : await findWorldNumber(img);
+        
+        console.log(
+            "World hop message detected and found world number: ",
+            currentWorld,
+        );
     }
 
     if (
@@ -299,44 +308,50 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     let lines =
         (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
-    const worldHopIncluded = lines.some((line) =>
+
+    worldHopMessage = lines.some((line) =>
         line.text.includes("Attempting to switch worlds..."),
     );
-    if (worldHopIncluded || worldHopMessage) {
+    if (worldHopMessage) {
+        worldHopMessage = false;
         await delay(2000);
-        // Only happens when there has been a world hop
-        const worldNumber =
+        currentWorld =
             alt1.currentWorld > 0
-                ? alt1.currentWorld
+                ? String(alt1.currentWorld)
                 : await findWorldNumber(img);
 
-        if (worldNumber && Number(worldNumber) > 0) {
+        if (currentWorld !== "null" && Number(currentWorld) > 0) {
             console.log(
                 "World hop message detected and found world number: ",
-                worldNumber,
+                currentWorld,
             );
-            sessionStorage.setItem("currentWorld", String(worldNumber));
+            sessionStorage.setItem("currentWorld", currentWorld);
         } else {
             console.log("Unable to capture world number.");
             sessionStorage.removeItem("currentWorld");
         }
-
-        worldHopMessage = false;
     }
 
-    const hasEventEnded = lines.some((line) => matchesEventEnd(line.text));
-    if (hasEventEnded) {
-        // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
-        const lastGameTimestamp = lines.slice(-1)[0].fragments[1].text;
-        lastTimestamp = new Date(
-            `${new Date().toLocaleDateString()} ${lastGameTimestamp}`,
-        );
-        return;
-    }
+    // A null world is no good so always make sure it is removed from storage
+    if (currentWorld === "null") sessionStorage.removeItem("currentWorld");
 
     // Checks on every image captured whether there are timestamps in chat
     // Every image capture in case a user decides to turn it on/off
     hasTimestamps = detectTimestamps(lines);
+
+    const hasEventEnded = lines.some((line) => matchesEventEnd(line.text));
+    if (hasEventEnded) {
+        if (hasTimestamps) {
+            // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
+            const lastGameTimestamp = lines.slice(-1)[0].fragments[1].text;
+            lastTimestamp = new Date(
+                `${new Date().toLocaleDateString()} ${lastGameTimestamp}`,
+            );
+        } else {
+            lastTimestamp = new Date();
+        }
+        return;
+    }
 
     // For fresh client, capture first new message within 3 seconds
     lastTimestamp = new Date(
@@ -344,16 +359,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     );
     lastMessage = sessionStorage.getItem("lastMessage") ?? "";
     if (lines?.length) {
-        // Remove blank lines
-        if (lines.some((line) => line.text === ""))
-            lines = lines.filter((line) => line.text !== "");
-
-        lines.some((line) =>
-            line.text.includes("Attempting to switch worlds..."),
-        )
-            ? (worldHopMessage = true)
-            : (worldHopMessage = false);
-
         // Remove all messages which are not older than the lastTimestamp
         // Messages will not be sent if there are messages which are sent at the same time!
         // Keeps messages which are cut onto 2 lines
@@ -384,22 +389,17 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             // Match the event with tolerance. Should work for lines with at least 15 characters
             const [matchingEvent, isFirstEvent] = getMatchingEvent(line.text);
             if (matchingEvent) {
-                let current_world =
-                    alt1.currentWorld < 0
-                        ? sessionStorage.getItem("currentWorld")
-                        : String(alt1.currentWorld);
-
                 console.log(
-                    `'Current world': ${current_world}`,
+                    `'Current world': ${currentWorld}`,
                     `Alt1 detected world: ${alt1.currentWorld}`,
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
                 );
-                if (current_world === null || current_world === "null") {
+                if (currentWorld === "null") {
                     console.log(
                         "Attempting to find world number from Friends List...",
                     );
                     const potentialWorldNumber = await findWorldNumber(img);
-                    if (!potentialWorldNumber) {
+                    if (potentialWorldNumber === "null") {
                         console.log(
                             "Unable to find world number. Please open your Friends List.",
                         );
@@ -408,9 +408,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     console.log(
                         `Found world number to be ${potentialWorldNumber}.`,
                     );
-                    current_world = potentialWorldNumber;
+                    currentWorld = potentialWorldNumber;
                 }
-                await reportEvent(matchingEvent, isFirstEvent, current_world);
+                await reportEvent(matchingEvent, isFirstEvent, currentWorld);
             }
         }
     }
@@ -501,14 +501,12 @@ function matchesEventEnd(lineText: string): boolean {
 /**
  * Find the current world number in the friend list
  */
-const findWorldNumber = async (
-    img: a1lib.ImgRefBind,
-): Promise<string | undefined> => {
+const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string> => {
     const imageRef = imgs.runescapeWorldPretext;
     const pos = img.findSubimage(imageRef);
     const buffData: ImageData = img.toData();
 
-    let worldNumber;
+    let worldNumber = "null";
     if (pos.length) {
         for (let match of pos) {
             const textObj = OCR.findReadLine(
