@@ -46,7 +46,7 @@ let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
-let currentWorld = "null";
+let currentWorld: string | null = null;
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -294,7 +294,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             alt1.currentWorld > 0
                 ? String(alt1.currentWorld)
                 : await findWorldNumber(img);
-        
+
         console.log(
             "World hop message detected and found world number: ",
             currentWorld,
@@ -317,25 +317,26 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (worldHopMessage) {
         worldHopMessage = false;
         await delay(2000);
+        console.log("alt1.currentWorld after world hop: ", alt1.currentWorld);
         currentWorld =
             alt1.currentWorld > 0
                 ? String(alt1.currentWorld)
                 : await findWorldNumber(img);
 
-        if (currentWorld !== "null" && Number(currentWorld) > 0) {
+        if (currentWorld && Number(currentWorld) > 0) {
             console.log(
                 "World hop message detected and found world number: ",
                 currentWorld,
             );
-            sessionStorage.setItem("currentWorld", currentWorld);
+            const previousWorld = sessionStorage.getItem("currentWorld");
+            if (previousWorld !== String(currentWorld)) {
+                sessionStorage.setItem("previousWorld", previousWorld ?? "");
+                sessionStorage.setItem("currentWorld", currentWorld);
+            }
         } else {
             console.log("Unable to capture world number.");
-            sessionStorage.removeItem("currentWorld");
         }
     }
-
-    // A null world is no good so always make sure it is removed from storage
-    if (currentWorld === "null") sessionStorage.removeItem("currentWorld");
 
     // Checks on every image captured whether there are timestamps in chat
     // Every image capture in case a user decides to turn it on/off
@@ -395,13 +396,19 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     `'Current world': ${currentWorld}`,
                     `Alt1 detected world: ${alt1.currentWorld}`,
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
+                    `Previous world (ss): ${sessionStorage.getItem("previousWorld")}`,
                 );
-                if (currentWorld === "null") {
+                currentWorld = Number(currentWorld)
+                    ? currentWorld
+                    : alt1.currentWorld > 0
+                      ? String(alt1.currentWorld)
+                      : sessionStorage.getItem("currentWorld");
+                if (currentWorld === null) {
                     console.log(
                         "Attempting to find world number from Friends List...",
                     );
                     const potentialWorldNumber = await findWorldNumber(img);
-                    if (potentialWorldNumber === "null") {
+                    if (!potentialWorldNumber) {
                         console.log(
                             "Unable to find world number. Please open your Friends List.",
                         );
@@ -503,12 +510,14 @@ function matchesEventEnd(lineText: string): boolean {
 /**
  * Find the current world number in the friend list
  */
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string> => {
+const findWorldNumber = async (
+    img: a1lib.ImgRefBind,
+): Promise<string | null> => {
     const imageRef = imgs.runescapeWorldPretext;
     const pos = img.findSubimage(imageRef);
     const buffData: ImageData = img.toData();
 
-    let worldNumber = "null";
+    let worldNumber = null;
     if (pos.length) {
         for (let match of pos) {
             const textObj = OCR.findReadLine(
