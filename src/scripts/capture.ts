@@ -316,8 +316,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     );
     if (worldHopMessage) {
         worldHopMessage = false;
-        await delay(2000);
-        console.log("alt1.currentWorld after world hop: ", alt1.currentWorld);
+        console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
+        await delay(6000);
+        console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
         currentWorld =
             alt1.currentWorld > 0
                 ? String(alt1.currentWorld)
@@ -398,7 +399,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     `Current world (ss): ${sessionStorage.getItem("currentWorld")}`,
                     `Previous world (ss): ${sessionStorage.getItem("previousWorld")}`,
                 );
-                currentWorld = Number(currentWorld)
+                currentWorld = Number(currentWorld) === alt1.currentWorld
                     ? currentWorld
                     : alt1.currentWorld > 0
                       ? String(alt1.currentWorld)
