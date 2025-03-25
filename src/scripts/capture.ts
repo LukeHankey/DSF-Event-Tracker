@@ -10,6 +10,7 @@ import {
     eventTimes,
     firstEventTexts,
     eventExpiredText,
+    EventRecord,
 } from "./events";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { wsClient } from "./ws";
@@ -181,8 +182,21 @@ async function reportEvent(
     isFirstEvent: boolean,
     currentWorld: string,
 ): Promise<void> {
+    const rsn = localStorage.getItem("rsn") ?? "";
+    const eventId = uuid();
+    const eventRecord: EventRecord = {
+        id: eventId,
+        type: "addEvent",
+        event: matchingEvent,
+        world: currentWorld,
+        duration: eventTimes[matchingEvent] + 6,
+        reportedBy: rsn,
+        timestamp: Date.now(),
+        oldEvent: null,
+        token: null,
+    };
+
     try {
-        const rsn = localStorage.getItem("rsn") ?? "";
         const sendWebhookResponse = await axios.post(
             `${API_URL}/events/webhook`,
             {
@@ -190,9 +204,8 @@ async function reportEvent(
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
                 },
-                event: matchingEvent,
+                eventRecord,
                 isFirstEvent,
-                world: currentWorld,
                 debug: DEBUG,
                 reportedBy: rsn,
             },
@@ -208,18 +221,7 @@ async function reportEvent(
             return;
         }
 
-        const eventId = uuid();
-        wsClient.send({
-            id: eventId,
-            type: "addEvent",
-            event: matchingEvent,
-            world: currentWorld,
-            duration: eventTimes[matchingEvent] + 6,
-            reportedBy: rsn,
-            timestamp: Date.now(),
-            oldEvent: null,
-            token: null,
-        });
+        wsClient.send(eventRecord);
 
         const eventTime = eventTimes[matchingEvent];
         const eventWorld = `${matchingEvent}_${currentWorld}`;
