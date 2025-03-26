@@ -127,4 +127,5 @@ export interface EventRecord {
     timestamp: number; // ISO string or any format you like
     oldEvent: EventRecord | null;
     token: string | null;
+    source: "alt1" | "discord";
 }

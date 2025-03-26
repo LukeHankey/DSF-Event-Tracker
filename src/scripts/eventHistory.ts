@@ -520,7 +520,26 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     row.appendChild(createCell(event.event));
     row.appendChild(createCell(event.world));
     row.appendChild(createCell(formatTimeLeft(event), "time-left"));
-    row.appendChild(createCell(event.reportedBy || "Unknown"));
+
+    const reportedByCell = document.createElement("td");
+
+    // Create an image element for the icon.
+    const icon = document.createElement("img");
+    icon.style.marginRight = "5px"; // adjust spacing as needed
+    icon.src = "./Alt1_icon.png";
+    icon.alt = "Alt1";
+
+    if (event.source === "discord") {
+        icon.src = "./Discord_icon.png";
+        icon.alt = "Discord";
+    }
+    reportedByCell.appendChild(icon);
+
+    // Append the reportedBy text after the icon.
+    reportedByCell.appendChild(document.createTextNode(event.reportedBy || "Unknown"));
+
+    // Finally, add this cell to the row.
+    row.appendChild(reportedByCell);
 
     // If current event is a pinned event or the event mode is not set to pin, add it to the top
     const favMode = localStorage.getItem("favoriteEventsMode");
@@ -687,6 +706,7 @@ function editEvent(event: EventRecord): void {
             timestamp: newTimestamp,
             oldEvent: event,
             token: token,
+            source: event.source,
         };
 
         rowMap.set(event.id, row);

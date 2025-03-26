@@ -222,6 +222,11 @@ a {
     position: relative; /* so button can fill cell if needed */
 }
 
+.event-table td img {
+    width: 14px;
+    height: 14px;
+}
+
 .action-buttons {
     display: flex;
     flex-direction: column;

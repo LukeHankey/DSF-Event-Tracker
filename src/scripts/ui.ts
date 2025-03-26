@@ -318,6 +318,7 @@ if (testEventButton && DEBUG) {
                 timestamp: Date.now(),
                 oldEvent: null,
                 token: null,
+                source: "alt1",
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
@@ -341,6 +342,7 @@ if (testEventButton && DEBUG) {
             timestamp: Date.now(),
             oldEvent: null,
             token: null,
+            source: "alt1",
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);

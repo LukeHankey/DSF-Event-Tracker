@@ -160,6 +160,7 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
         timestamp: Date.now(),
         oldEvent: null,
         token: null,
+        source: "alt1",
     };
 
     try {
