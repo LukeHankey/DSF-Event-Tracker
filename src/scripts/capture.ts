@@ -277,7 +277,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     // Highlight the main chatbox
     if (!mainboxRect) {
-        const { x, y, width, height } = chatbox.pos!.mainbox.rect;
+        const mainbox = chatbox.pos!.mainbox
+        const { x, y, width, height } = mainbox.rect;
         alt1.overLayRect(
             a1lib.mixColor(255, 0, 0),
             x,
@@ -285,9 +286,37 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             width,
             height,
             2000,
-            3,
+            1,
         );
         mainboxRect = true;
+
+        const rsnRect = {
+            x: mainbox.rect.x,
+            y: mainbox.botleft.y -10,
+            width: mainbox.botleft.x - mainbox.rect.x,
+            height: 23
+        }
+
+        const buffer = img.toData()
+        let chr = OCR.findChar(buffer, font, [255, 255, 255], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height)
+        let data;
+        // Lifeguard title
+        if (["e", "g", "u"].includes(chr!.chr) && chr!.x === rsnRect.x + 25) {
+            data = OCR.findReadLine(buffer, font, [[255, 255, 255]], rsnRect.x + 50, rsnRect.y, rsnRect.width, rsnRect.height)
+        }
+        else {
+            data = OCR.findReadLine(buffer, font, [[255, 255, 255]], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height)
+        }
+        const valkTitle = "of the Valkyrie"
+        if (data.text.includes("of the Valkyrie")) data.text.replace(valkTitle, "")
+
+        if (data.text !== "") {
+            alt1.overLayRect(a1lib.mixColor(0, 255, 0), data.debugArea.x, data.debugArea.y, data.debugArea.w, data.debugArea.h, 2000, 1)
+            console.log(`Captured RSN: ${data.text}`)
+        } else {
+            console.log("Failed to capture RSN")
+        }
+
 
         // Get current world when alt1 app first loads
         currentWorld =
