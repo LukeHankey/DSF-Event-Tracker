@@ -337,8 +337,14 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines =
-        (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
+    let lines = []
+    try {
+        lines =
+            (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
+    } catch (err) {
+        // TypeError: Cannot read property 'width' of null
+        return
+    }
 
     worldHopMessage = lines.some((line) =>
         line.text.includes("Attempting to switch worlds..."),
