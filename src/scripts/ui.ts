@@ -4,6 +4,7 @@ import {
     renderEventHistory,
     clearEventHistory,
     updateHideExpiredRows,
+    MEMBER_WORLDS,
 } from "./eventHistory";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient } from "./ws";
@@ -330,7 +331,7 @@ if (testEventButton && DEBUG) {
         // Get user-selected event
         const selectedEvent = (eventSelect.value as EventKeys) || "Testing";
         const eventDuration = eventTimes[selectedEvent] ?? 15; // Default to 15 if not found
-        const randomWorld = String(Math.floor(Math.random() * 150) + 1);
+        const randomWorld = MEMBER_WORLDS[Math.floor(Math.random() * MEMBER_WORLDS.length)];
 
         const testEvent: EventRecord = {
             id: uuid(),

@@ -12,7 +12,7 @@ export const rowMap = new Map<UUIDTypes, HTMLTableRowElement>();
 // Local refresh interval for timer updates.
 let refreshInterval: NodeJS.Timeout | null = null;
 
-const MEMBER_WORLDS = [
+export const MEMBER_WORLDS = [
     "1",
     "2",
     "4",
