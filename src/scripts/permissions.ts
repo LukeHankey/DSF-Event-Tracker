@@ -1,3 +1,5 @@
+import { EventRecord } from "./events";
+
 interface AccessToken {
     discord_id: string;
     role_ids: string[];
@@ -11,6 +13,12 @@ interface RefreshToken {
     exp: number;
     iat: number;
     type: "refresh";
+}
+
+export interface ExpiredTokenRecord {
+    error: string;
+    type: "refresh_token";
+    event_data: EventRecord;
 }
 
 export type Token = AccessToken | RefreshToken;
@@ -31,15 +39,7 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
     if (!token) return false;
 
     const decodedToken = decodeJWT(token);
-    console.log(decodedToken, requiredRoles);
-    if (
-        !decodedToken ||
-        decodedToken.type !== "access" ||
-        !decodedToken.role_ids
-    )
-        return false;
+    if (!decodedToken || decodedToken.type !== "access" || !decodedToken.role_ids) return false;
 
-    return decodedToken.role_ids.some((roleId: string) =>
-        requiredRoles.includes(roleId),
-    );
+    return decodedToken.role_ids.some((roleId: string) => requiredRoles.includes(roleId));
 }

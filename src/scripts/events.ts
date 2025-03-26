@@ -87,11 +87,18 @@ export const events: Events = {
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary...",
     ],
-    Testing: [
-        "1",
-        "Test",
-        "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123",
-    ],
+    Testing: ["1", "Test", "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
+};
+
+export const eventExpiredText: Events = {
+    "Travelling merchant": ["The travelling merchant has departed..."],
+    Jellyfish: ["The giant jellyfish has departed..."],
+    Arkaneo: ["The sailfish, Arkaneo, has departed..."],
+    "Sea Monster": ["The sea monster has departed..."],
+    "Treasure Turtle": ["The treasure turtle has departed..."],
+    Whale: ["The whale has departed..."],
+    Whirlpool: ["The whirlpool has disappeared..."],
+    Testing: ["test"],
 };
 
 export const firstEventTexts = Object.values(events).map((texts) => texts[0]);
@@ -113,11 +120,12 @@ export const eventTimes: EventTimes = {
 export interface EventRecord {
     id: UUIDTypes;
     type: EventRecordTypes;
-    event: string;
+    event: EventKeys;
     world: string;
     duration: number; // in seconds, or you can use a string if you prefer
     reportedBy: string;
     timestamp: number; // ISO string or any format you like
     oldEvent: EventRecord | null;
     token: string | null;
+    source: "alt1" | "discord";
 }

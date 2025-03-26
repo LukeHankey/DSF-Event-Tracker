@@ -11,6 +11,8 @@
         "strictFunctionTypes": true,
         "strictPropertyInitialization": true,
         "noImplicitThis": true,
-        "alwaysStrict": true
+        "alwaysStrict": true,
+        "target": "ES2017",
+        "downlevelIteration": true
     }
 }
