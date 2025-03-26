@@ -20,17 +20,13 @@ const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
 tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
         // Remove active state from the currently active tab
-        const activeTab = document.querySelector<HTMLElement>(
-            ".tabs__tab.tabs__tab--active",
-        );
+        const activeTab = document.querySelector<HTMLElement>(".tabs__tab.tabs__tab--active");
         if (activeTab) {
             activeTab.classList.remove("tabs__tab--active");
         }
 
         // Remove active state from the currently active content
-        const activeContent = document.querySelector<HTMLElement>(
-            ".tabs__content.tabs__content--active",
-        );
+        const activeContent = document.querySelector<HTMLElement>(".tabs__content.tabs__content--active");
         if (activeContent) {
             activeContent.classList.remove("tabs__content--active");
         }
@@ -52,14 +48,8 @@ tabs.forEach((tab) => {
             } else {
                 if (targetElement) {
                     // If Scouts is active, check the currently active sub-tab.
-                    const activeSubTab = targetElement.querySelector(
-                        ".sub-tab.sub-tab--active",
-                    );
-                    if (
-                        activeSubTab &&
-                        activeSubTab.getAttribute("data-subtab") ===
-                            "eventHistoryTab"
-                    ) {
+                    const activeSubTab = targetElement.querySelector(".sub-tab.sub-tab--active");
+                    if (activeSubTab && activeSubTab.getAttribute("data-subtab") === "eventHistoryTab") {
                         startEventTimerRefresh();
                     } else {
                         stopEventTimerRefresh();
@@ -72,18 +62,12 @@ tabs.forEach((tab) => {
 
 // Query the status tab and notification
 const statusTab = document.querySelector<HTMLElement>('[data-tab="statusTab"]');
-const statusNotification = document.getElementById(
-    "statusNotification",
-) as HTMLElement | null;
+const statusNotification = document.getElementById("statusNotification") as HTMLElement | null;
 
 // Function to update status dynamically using new BEM classes for status
 function updateStatus(status: StatusType): void {
-    const statusMessage = document.getElementById(
-        "statusMessage",
-    ) as HTMLElement | null;
-    const statusIcon = document.getElementById(
-        "statusIcon",
-    ) as HTMLElement | null;
+    const statusMessage = document.getElementById("statusMessage") as HTMLElement | null;
+    const statusIcon = document.getElementById("statusIcon") as HTMLElement | null;
     if (!statusMessage || !statusIcon) return;
 
     // Set base class for the status icon
@@ -105,11 +89,7 @@ function updateStatus(status: StatusType): void {
     }
 
     // Show notification dot if not already on the Status tab
-    if (
-        statusTab &&
-        !statusTab.classList.contains("tabs__tab--active") &&
-        statusNotification
-    ) {
+    if (statusTab && !statusTab.classList.contains("tabs__tab--active") && statusNotification) {
         statusNotification.style.display = "inline-block";
     }
 }
@@ -128,9 +108,7 @@ setTimeout(() => {
 }, 5000);
 
 // Load settings from localStorage, if available
-const discordIDInput = document.getElementById(
-    "discordID",
-) as HTMLInputElement | null;
+const discordIDInput = document.getElementById("discordID") as HTMLInputElement | null;
 const savedDiscordID = localStorage.getItem("discordID");
 if (discordIDInput && savedDiscordID) {
     discordIDInput.value = savedDiscordID;
@@ -142,17 +120,13 @@ if (rsnInput && savedRSN) {
     rsnInput.value = savedRSN;
 }
 
-const captureFrequency = document.getElementById(
-    "captureFrequency",
-) as HTMLInputElement | null;
+const captureFrequency = document.getElementById("captureFrequency") as HTMLInputElement | null;
 const savedCaptureFrequency = localStorage.getItem("captureFrequency");
 if (captureFrequency && savedCaptureFrequency) {
     captureFrequency.value = savedCaptureFrequency;
 }
 
-const favoriteEventsSelect = document.getElementById(
-    "favoriteEvents",
-) as HTMLSelectElement | null;
+const favoriteEventsSelect = document.getElementById("favoriteEvents") as HTMLSelectElement | null;
 const savedFavoriteEvents = localStorage.getItem("favoriteEvents");
 if (savedFavoriteEvents && favoriteEventsSelect) {
     const favorites: string[] = JSON.parse(savedFavoriteEvents);
@@ -162,9 +136,7 @@ if (savedFavoriteEvents && favoriteEventsSelect) {
     });
 }
 
-const favoriteEventsModeSelect = document.getElementById(
-    "favoriteEventsMode",
-) as HTMLSelectElement | null;
+const favoriteEventsModeSelect = document.getElementById("favoriteEventsMode") as HTMLSelectElement | null;
 const savedFavMode = localStorage.getItem("favoriteEventsMode");
 if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
@@ -174,15 +146,12 @@ function updateIfChanged(key: string, currentValue: string): void {
     const savedValue = localStorage.getItem(key);
     if (savedValue !== currentValue) {
         localStorage.setItem(key, currentValue);
-        if (key === "favoriteEventsMode" || key === "favoriteEvents")
-            renderEventHistory();
+        if (key === "favoriteEventsMode" || key === "favoriteEvents") renderEventHistory();
     }
 }
 
 // Handle settings form submission and save to localStorage
-const settingsForm = document.getElementById(
-    "settingsForm",
-) as HTMLFormElement | null;
+const settingsForm = document.getElementById("settingsForm") as HTMLFormElement | null;
 settingsForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     if (discordIDInput) {
@@ -196,9 +165,7 @@ settingsForm?.addEventListener("submit", (e) => {
     }
 
     if (favoriteEventsSelect) {
-        const selectedValues = Array.from(
-            favoriteEventsSelect.selectedOptions,
-        ).map((opt) => opt.value);
+        const selectedValues = Array.from(favoriteEventsSelect.selectedOptions).map((opt) => opt.value);
         updateIfChanged("favoriteEvents", JSON.stringify(selectedValues));
     }
 
@@ -210,103 +177,80 @@ settingsForm?.addEventListener("submit", (e) => {
     showToast("✅ Settings saved!");
 });
 
-document
-    .getElementById("validateDiscordID")
-    ?.addEventListener("click", async () => {
-        const discordID = (
-            document.getElementById("discordID") as HTMLInputElement
-        ).value;
-        const validationMessage = document.getElementById("validationMessage");
+document.getElementById("validateDiscordID")?.addEventListener("click", async () => {
+    const discordID = (document.getElementById("discordID") as HTMLInputElement).value;
+    const validationMessage = document.getElementById("validationMessage");
 
-        if (!discordID.match(/^\d{17,20}$/)) {
-            validationMessage!.textContent = "Invalid Discord ID format.";
-            validationMessage!.style.color = "red";
-            return;
+    if (!discordID.match(/^\d{17,20}$/)) {
+        validationMessage!.textContent = "Invalid Discord ID format.";
+        validationMessage!.style.color = "red";
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/auth/validate/${discordID}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Origin: ORIGIN,
+            },
+        });
+
+        if (response.status === 200 && response.data.exists) {
+            validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
+            validationMessage!.style.display = "block";
+            validationMessage!.style.color = "green";
+            updateIfChanged("discordID", discordID);
+            document.getElementById("verificationSection")!.style.display = "block";
         }
-
-        try {
-            const response = await axios.post(
-                `${API_URL}/auth/validate/${discordID}`,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Origin: ORIGIN,
-                    },
-                },
-            );
-
-            if (response.status === 200 && response.data.exists) {
-                validationMessage!.textContent =
-                    "✅ Run /alt1 verify in Discord.";
-                validationMessage!.style.display = "block";
-                validationMessage!.style.color = "green";
-                updateIfChanged("discordID", discordID);
-                document.getElementById("verificationSection")!.style.display =
-                    "block";
-            }
-        } catch (err) {
-            console.error("Error validating Discord ID:", err);
-            validationMessage!.textContent = "❌ Error validating Discord ID.";
-            validationMessage!.style.color = "red";
-        }
-    });
+    } catch (err) {
+        console.error("Error validating Discord ID:", err);
+        validationMessage!.textContent = "❌ Error validating Discord ID.";
+        validationMessage!.style.color = "red";
+    }
+});
 
 // Step 2: Handle verification code input
-document
-    .getElementById("submitVerificationCode")
-    ?.addEventListener("click", async () => {
-        const discordID = (
-            document.getElementById("discordID") as HTMLInputElement
-        ).value;
-        const verificationCode = (
-            document.getElementById("verificationCode") as HTMLInputElement
-        ).value;
-        const verificationSection = document.getElementById(
-            "verificationSection",
-        );
-        const verificationMessage = document.getElementById(
-            "verificationMessage",
-        );
+document.getElementById("submitVerificationCode")?.addEventListener("click", async () => {
+    const discordID = (document.getElementById("discordID") as HTMLInputElement).value;
+    const verificationCode = (document.getElementById("verificationCode") as HTMLInputElement).value;
+    const verificationSection = document.getElementById("verificationSection");
+    const verificationMessage = document.getElementById("verificationMessage");
 
-        const validationMessage = document.getElementById("validationMessage");
+    const validationMessage = document.getElementById("validationMessage");
 
-        if (!verificationCode.match(/^\d{8}$/)) {
-            verificationMessage!.textContent = "Invalid verification code.";
-            verificationMessage!.style.display = "block";
-            verificationMessage!.style.color = "red";
-            return;
-        }
+    if (!verificationCode.match(/^\d{8}$/)) {
+        verificationMessage!.textContent = "Invalid verification code.";
+        verificationMessage!.style.display = "block";
+        verificationMessage!.style.color = "red";
+        return;
+    }
 
-        const response = await axios.post(
-            `${API_URL}/auth/verify/${discordID}?code=${verificationCode}`,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Origin: ORIGIN,
-                },
-            },
-        );
-
-        if (response.data.verified && response.data.refresh_token) {
-            // Hide verification section
-            verificationSection!.style.display = "none";
-            validationMessage!.style.display = "none";
-            verificationMessage!.style.display = "none";
-
-            localStorage.setItem("refreshToken", response.data.refresh_token);
-            localStorage.setItem("accessToken", response.data.access_token);
-
-            // Update discord_id to websocket and load profile
-            wsClient.reconnect();
-
-            // Show success toast
-            showToast("✅ Verified successfully!");
-        } else {
-            verificationMessage!.textContent =
-                "❌ Incorrect verification code.";
-            verificationMessage!.style.color = "red";
-        }
+    const response = await axios.post(`${API_URL}/auth/verify/${discordID}?code=${verificationCode}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Origin: ORIGIN,
+        },
     });
+
+    if (response.data.verified && response.data.refresh_token) {
+        // Hide verification section
+        verificationSection!.style.display = "none";
+        validationMessage!.style.display = "none";
+        verificationMessage!.style.display = "none";
+
+        localStorage.setItem("refreshToken", response.data.refresh_token);
+        localStorage.setItem("accessToken", response.data.access_token);
+
+        // Update discord_id to websocket and load profile
+        wsClient.reconnect();
+
+        // Show success toast
+        showToast("✅ Verified successfully!");
+    } else {
+        verificationMessage!.textContent = "❌ Incorrect verification code.";
+        verificationMessage!.style.color = "red";
+    }
+});
 
 // Sub-tab switching inside #scoutsTab
 const sub_tabs = document.querySelectorAll<HTMLElement>(".sub-tab");
@@ -319,9 +263,7 @@ sub_tabs.forEach((subTab) => {
         }
 
         // Hide the currently active sub-tab-content
-        const activeContent = document.querySelector(
-            ".sub-tab__content.sub-tab__content--active",
-        );
+        const activeContent = document.querySelector(".sub-tab__content.sub-tab__content--active");
         if (activeContent) {
             activeContent.classList.remove("sub-tab__content--active");
         }
@@ -338,38 +280,30 @@ sub_tabs.forEach((subTab) => {
 
         // If the event history sub-tab is active, start the timer, otherwise stop it.
         if (targetId === "eventHistoryTab") {
-            document.getElementById("eventHistoryWrapper")!.style.display =
-                "flex";
+            document.getElementById("eventHistoryWrapper")!.style.display = "flex";
             startEventTimerRefresh();
         } else {
-            document.getElementById("eventHistoryWrapper")!.style.display =
-                "none";
+            document.getElementById("eventHistoryWrapper")!.style.display = "none";
             stopEventTimerRefresh();
         }
     });
 });
 
-const hideExpiredCheckbox = document.getElementById(
-    "hideExpiredCheckbox",
-) as HTMLInputElement | null;
+const hideExpiredCheckbox = document.getElementById("hideExpiredCheckbox") as HTMLInputElement | null;
 if (hideExpiredCheckbox) {
     hideExpiredCheckbox.addEventListener("change", () => {
         updateHideExpiredRows();
     });
 }
 
-const clearAllBtn = document.getElementById(
-    "clearHistoryBtn",
-) as HTMLButtonElement | null;
+const clearAllBtn = document.getElementById("clearHistoryBtn") as HTMLButtonElement | null;
 if (clearAllBtn) {
     clearAllBtn.addEventListener("click", () => clearEventHistory());
 }
 
 // When you click the test button, emit the "updateEventHistory" event with your payload.
 const testEventButton = document.getElementById("testWS");
-const eventSelect = document.getElementById(
-    "testEventSelect",
-) as HTMLSelectElement; // Dropdown for event selection
+const eventSelect = document.getElementById("testEventSelect") as HTMLSelectElement; // Dropdown for event selection
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const eventHistory = localStorage.getItem("eventHistory");
@@ -385,14 +319,9 @@ if (testEventButton && DEBUG) {
                 oldEvent: null,
                 token: null,
             };
-            localStorage.setItem(
-                "eventHistory",
-                JSON.stringify([addTestEvent]),
-            );
+            localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
-        const lastEvent = JSON.parse(
-            localStorage.getItem("eventHistory")!,
-        ).slice(-1)[0] as EventRecord;
+        const lastEvent = JSON.parse(localStorage.getItem("eventHistory")!).slice(-1)[0] as EventRecord;
         const lastEventTimestamp = lastEvent?.timestamp || 0;
         const lastEventId = lastEvent?.id;
         wsClient.sendSync(lastEventTimestamp, lastEventId);
@@ -419,9 +348,7 @@ if (testEventButton && DEBUG) {
 }
 
 function populateEventDropdown() {
-    const eventSelect = document.getElementById(
-        "testEventSelect",
-    ) as HTMLSelectElement;
+    const eventSelect = document.getElementById("testEventSelect") as HTMLSelectElement;
     if (!eventSelect) return;
 
     Object.entries(eventTimes).forEach(([eventName, duration]) => {

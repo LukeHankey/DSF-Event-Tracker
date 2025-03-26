@@ -39,14 +39,7 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
     if (!token) return false;
 
     const decodedToken = decodeJWT(token);
-    if (
-        !decodedToken ||
-        decodedToken.type !== "access" ||
-        !decodedToken.role_ids
-    )
-        return false;
+    if (!decodedToken || decodedToken.type !== "access" || !decodedToken.role_ids) return false;
 
-    return decodedToken.role_ids.some((roleId: string) =>
-        requiredRoles.includes(roleId),
-    );
+    return decodedToken.role_ids.some((roleId: string) => requiredRoles.includes(roleId));
 }

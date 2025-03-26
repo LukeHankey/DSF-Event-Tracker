@@ -129,9 +129,7 @@ export function updateTableRowCells(
         newStyle?: Partial<CSSStyleDeclaration>;
     }[],
 ): void {
-    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter(
-        (e) => DEBUG || e !== "Testing",
-    );
+    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter((e) => DEBUG || e !== "Testing");
     updates.forEach((update) => {
         const cell = row.cells[update.cellIndex];
         if (!cell) return;
@@ -180,9 +178,7 @@ export function updateTableRowCells(
 }
 
 export function updateHideExpiredRows(): void {
-    const hideExpiredCheckbox = document.getElementById(
-        "hideExpiredCheckbox",
-    ) as HTMLInputElement | null;
+    const hideExpiredCheckbox = document.getElementById("hideExpiredCheckbox") as HTMLInputElement | null;
     if (!hideExpiredCheckbox) return;
     const hideExpired = hideExpiredCheckbox.checked;
     const tbody = document.getElementById("eventHistoryBody");
@@ -201,10 +197,7 @@ export function updateHideExpiredRows(): void {
     }
 }
 
-const sortPinnedEvents = (
-    activeEvents: EventRecord[],
-    favouriteEvents: EventKeys[],
-): EventRecord[] => {
+const sortPinnedEvents = (activeEvents: EventRecord[], favouriteEvents: EventKeys[]): EventRecord[] => {
     return activeEvents.sort((x, y) => {
         const xPriority = favouriteEvents.includes(x.event);
         const yPriority = favouriteEvents.includes(y.event);
@@ -224,17 +217,13 @@ export function renderEventHistory(): void {
 
     const now = Date.now();
     const savedFavourites = localStorage.getItem("favoriteEvents");
-    const favouriteEvents = savedFavourites
-        ? (JSON.parse(savedFavourites) as EventKeys[])
-        : [];
+    const favouriteEvents = savedFavourites ? (JSON.parse(savedFavourites) as EventKeys[]) : [];
 
     const favMode = localStorage.getItem("favoriteEventsMode") || "none";
 
     let eventsToRender = eventHistory.slice();
     if (favMode === "only") {
-        eventsToRender = eventsToRender.filter((event) =>
-            favouriteEvents.includes(event.event),
-        );
+        eventsToRender = eventsToRender.filter((event) => favouriteEvents.includes(event.event));
     }
 
     let activeEvents: EventRecord[] = [];
@@ -258,17 +247,11 @@ export function renderEventHistory(): void {
     // On initial render, sort active events to the top of the table
     let sortedEvents = [...expiredEvents, ...activeEvents];
     if (favMode === "only") {
-        sortedEvents = sortedEvents.filter((event) =>
-            favouriteEvents.includes(event.event),
-        );
+        sortedEvents = sortedEvents.filter((event) => favouriteEvents.includes(event.event));
     }
 
-    const hideExpiredCheckbox = document.getElementById(
-        "hideExpiredCheckbox",
-    ) as HTMLInputElement | null;
-    const hideExpired = hideExpiredCheckbox
-        ? hideExpiredCheckbox.checked
-        : false;
+    const hideExpiredCheckbox = document.getElementById("hideExpiredCheckbox") as HTMLInputElement | null;
+    const hideExpired = hideExpiredCheckbox ? hideExpiredCheckbox.checked : false;
 
     sortedEvents.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
@@ -321,9 +304,7 @@ export function addNewEvent(newEvent: EventRecord): void {
 
     const favMode = localStorage.getItem("favoriteEventsMode") || "none";
     const savedFavourites = localStorage.getItem("favoriteEvents");
-    const favouriteEvents = savedFavourites
-        ? (JSON.parse(savedFavourites) as string[])
-        : [];
+    const favouriteEvents = savedFavourites ? (JSON.parse(savedFavourites) as string[]) : [];
 
     if (favMode === "only" && !favouriteEvents.includes(newEvent.event)) {
         return;
@@ -376,9 +357,7 @@ export function updateEventTimers(): void {
         const row = rowMap.get(event.id);
         if (row) {
             if (row && row.classList.contains("editing")) return;
-            updateTableRowCells(row, [
-                { cellIndex: 3, newContent: formatTimeLeftValue(remaining) },
-            ]);
+            updateTableRowCells(row, [{ cellIndex: 3, newContent: formatTimeLeftValue(remaining) }]);
         }
 
         if (remaining < 0) {
@@ -420,9 +399,7 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
     if (!row) return;
 
     // Find the first expired row (i.e. with "Expired" text in the time cell) among non-editing rows.
-    const rows = Array.from(
-        tbody.getElementsByTagName("tr"),
-    ) as HTMLTableRowElement[];
+    const rows = Array.from(tbody.getElementsByTagName("tr")) as HTMLTableRowElement[];
 
     let firstExpiredRow: HTMLTableRowElement | null = null;
     for (const r of rows) {
@@ -478,11 +455,7 @@ function restartRefreshInterval(): void {
     startEventTimerRefresh();
 }
 
-function appendEventRow(
-    event: EventRecord,
-    highlight: boolean = false,
-    pin: boolean = false,
-): void {
+function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boolean = false): void {
     const tbody = document.getElementById("eventHistoryBody");
     if (!tbody) return;
 
@@ -536,10 +509,7 @@ function appendEventRow(
     row.appendChild(buttonsTd);
 
     // Helper to create a cell with optional class.
-    const createCell = (
-        text: string,
-        className?: string,
-    ): HTMLTableCellElement => {
+    const createCell = (text: string, className?: string): HTMLTableCellElement => {
         const cell = document.createElement("td");
         cell.textContent = text;
         if (className) cell.className = className;
@@ -562,14 +532,10 @@ function appendEventRow(
 
     // Get saved favorites
     const savedFavourites = localStorage.getItem("favoriteEvents");
-    const favouriteEvents = savedFavourites
-        ? (JSON.parse(savedFavourites) as string[])
-        : [];
+    const favouriteEvents = savedFavourites ? (JSON.parse(savedFavourites) as string[]) : [];
 
     // Get all active event rows
-    const activeEventIds = eventHistory
-        .filter(checkActive)
-        .map((event) => event.id);
+    const activeEventIds = eventHistory.filter(checkActive).map((event) => event.id);
     const activeTableRows = activeEventIds
         .map((id) => rowMap.get(id))
         .filter((row) => row !== undefined) as HTMLTableRowElement[];
@@ -636,9 +602,7 @@ function checkActive(event: EventRecord): boolean {
 function editEvent(event: EventRecord): void {
     const row = rowMap.get(event.id);
     if (!row) return;
-    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter(
-        (e) => DEBUG || e !== "Testing",
-    );
+    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter((e) => DEBUG || e !== "Testing");
 
     if (!row.classList.contains("editing")) {
         row.classList.add("editing");
@@ -687,14 +651,10 @@ function editEvent(event: EventRecord): void {
         });
 
         const unchanged =
-            row.cells[1].textContent?.trim() ===
-                row.dataset.originalEvent?.trim() &&
-            row.cells[2].textContent?.trim() ===
-                row.dataset.originalWorld?.trim() &&
-            row.cells[3].textContent?.trim() ===
-                row.dataset.originalDuration?.trim() &&
-            row.cells[4].textContent?.trim() ===
-                row.dataset.originalReportedBy?.trim();
+            row.cells[1].textContent?.trim() === row.dataset.originalEvent?.trim() &&
+            row.cells[2].textContent?.trim() === row.dataset.originalWorld?.trim() &&
+            row.cells[3].textContent?.trim() === row.dataset.originalDuration?.trim() &&
+            row.cells[4].textContent?.trim() === row.dataset.originalReportedBy?.trim();
 
         if (unchanged) return;
 
@@ -712,14 +672,9 @@ function editEvent(event: EventRecord): void {
         // Note: if the duration cell wasn’t changed, we want to keep the original duration value.
         const newDurationText = row.cells[3].textContent?.trim() || "";
         const newDuration =
-            newDurationText === row.dataset.originalDuration?.trim()
-                ? event.duration
-                : parseDuration(newDurationText);
+            newDurationText === row.dataset.originalDuration?.trim() ? event.duration : parseDuration(newDurationText);
 
-        const newTimestamp =
-            newDurationText === row.dataset.originalDuration?.trim()
-                ? event.timestamp
-                : Date.now();
+        const newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
 
         const token = localStorage.getItem("accessToken");
         const updatedEvent: EventRecord = {
@@ -736,9 +691,7 @@ function editEvent(event: EventRecord): void {
 
         rowMap.set(event.id, row);
 
-        const idx = eventHistory.findIndex(
-            (e) => checkActive(e) && e.id === event.id,
-        );
+        const idx = eventHistory.findIndex((e) => checkActive(e) && e.id === event.id);
         if (idx !== -1) {
             eventHistory[idx] = updatedEvent;
             saveEventHistory();

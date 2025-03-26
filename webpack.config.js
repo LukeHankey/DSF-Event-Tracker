@@ -27,9 +27,7 @@ module.exports = {
     },
     plugins: [
         new DefinePlugin({
-            "process.env.WEBHOOK_CHANNEL": JSON.stringify(
-                process.env.WEBHOOK_CHANNEL,
-            ),
+            "process.env.WEBHOOK_CHANNEL": JSON.stringify(process.env.WEBHOOK_CHANNEL),
         }),
     ],
     module: {

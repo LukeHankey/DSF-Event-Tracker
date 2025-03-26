@@ -1,8 +1,5 @@
 // Function to show toast notification using new BEM modifier for "show"
-export function showToast(
-    message: string,
-    type: "error" | "success" = "success",
-): void {
+export function showToast(message: string, type: "error" | "success" = "success"): void {
     const toast = document.createElement("div");
     toast.classList.add("toast");
     if (type === "error") {

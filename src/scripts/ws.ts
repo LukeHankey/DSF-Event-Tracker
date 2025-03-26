@@ -4,17 +4,9 @@ import { DEBUG, ORIGIN, API_URL } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
-import {
-    updateProfileCounters,
-    ProfileRecord,
-    getEventCountData,
-} from "./profile";
+import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
 
-type ReceivedData =
-    | EventRecord
-    | ProfileRecord
-    | ExpiredTokenRecord
-    | EventRecord[];
+type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[];
 
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
@@ -39,11 +31,7 @@ console.warn = (...args: unknown[]) => {
 };
 
 const prepareLog = (args: unknown[]): string => {
-    return args
-        .map((arg) =>
-            typeof arg === "object" ? JSON.stringify(arg) : String(arg),
-        )
-        .join(" ");
+    return args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ");
 };
 
 async function refreshToken(): Promise<string | null> {
@@ -55,24 +43,19 @@ async function refreshToken(): Promise<string | null> {
     }
 
     try {
-        const response = await axios.post(
-            `${API_URL}/auth/refresh?token=${refreshToken}`,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Origin: ORIGIN,
-                },
+        const response = await axios.post(`${API_URL}/auth/refresh?token=${refreshToken}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Origin: ORIGIN,
             },
-        );
+        });
 
         if (response.data.access_token) {
             console.log("🔄 Token refreshed successfully");
             localStorage.setItem("accessToken", response.data.access_token);
             return response.data.access_token; // ✅ Return new token for immediate use
         } else {
-            console.error(
-                "⚠️ Failed to refresh token, user must re-authenticate.",
-            );
+            console.error("⚠️ Failed to refresh token, user must re-authenticate.");
             return null;
         }
     } catch (error) {
@@ -120,9 +103,7 @@ export class WebSocketClient {
         this.socket.onopen = async () => {
             console.log("✅ Connected to WebSocket!");
             // Send a SYNC message with the last known event timestamp
-            const lastEvent = JSON.parse(
-                localStorage.getItem("eventHistory") ?? "[]",
-            ).slice(-1)[0] as EventRecord;
+            const lastEvent = JSON.parse(localStorage.getItem("eventHistory") ?? "[]").slice(-1)[0] as EventRecord;
             const lastEventTimestamp = lastEvent?.timestamp;
             const lastEventId = lastEvent?.id || uuid();
             const lastTimestamp = lastEventTimestamp || 0;
@@ -145,9 +126,7 @@ export class WebSocketClient {
         };
 
         this.socket.onclose = (event) => {
-            console.log(
-                `❌ WebSocket Disconnected (code: ${event.code}, reason: ${event.reason})`,
-            );
+            console.log(`❌ WebSocket Disconnected (code: ${event.code}, reason: ${event.reason})`);
             this.reconnect();
         };
     }
@@ -165,9 +144,7 @@ export class WebSocketClient {
 
                     const newToken = await refreshToken();
                     if (newToken && parsedData.event_data) {
-                        console.log(
-                            "🔄 Resending event after token refresh...",
-                        );
+                        console.log("🔄 Resending event after token refresh...");
                         parsedData.event_data.token = newToken; // ✅ Update the token
                         this.send(parsedData.event_data as EventRecord); // ✅ Resend the event
                         console.log("✅ Event sent successfully");
@@ -196,10 +173,7 @@ export class WebSocketClient {
         }
     }
 
-    sendSync(
-        lastEventTimestamp: number,
-        lastEventId: UUIDTypes | undefined,
-    ): void {
+    sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const syncMessage = {
                 type: "SYNC",
@@ -208,9 +182,7 @@ export class WebSocketClient {
             };
             this.socket.send(JSON.stringify(syncMessage));
         } else {
-            console.warn(
-                "⚠️ WebSocket is not open. Unable to send SYNC message.",
-            );
+            console.warn("⚠️ WebSocket is not open. Unable to send SYNC message.");
         }
     }
 
@@ -224,17 +196,12 @@ export class WebSocketClient {
 
     reconnect(): void {
         console.log("🔄 Reconnecting WebSocket in 5 seconds...");
-        this.url = this.url.replace(
-            /discord_id=[^&\s]*/,
-            `discord_id=${this.discordID}`,
-        );
+        this.url = this.url.replace(/discord_id=[^&\s]*/, `discord_id=${this.discordID}`);
         setTimeout(() => this.connect(), 5000);
     }
 }
 
 export const wsClient = new WebSocketClient(
-    DEBUG
-        ? "ws://localhost:8000/ws?room=development"
-        : "wss://ws.dsfeventtracker.com/ws?room=production",
+    DEBUG ? "ws://localhost:8000/ws?room=development" : "wss://ws.dsfeventtracker.com/ws?room=production",
 );
 wsClient.connect();

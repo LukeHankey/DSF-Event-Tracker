@@ -52,48 +52,32 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     };
 
     // ✅ Get previous stored values or initialize them
-    let merchant =
-        lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
-    let alt1Merchant =
-        lastKnownCounts["alt1.merchantCount"] ??
-        extractFirstNumber(alt1MerchantEl?.textContent);
-    let other =
-        lastKnownCounts["otherCount"] ??
-        extractFirstNumber(otherEl?.textContent);
-    let alt1Other =
-        lastKnownCounts["alt1.otherCount"] ??
-        extractFirstNumber(alt1OtherEl?.textContent);
+    let merchant = lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
+    let alt1Merchant = lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
+    let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
+    let alt1Other = lastKnownCounts["alt1.otherCount"] ?? extractFirstNumber(alt1OtherEl?.textContent);
 
     let alt1MerchantFirst =
-        lastKnownCounts["alt1First.merchantCount"] ??
-        extractFirstNumber(alt1MerchantFirstEl?.textContent);
-    let alt1OtherFirst =
-        lastKnownCounts["alt1First.otherCount"] ??
-        extractFirstNumber(alt1OtherFirstEl?.textContent);
+        lastKnownCounts["alt1First.merchantCount"] ?? extractFirstNumber(alt1MerchantFirstEl?.textContent);
+    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? extractFirstNumber(alt1OtherFirstEl?.textContent);
 
     // ✅ Update values correctly (only add the difference)
     if (updateFields["count"] !== undefined) {
-        const diff =
-            updateFields["count"] - (lastKnownCounts["count"] ?? merchant);
+        const diff = updateFields["count"] - (lastKnownCounts["count"] ?? merchant);
         merchant += diff;
         lastKnownCounts["count"] = updateFields["count"];
         merchantEl.textContent = merchant.toString();
     }
     if (updateFields["alt1.merchantCount"] !== undefined) {
-        const diff =
-            updateFields["alt1.merchantCount"] -
-            (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
+        const diff = updateFields["alt1.merchantCount"] - (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
         alt1Merchant += diff;
-        lastKnownCounts["alt1.merchantCount"] =
-            updateFields["alt1.merchantCount"];
+        lastKnownCounts["alt1.merchantCount"] = updateFields["alt1.merchantCount"];
     }
     if (updateFields["alt1First.merchantCount"] !== undefined) {
         const diff =
-            updateFields["alt1First.merchantCount"] -
-            (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
+            updateFields["alt1First.merchantCount"] - (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
         alt1MerchantFirst += diff;
-        lastKnownCounts["alt1First.merchantCount"] =
-            updateFields["alt1First.merchantCount"];
+        lastKnownCounts["alt1First.merchantCount"] = updateFields["alt1First.merchantCount"];
     }
 
     // ✅ Now Alt1 Merchant includes First Found count
@@ -101,27 +85,20 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     alt1MerchantEl.textContent = `${totalAlt1Merchant} (First: ${alt1MerchantFirst})`;
 
     if (updateFields["otherCount"] !== undefined) {
-        const diff =
-            updateFields["otherCount"] -
-            (lastKnownCounts["otherCount"] ?? other);
+        const diff = updateFields["otherCount"] - (lastKnownCounts["otherCount"] ?? other);
         other += diff;
         lastKnownCounts["otherCount"] = updateFields["otherCount"];
         otherEl.textContent = other.toString();
     }
     if (updateFields["alt1.otherCount"] !== undefined) {
-        const diff =
-            updateFields["alt1.otherCount"] -
-            (lastKnownCounts["alt1.otherCount"] ?? alt1Other);
+        const diff = updateFields["alt1.otherCount"] - (lastKnownCounts["alt1.otherCount"] ?? alt1Other);
         alt1Other += diff;
         lastKnownCounts["alt1.otherCount"] = updateFields["alt1.otherCount"];
     }
     if (updateFields["alt1First.otherCount"] !== undefined) {
-        const diff =
-            updateFields["alt1First.otherCount"] -
-            (lastKnownCounts["alt1First.otherCount"] ?? alt1OtherFirst);
+        const diff = updateFields["alt1First.otherCount"] - (lastKnownCounts["alt1First.otherCount"] ?? alt1OtherFirst);
         alt1OtherFirst += diff;
-        lastKnownCounts["alt1First.otherCount"] =
-            updateFields["alt1First.otherCount"];
+        lastKnownCounts["alt1First.otherCount"] = updateFields["alt1First.otherCount"];
     }
 
     // ✅ Now Alt1 Other includes First Found count
@@ -247,9 +224,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
     const achievedRoles = new Set<string>();
     const unlockedRoles = new Set<string>();
 
-    const roleOrder = new Map(
-        ROLE_DATA.map((role, index) => [role.role_id, index]),
-    );
+    const roleOrder = new Map(ROLE_DATA.map((role, index) => [role.role_id, index]));
 
     // ✅ Sort role_ids based on their position in ROLE_DATA
     const sortedRoleIds = decodedToken.role_ids.sort((a, b) => {
@@ -261,10 +236,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
         if (!role) return;
 
         // ✅ Ensure required roles are already achieved before showing this role
-        if (
-            role.require &&
-            !role.require.every((req) => achievedRoles.has(req))
-        ) {
+        if (role.require && !role.require.every((req) => achievedRoles.has(req))) {
             return; // If any required role is missing, skip this role
         }
 
@@ -273,10 +245,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
         // If role has a progress bar, add it
         if (role.achievable) {
             const userEventCount = userEventCounts[role.type_of_event] || 0; // Get user's progress
-            const progressPercentage = Math.min(
-                (userEventCount / role.num_of_event) * 100,
-                100,
-            ); // Cap at 100%
+            const progressPercentage = Math.min((userEventCount / role.num_of_event) * 100, 100); // Cap at 100%
 
             // Create progress bar
             const progressWrapper = document.createElement("div");

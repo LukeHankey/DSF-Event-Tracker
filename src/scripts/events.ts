@@ -87,11 +87,7 @@ export const events: Events = {
         "That's one big whirlpool!",
         "I nearly fell in before, that was scary...",
     ],
-    Testing: [
-        "1",
-        "Test",
-        "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123",
-    ],
+    Testing: ["1", "Test", "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
 };
 
 export const eventExpiredText: Events = {
