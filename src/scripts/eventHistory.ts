@@ -338,10 +338,9 @@ export function addNewEvent(newEvent: EventRecord): void {
     restartRefreshInterval();
 }
 
+let eventNotFound = true;
 export function updateEvent(event: EventRecord): void {
-    const idx = eventHistory.findIndex(
-        (e) => checkActive(e) && e.id === event.id,
-    );
+    const idx = eventHistory.findIndex((e) => checkActive(e) && e.id === event.id);
     if (idx !== -1) {
         eventHistory[idx] = event; // Update the event in the history.
         saveEventHistory(); // Save the updated event history.
@@ -358,8 +357,12 @@ export function updateEvent(event: EventRecord): void {
         }
         restartRefreshInterval();
     } else {
-        addNewEvent(event.oldEvent!);
-        updateEvent(event);
+        if (eventNotFound) {
+            eventNotFound = false;
+            addNewEvent(event.oldEvent!);
+            updateEvent(event);
+        }
+        eventNotFound = true;
     }
 }
 
