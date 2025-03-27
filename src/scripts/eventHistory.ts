@@ -1,5 +1,5 @@
 import { UUIDTypes } from "uuid";
-import { EventRecord, EventKeys, events } from "./events";
+import { EventRecord, EventKeys, events, eventTimes } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
 import { userHasRequiredRole } from "./permissions";
@@ -690,16 +690,28 @@ function editEvent(event: EventRecord): void {
 
         // Note: if the duration cell wasn’t changed, we want to keep the original duration value.
         const newDurationText = row.cells[3].textContent?.trim() || "";
-        const newDuration =
+        let newDuration =
             newDurationText === row.dataset.originalDuration?.trim() ? event.duration : parseDuration(newDurationText);
 
-        const newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
+        let newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
+        if (newDuration > eventTimes[eventName] && eventName !== event.event) {
+            newDuration = eventTimes[eventName];
+            newTimestamp = Date.now();
+        } else if (newDuration > eventTimes[eventName] && eventName === event.event) {
+            row.cells[1].textContent = row.dataset.originalEvent ?? "";
+            row.cells[2].textContent = row.dataset.originalWorld ?? "";
+            row.cells[3].textContent = row.dataset.originalDuration ?? "";
+            if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
+
+            showToast("❌ Time left cannot be longer than a fresh spawn!", "error");
+            return;
+        }
 
         const token = localStorage.getItem("accessToken");
         const updatedEvent: EventRecord = {
             id: event.id,
             type: "editEvent",
-            event: row.cells[1].textContent?.trim() as EventKeys,
+            event: eventName,
             world: newWorld,
             duration: newDuration,
             reportedBy: row.cells[4].textContent?.trim() || "",
