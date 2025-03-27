@@ -535,17 +535,17 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     row.appendChild(buttonsTd);
 
     // Helper to create a cell with optional class.
-    const createCell = (text: string, className?: string): HTMLTableCellElement => {
-        const cell = document.createElement("td");
+    const createElement = (text: string, className?: string, element: string = "td"): HTMLElement => {
+        const cell = document.createElement(element);
         cell.textContent = text;
         if (className) cell.className = className;
         return cell;
     };
 
     // Create cells for event, world, time left, and reportedBy.
-    row.appendChild(createCell(event.event));
-    row.appendChild(createCell(event.world));
-    row.appendChild(createCell(formatTimeLeft(event), "time-left"));
+    row.appendChild(createElement(event.event));
+    row.appendChild(createElement(event.world));
+    row.appendChild(createElement(formatTimeLeft(event), "time-left"));
 
     const reportedByCell = document.createElement("td");
 
@@ -562,7 +562,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     reportedByCell.appendChild(icon);
 
     // Append the reportedBy text after the icon.
-    reportedByCell.appendChild(document.createTextNode(event.reportedBy || "Unknown"));
+    reportedByCell.appendChild(createElement(event.reportedBy || "Unknown", "reported-by-text", "span"));
 
     // Finally, add this cell to the row.
     row.appendChild(reportedByCell);
