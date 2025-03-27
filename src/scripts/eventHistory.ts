@@ -124,7 +124,7 @@ export function updateTableRowCells(
     row: HTMLTableRowElement,
     updates: {
         cellIndex: number;
-        newContent?: string;
+        newContent: string;
         newClass?: string;
         newStyle?: Partial<CSSStyleDeclaration>;
     }[],
@@ -165,14 +165,39 @@ export function updateTableRowCells(
             });
         }
 
-        if (update.newContent !== undefined) {
+        if (update.cellIndex === 4) {
+            // Special handling for the reportedBy cell.
+            // Check for an existing icon.
+            let icon = cell.querySelector("img");
+            if (!icon) {
+                icon = document.createElement("img");
+                icon.style.marginRight = "5px"; // Adjust spacing as needed.
+                icon.src = "./Alt1_icon.png";
+                icon.alt = "Alt1";
+                if (update.newContent === "discord") {
+                    icon.src = "./Discord_icon.png";
+                    icon.alt = "Discord";
+                }
+                // Insert the icon at the beginning of the cell.
+                cell.insertBefore(icon, cell.firstChild);
+            } else {
+                // Now update the RSN text in a span.
+                let textSpan = cell.querySelector("span.reported-by-text");
+                if (!textSpan) {
+                    textSpan = document.createElement("span");
+                    textSpan.className = "reported-by-text";
+                    cell.appendChild(textSpan);
+                }
+                textSpan.textContent = update.newContent || "Unknown";
+            }
+        } else {
             cell.textContent = update.newContent;
-        }
-        if (update.newClass !== undefined) {
-            cell.className = update.newClass;
-        }
-        if (update.newStyle !== undefined) {
-            Object.assign(cell.style, update.newStyle);
+            if (update.newClass !== undefined) {
+                cell.className = update.newClass;
+            }
+            if (update.newStyle !== undefined) {
+                Object.assign(cell.style, update.newStyle);
+            }
         }
     });
 }
@@ -333,6 +358,7 @@ export function updateEvent(event: EventRecord): void {
                 { cellIndex: 1, newContent: event.event },
                 { cellIndex: 2, newContent: event.world },
                 { cellIndex: 3, newContent: formatTimeLeft(event) },
+                { cellIndex: 4, newContent: event.source },
                 { cellIndex: 4, newContent: event.reportedBy },
             ]);
         }
@@ -669,20 +695,37 @@ function editEvent(event: EventRecord): void {
             }
         });
 
+        const textSpan = row.cells[4].querySelector(".reported-by-text");
         const unchanged =
             row.cells[1].textContent?.trim() === row.dataset.originalEvent?.trim() &&
             row.cells[2].textContent?.trim() === row.dataset.originalWorld?.trim() &&
             row.cells[3].textContent?.trim() === row.dataset.originalDuration?.trim() &&
             row.cells[4].textContent?.trim() === row.dataset.originalReportedBy?.trim();
 
-        if (unchanged) return;
+        if (unchanged) {
+            const iconMissing = !row.cells[4].querySelector("img");
+            if (iconMissing) {
+                let icon = document.createElement("img");
+                icon.style.marginRight = "5px"; // Adjust spacing as needed.
+                icon.src = "./Alt1_icon.png";
+                icon.alt = "Alt1";
+                if (event.source === "discord") {
+                    icon.src = "./Discord_icon.png";
+                    icon.alt = "Discord";
+                }
+                // Insert the icon at the beginning of the cell.
+                row.cells[4].insertBefore(icon, row.cells[4].firstChild);
+            }
+            return;
+        }
+        const eventName = row.cells[1].textContent?.trim() as EventKeys;
 
         const newWorld = row.cells[2].textContent?.trim() || "";
         if (!MEMBER_WORLDS.includes(newWorld)) {
             row.cells[1].textContent = row.dataset.originalEvent ?? "";
             row.cells[2].textContent = row.dataset.originalWorld ?? "";
             row.cells[3].textContent = row.dataset.originalDuration ?? "";
-            row.cells[4].textContent = row.dataset.originalReportedBy ?? "";
+            if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
 
             showToast("❌ Invalid world number!", "error");
             return;
