@@ -793,12 +793,26 @@ function formatTimeLeftValue(seconds: number): string {
 }
 
 function parseDuration(durationStr: string): number {
-    const regex = /^(\d+)m\s(\d+)s$/;
+    const regex = /^\s*(?:(\d{1,2})\s*m\s*(\d{1,2})\s*s|(\d{1,3})\s*s|(\d{1,2}):(\d{1,2})|(\d{1,3}))\s*$/i;
     const match = durationStr.match(regex);
     if (!match) {
         throw new Error(`Invalid duration format: ${durationStr}`);
     }
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-    return minutes * 60 + seconds;
+
+    let totalSeconds = 0;
+    if (match[1] && match[2]) {
+        const minutes = parseInt(match[1], 10);
+        const seconds = parseInt(match[2], 10);
+        totalSeconds = minutes * 60 + seconds;
+    } else if (match[3]) {
+        totalSeconds = parseInt(match[3], 10);
+    } else if (match[4] && match[5]) {
+        const minutes = parseInt(match[4], 10);
+        const seconds = parseInt(match[5], 10);
+        totalSeconds = minutes * 60 + seconds;
+    } else if (match[6]) {
+        totalSeconds = parseInt(match[6], 10);
+    }
+
+    return totalSeconds;
 }
