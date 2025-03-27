@@ -18,7 +18,7 @@ export type Events = {
     [key in EventKeys]: string[];
 };
 
-type EventRecordTypes = "addEvent" | "editEvent" | "testing";
+type EventRecordTypes = "addEvent" | "editEvent";
 
 // Gold text for event arrival is at the start of each value array
 // Fisherman text is at the end of events, if any

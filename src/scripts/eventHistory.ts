@@ -1,5 +1,5 @@
 import { UUIDTypes } from "uuid";
-import { EventRecord, EventKeys, events } from "./events";
+import { EventRecord, EventKeys, events, eventTimes } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG } from "../config";
 import { userHasRequiredRole } from "./permissions";
@@ -124,7 +124,7 @@ export function updateTableRowCells(
     row: HTMLTableRowElement,
     updates: {
         cellIndex: number;
-        newContent?: string;
+        newContent: string;
         newClass?: string;
         newStyle?: Partial<CSSStyleDeclaration>;
     }[],
@@ -165,14 +165,39 @@ export function updateTableRowCells(
             });
         }
 
-        if (update.newContent !== undefined) {
+        if (update.cellIndex === 4) {
+            // Special handling for the reportedBy cell.
+            // Check for an existing icon.
+            let icon = cell.querySelector("img");
+            if (!icon) {
+                icon = document.createElement("img");
+                icon.style.marginRight = "5px"; // Adjust spacing as needed.
+                icon.src = "./Alt1_icon.png";
+                icon.alt = "Alt1";
+                if (update.newContent === "discord") {
+                    icon.src = "./Discord_icon.png";
+                    icon.alt = "Discord";
+                }
+                // Insert the icon at the beginning of the cell.
+                cell.insertBefore(icon, cell.firstChild);
+            } else {
+                // Now update the RSN text in a span.
+                let textSpan = cell.querySelector("span.reported-by-text");
+                if (!textSpan) {
+                    textSpan = document.createElement("span");
+                    textSpan.className = "reported-by-text";
+                    cell.appendChild(textSpan);
+                }
+                textSpan.textContent = update.newContent || "Unknown";
+            }
+        } else {
             cell.textContent = update.newContent;
-        }
-        if (update.newClass !== undefined) {
-            cell.className = update.newClass;
-        }
-        if (update.newStyle !== undefined) {
-            Object.assign(cell.style, update.newStyle);
+            if (update.newClass !== undefined) {
+                cell.className = update.newClass;
+            }
+            if (update.newStyle !== undefined) {
+                Object.assign(cell.style, update.newStyle);
+            }
         }
     });
 }
@@ -333,6 +358,7 @@ export function updateEvent(event: EventRecord): void {
                 { cellIndex: 1, newContent: event.event },
                 { cellIndex: 2, newContent: event.world },
                 { cellIndex: 3, newContent: formatTimeLeft(event) },
+                { cellIndex: 4, newContent: event.source },
                 { cellIndex: 4, newContent: event.reportedBy },
             ]);
         }
@@ -509,17 +535,17 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     row.appendChild(buttonsTd);
 
     // Helper to create a cell with optional class.
-    const createCell = (text: string, className?: string): HTMLTableCellElement => {
-        const cell = document.createElement("td");
+    const createElement = (text: string, className?: string, element: string = "td"): HTMLElement => {
+        const cell = document.createElement(element);
         cell.textContent = text;
         if (className) cell.className = className;
         return cell;
     };
 
     // Create cells for event, world, time left, and reportedBy.
-    row.appendChild(createCell(event.event));
-    row.appendChild(createCell(event.world));
-    row.appendChild(createCell(formatTimeLeft(event), "time-left"));
+    row.appendChild(createElement(event.event));
+    row.appendChild(createElement(event.world));
+    row.appendChild(createElement(formatTimeLeft(event), "time-left"));
 
     const reportedByCell = document.createElement("td");
 
@@ -536,7 +562,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     reportedByCell.appendChild(icon);
 
     // Append the reportedBy text after the icon.
-    reportedByCell.appendChild(document.createTextNode(event.reportedBy || "Unknown"));
+    reportedByCell.appendChild(createElement(event.reportedBy || "Unknown", "reported-by-text", "span"));
 
     // Finally, add this cell to the row.
     row.appendChild(reportedByCell);
@@ -669,20 +695,37 @@ function editEvent(event: EventRecord): void {
             }
         });
 
+        const textSpan = row.cells[4].querySelector(".reported-by-text");
         const unchanged =
             row.cells[1].textContent?.trim() === row.dataset.originalEvent?.trim() &&
             row.cells[2].textContent?.trim() === row.dataset.originalWorld?.trim() &&
             row.cells[3].textContent?.trim() === row.dataset.originalDuration?.trim() &&
             row.cells[4].textContent?.trim() === row.dataset.originalReportedBy?.trim();
 
-        if (unchanged) return;
+        if (unchanged) {
+            const iconMissing = !row.cells[4].querySelector("img");
+            if (iconMissing) {
+                let icon = document.createElement("img");
+                icon.style.marginRight = "5px"; // Adjust spacing as needed.
+                icon.src = "./Alt1_icon.png";
+                icon.alt = "Alt1";
+                if (event.source === "discord") {
+                    icon.src = "./Discord_icon.png";
+                    icon.alt = "Discord";
+                }
+                // Insert the icon at the beginning of the cell.
+                row.cells[4].insertBefore(icon, row.cells[4].firstChild);
+            }
+            return;
+        }
+        const eventName = row.cells[1].textContent?.trim() as EventKeys;
 
         const newWorld = row.cells[2].textContent?.trim() || "";
         if (!MEMBER_WORLDS.includes(newWorld)) {
             row.cells[1].textContent = row.dataset.originalEvent ?? "";
             row.cells[2].textContent = row.dataset.originalWorld ?? "";
             row.cells[3].textContent = row.dataset.originalDuration ?? "";
-            row.cells[4].textContent = row.dataset.originalReportedBy ?? "";
+            if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
 
             showToast("❌ Invalid world number!", "error");
             return;
@@ -690,16 +733,28 @@ function editEvent(event: EventRecord): void {
 
         // Note: if the duration cell wasn’t changed, we want to keep the original duration value.
         const newDurationText = row.cells[3].textContent?.trim() || "";
-        const newDuration =
+        let newDuration =
             newDurationText === row.dataset.originalDuration?.trim() ? event.duration : parseDuration(newDurationText);
 
-        const newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
+        let newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
+        if (newDuration > eventTimes[eventName] && eventName !== event.event) {
+            newDuration = eventTimes[eventName];
+            newTimestamp = Date.now();
+        } else if (newDuration > eventTimes[eventName] && eventName === event.event) {
+            row.cells[1].textContent = row.dataset.originalEvent ?? "";
+            row.cells[2].textContent = row.dataset.originalWorld ?? "";
+            row.cells[3].textContent = row.dataset.originalDuration ?? "";
+            if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
+
+            showToast("❌ Time left cannot be longer than a fresh spawn!", "error");
+            return;
+        }
 
         const token = localStorage.getItem("accessToken");
         const updatedEvent: EventRecord = {
             id: event.id,
             type: "editEvent",
-            event: row.cells[1].textContent?.trim() as EventKeys,
+            event: eventName,
             world: newWorld,
             duration: newDuration,
             reportedBy: row.cells[4].textContent?.trim() || "",
@@ -738,12 +793,26 @@ function formatTimeLeftValue(seconds: number): string {
 }
 
 function parseDuration(durationStr: string): number {
-    const regex = /^(\d+)m\s(\d+)s$/;
+    const regex = /^\s*(?:(\d{1,2})\s*m\s*(\d{1,2})\s*s|(\d{1,3})\s*s|(\d{1,2}):(\d{1,2})|(\d{1,3}))\s*$/i;
     const match = durationStr.match(regex);
     if (!match) {
         throw new Error(`Invalid duration format: ${durationStr}`);
     }
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-    return minutes * 60 + seconds;
+
+    let totalSeconds = 0;
+    if (match[1] && match[2]) {
+        const minutes = parseInt(match[1], 10);
+        const seconds = parseInt(match[2], 10);
+        totalSeconds = minutes * 60 + seconds;
+    } else if (match[3]) {
+        totalSeconds = parseInt(match[3], 10);
+    } else if (match[4] && match[5]) {
+        const minutes = parseInt(match[4], 10);
+        const seconds = parseInt(match[5], 10);
+        totalSeconds = minutes * 60 + seconds;
+    } else if (match[6]) {
+        totalSeconds = parseInt(match[6], 10);
+    }
+
+    return totalSeconds;
 }
