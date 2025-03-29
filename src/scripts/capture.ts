@@ -297,7 +297,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines = [];
+    let lines: ChatLine[] = [];
     try {
         lines = (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
     } catch (err) {
@@ -324,6 +324,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         } else {
             console.log("Unable to capture world number.");
         }
+        // After a world hop, don't process any lines and have a 5 second delay for any new ones
+        lines = [];
+        const futureTime = new Date(Number(new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`)) + 5000);
+        sessionStorage.setItem("lastTimestamp", String(futureTime));
     }
 
     // Checks on every image captured whether there are timestamps in chat
