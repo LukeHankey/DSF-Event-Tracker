@@ -283,6 +283,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 1,
             );
             console.log(`Captured RSN: ${data.text}`);
+            sessionStorage.setItem("rsn", data.text);
         } else {
             console.log("Failed to capture RSN");
         }
@@ -305,6 +306,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         return;
     }
 
+    const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1]?.text;
     worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
     if (worldHopMessage) {
         worldHopMessage = false;
@@ -333,7 +335,6 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (hasEventEnded) {
         if (hasTimestamps) {
             // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
-            const lastGameTimestamp = lines.slice(-1)[0].fragments[1].text;
             lastTimestamp = new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`);
         } else {
             lastTimestamp = new Date();
