@@ -148,7 +148,7 @@ function processLine(
 }
 
 async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
-    const rsn = localStorage.getItem("rsn") ?? "";
+    const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const eventId = uuid();
     const eventRecord: EventRecord = {
         id: eventId,
