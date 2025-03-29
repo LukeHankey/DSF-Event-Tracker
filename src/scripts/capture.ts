@@ -291,7 +291,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         // Get current world when alt1 app first loads
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
 
-        console.log("World hop message detected and found world number: ", currentWorld);
+        console.log("Looking up world number for the first time: ", currentWorld);
     }
 
     if (document.querySelector("#mainTab p")!.textContent === "Could not find chat box.") {
