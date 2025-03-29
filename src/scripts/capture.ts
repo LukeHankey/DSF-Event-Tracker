@@ -446,7 +446,14 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
 
     if (results.length > 0) {
         const bestMatch = results[0];
-        return [bestMatch.item.event as EventKeys, firstEventTexts.includes(bestMatch.item.text)];
+        let eventKey = bestMatch.item.event as EventKeys;
+        const eventText = firstEventTexts.includes(bestMatch.item.text);
+
+        if ("has appeared at the hub!" === lineText) {
+            !eventKey.toLowerCase().includes(lineText) ? (eventKey = "Unknown") : (eventKey = eventKey);
+        }
+
+        return [eventKey, eventText];
     }
 
     return [null, false]; // No match found
