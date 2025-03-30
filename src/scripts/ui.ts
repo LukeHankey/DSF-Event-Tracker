@@ -360,6 +360,7 @@ const eventSelect = document.getElementById("testEventSelect") as HTMLSelectElem
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const eventHistory = localStorage.getItem("eventHistory");
+        const token = localStorage.getItem("accessToken");
         if (!eventHistory) {
             const addTestEvent: EventRecord = {
                 id: uuid(),
@@ -370,7 +371,7 @@ if (testEventButton && DEBUG) {
                 reportedBy: "Me",
                 timestamp: Date.now(),
                 oldEvent: null,
-                token: null,
+                token: token,
                 source: "alt1",
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
@@ -394,7 +395,7 @@ if (testEventButton && DEBUG) {
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
-            token: null,
+            token: token,
             source: "alt1",
         };
         console.log("Emitting event_data", testEvent);
@@ -478,17 +479,14 @@ const modModal = document.getElementById("modActionModal") as HTMLElement;
 const closeBtn = document.getElementById("modActionClose")!;
 const modGlobalDeleteBtn = document.getElementById("modGlobalDeleteBtn")!;
 
-let activeEventId: UUIDTypes | null = null;
-
 // Show the modal and store the event ID
 window.openModActionModal = (eventId: UUIDTypes) => {
-    activeEventId = eventId;
     modModal.style.display = "block";
+    modModal.dataset.eventId = String(eventId);
 };
 
 const closeModal = () => {
     modModal.style.display = "none";
-    activeEventId = null;
 };
 
 closeBtn.addEventListener("click", closeModal);
@@ -500,21 +498,32 @@ window.addEventListener("click", (event) => {
 });
 
 modGlobalDeleteBtn.addEventListener("click", () => {
-    closeModal();
+    const eventId = modModal.dataset.eventId as UUIDTypes | undefined;
+    if (!eventId) return;
 
-    // Show confirmation modal (reuse your existing logic if you have it)
+    modModal.style.display = "none"; // 👈 hide the mod modal first
+
+    const confirmAndDelete = async () => {
+        const eventHistory: EventRecord[] = JSON.parse(localStorage.getItem("eventHistory") ?? "[]");
+        const event = eventHistory.find((e) => e.id === eventId);
+        if (!event) return;
+
+        const eventToSend = { ...event, type: "deleteEvent" } as EventRecord;
+
+        await axios.delete(`${API_URL}/worlds/${eventToSend.world}/event`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${eventToSend.token}`,
+            },
+        });
+
+        wsClient.send(eventToSend);
+    };
+
     showConfirmationModal({
         title: "Confirm Global Delete",
         message: "Are you sure you want to remove this event from all clients?",
         confirmText: "Delete for All",
-        onConfirm: () => {
-            if (!activeEventId) return;
-            // 🔥 Replace this with your actual delete logic
-            const eventHistory: EventRecord[] = JSON.parse(localStorage.getItem("eventHistory") ?? "[]")
-            if (!eventHistory) return;
-            const event = eventHistory.find((e) => e.id === activeEventId)!
-            event.type = "deleteEvent"
-            wsClient.send(event)
-        },
+        onConfirm: confirmAndDelete,
     });
 });

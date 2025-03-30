@@ -149,6 +149,7 @@ function processLine(
 
 async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
+    const token = localStorage.getItem("accessToken");
     const eventId = uuid();
     const eventRecord: EventRecord = {
         id: eventId,
@@ -159,7 +160,7 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
         reportedBy: rsn,
         timestamp: Date.now(),
         oldEvent: null,
-        token: null,
+        token: token,
         source: "alt1",
     };
 
