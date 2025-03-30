@@ -297,7 +297,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
     }
 
-    let lines = [];
+    let lines: ChatLine[] = [];
     try {
         lines = (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
     } catch (err) {
@@ -305,6 +305,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         return;
     }
 
+    const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1].text;
     worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
     if (worldHopMessage) {
         worldHopMessage = false;
@@ -323,6 +324,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         } else {
             console.log("Unable to capture world number.");
         }
+        // After a world hop, don't process any lines and have a 5 second delay for any new ones
+        lines = [];
+        const futureTime = new Date(Number(new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`)) + 5000);
+        sessionStorage.setItem("lastTimestamp", String(futureTime));
     }
 
     // Checks on every image captured whether there are timestamps in chat
@@ -333,11 +338,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     if (hasEventEnded) {
         if (hasTimestamps) {
             // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
-            const lastGameTimestamp = lines.slice(-1)[0].fragments[1].text;
             lastTimestamp = new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`);
         } else {
             lastTimestamp = new Date();
         }
+        sessionStorage.setItem("lastTimestamp", String(lastTimestamp));
         return;
     }
 
@@ -441,7 +446,14 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
 
     if (results.length > 0) {
         const bestMatch = results[0];
-        return [bestMatch.item.event as EventKeys, firstEventTexts.includes(bestMatch.item.text)];
+        let eventKey = bestMatch.item.event as EventKeys;
+        const eventText = firstEventTexts.includes(bestMatch.item.text);
+
+        if ("has appeared at the hub!" === lineText) {
+            !eventKey.toLowerCase().includes(lineText) ? (eventKey = "Unknown") : (eventKey = eventKey);
+        }
+
+        return [eventKey, eventText];
     }
 
     return [null, false]; // No match found
