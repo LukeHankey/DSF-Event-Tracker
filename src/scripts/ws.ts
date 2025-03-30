@@ -173,6 +173,7 @@ export class WebSocketClient {
         console.log("Parsed data: ", eventData);
         if (eventData.type === "addEvent") addNewEvent(eventData);
         if (eventData.type === "editEvent") updateEvent(eventData);
+        if (eventData.type === "deleteEvent") "deleteEvent";
     }
 
     sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
