@@ -531,6 +531,28 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
             buttonContainer.appendChild(editBtn);
         }
     }
+
+    const modRoles = ["444972115180126228"]  // Mod role
+    const hasModPermission = userHasRequiredRole(modRoles);
+    if (hasModPermission) {
+        const modBtn = document.createElement("button");
+        modBtn.className = "btn-extra";
+        modBtn.title = "Mod actions";
+        
+        const modIcon = document.createElement("img");
+        modIcon.src = "./rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
+        modIcon.alt = "Mod actions";
+    
+        modBtn.appendChild(modIcon);
+    
+        modBtn.addEventListener("click", () => {
+            // Open the modal and pass the event ID
+            window.openModActionModal(event.id);
+        });
+    
+        buttonContainer.appendChild(modBtn);
+    }
+    
     buttonsTd.appendChild(buttonContainer);
     row.appendChild(buttonsTd);
 

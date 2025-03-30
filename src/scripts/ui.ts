@@ -9,7 +9,7 @@ import {
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG, ORIGIN, API_URL } from "../config";
-import { v4 as uuid } from "uuid";
+import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
 
@@ -465,5 +465,52 @@ window.addEventListener("DOMContentLoaded", () => {
             // Optionally, remove the value if the user clears the field
             localStorage.removeItem("rsn");
         }
+    });
+});
+
+declare global {
+    interface Window {
+        openModActionModal: (eventId: UUIDTypes) => void;
+    }
+}
+
+const modModal = document.getElementById("modActionModal") as HTMLElement;
+const closeBtn = document.getElementById("modActionClose")!;
+const modGlobalDeleteBtn = document.getElementById("modGlobalDeleteBtn")!;
+
+let activeEventId: UUIDTypes | null = null;
+
+// Show the modal and store the event ID
+window.openModActionModal = (eventId: UUIDTypes) => {
+    activeEventId = eventId;
+    modModal.style.display = "block";
+};
+
+const closeModal = () => {
+    modModal.style.display = "none";
+    activeEventId = null;
+};
+
+closeBtn.addEventListener("click", closeModal);
+
+window.addEventListener("click", (event) => {
+    if (event.target === modModal) {
+        closeModal();
+    }
+});
+
+modGlobalDeleteBtn.addEventListener("click", () => {
+    closeModal();
+
+    // Show confirmation modal (reuse your existing logic if you have it)
+    showConfirmationModal({
+        title: "Confirm Global Delete",
+        message: "Are you sure you want to remove this event from all clients?",
+        confirmText: "Delete for All",
+        onConfirm: () => {
+            if (!activeEventId) return;
+            // 🔥 Replace this with your actual delete logic
+            // deleteEventGlobally(activeEventId);
+        },
     });
 });
