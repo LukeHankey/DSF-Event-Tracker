@@ -1,5 +1,5 @@
 import { EventRecord } from "./events";
-import { addNewEvent, updateEvent } from "./eventHistory";
+import { addNewEvent, updateEvent, removeEvent } from "./eventHistory";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
@@ -173,7 +173,7 @@ export class WebSocketClient {
         console.log("Parsed data: ", eventData);
         if (eventData.type === "addEvent") addNewEvent(eventData);
         if (eventData.type === "editEvent") updateEvent(eventData);
-        if (eventData.type === "deleteEvent") "deleteEvent";
+        if (eventData.type === "deleteEvent") removeEvent(eventData);
     }
 
     sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
