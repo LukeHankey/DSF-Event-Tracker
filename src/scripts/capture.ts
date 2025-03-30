@@ -148,7 +148,7 @@ function processLine(
 }
 
 async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
-    const rsn = localStorage.getItem("rsn") ?? "";
+    const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const eventId = uuid();
     const eventRecord: EventRecord = {
         id: eventId,
@@ -283,6 +283,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 1,
             );
             console.log(`Captured RSN: ${data.text}`);
+            sessionStorage.setItem("rsn", data.text);
         } else {
             console.log("Failed to capture RSN");
         }
@@ -290,7 +291,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         // Get current world when alt1 app first loads
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
 
-        console.log("World hop message detected and found world number: ", currentWorld);
+        console.log("Looking up world number for the first time: ", currentWorld);
     }
 
     if (document.querySelector("#mainTab p")!.textContent === "Could not find chat box.") {
@@ -305,7 +306,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         return;
     }
 
-    const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1].text;
+    const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1]?.text;
     worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
     if (worldHopMessage) {
         worldHopMessage = false;

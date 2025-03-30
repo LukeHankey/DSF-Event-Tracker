@@ -83,6 +83,10 @@ export class WebSocketClient {
         return discordID;
     }
 
+    get rsn(): string | null {
+        return sessionStorage.getItem("rsn");
+    }
+
     log(level: "info" | "warn" | "error", message: string): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(
@@ -92,6 +96,7 @@ export class WebSocketClient {
                     level,
                     message,
                     discordID: this.discordID,
+                    rsn: this.rsn,
                 }),
             );
         }

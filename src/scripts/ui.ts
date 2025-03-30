@@ -116,10 +116,6 @@ if (discordIDInput && savedDiscordID) {
 }
 
 const rsnInput = document.getElementById("rsn") as HTMLInputElement | null;
-const savedRSN = localStorage.getItem("rsn");
-if (rsnInput && savedRSN) {
-    rsnInput.value = savedRSN;
-}
 
 const captureFrequency = document.getElementById("captureFrequency") as HTMLInputElement | null;
 const savedCaptureFrequency = localStorage.getItem("captureFrequency");
@@ -391,6 +387,27 @@ window.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("click", function (event) {
         if (event.target === modal) {
             modal.style.display = "none";
+        }
+    });
+
+    // Assume the input field has an id of 'rsn-input'
+    const rsnInput = document.getElementById("rsn") as HTMLInputElement | null;
+    if (!rsnInput) return;
+
+    // First, check if there's a user-set RSN in localStorage
+    const savedRSN = localStorage.getItem("rsn") || sessionStorage.getItem("rsn");
+    if (savedRSN) {
+        rsnInput.value = savedRSN;
+    }
+
+    // When the user changes the input, store the new RSN in localStorage
+    rsnInput.addEventListener("change", () => {
+        const newRSN = rsnInput.value;
+        if (newRSN) {
+            localStorage.setItem("rsn", newRSN);
+        } else {
+            // Optionally, remove the value if the user clears the field
+            localStorage.removeItem("rsn");
         }
     });
 });
