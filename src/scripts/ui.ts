@@ -334,7 +334,7 @@ if (testEventButton && DEBUG) {
             type: "addEvent",
             event: selectedEvent,
             world: randomWorld,
-            duration: eventDuration,
+            duration: eventDuration + 6,
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
