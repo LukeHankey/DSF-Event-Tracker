@@ -293,9 +293,65 @@ if (hideExpiredCheckbox) {
     });
 }
 
+function showConfirmationModal({
+    title = "Confirm",
+    message = "Are you sure you want to proceed?",
+    confirmText = "Yes",
+    onConfirm,
+}: {
+    title?: string;
+    message?: string;
+    confirmText?: string;
+    onConfirm: () => void;
+}) {
+    const modal = document.getElementById("confirmModal") as HTMLElement;
+    const closeBtn = document.getElementById("confirmModalClose")!;
+    const yesBtn = document.getElementById("confirmModalYes")!;
+    const noBtn = document.getElementById("confirmModalNo")!;
+    const modalTitle = document.getElementById("confirmModalTitle")!;
+    const modalMessage = document.getElementById("confirmModalMessage")!;
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    yesBtn.textContent = confirmText;
+
+    modal.style.display = "block";
+
+    const cleanup = () => {
+        modal.style.display = "none";
+        yesBtn.removeEventListener("click", confirmHandler);
+        noBtn.removeEventListener("click", cleanup);
+        closeBtn.removeEventListener("click", cleanup);
+        window.removeEventListener("click", outsideClickHandler);
+    };
+
+    const confirmHandler = () => {
+        onConfirm();
+        cleanup();
+    };
+
+    const outsideClickHandler = (event: MouseEvent) => {
+        if (event.target === modal) {
+            cleanup();
+        }
+    };
+
+    yesBtn.addEventListener("click", confirmHandler);
+    noBtn.addEventListener("click", cleanup);
+    closeBtn.addEventListener("click", cleanup);
+    window.addEventListener("click", outsideClickHandler);
+}
+
 const clearAllBtn = document.getElementById("clearHistoryBtn") as HTMLButtonElement | null;
 if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => clearEventHistory());
+    clearAllBtn.addEventListener("click", () => {
+        showConfirmationModal({
+            title: "Confirm Clear",
+            message: "Are you sure you want to clear your entire event history? This cannot be undone.",
+            confirmText: "Yes, clear it",
+            onConfirm: () => clearEventHistory(),
+        });
+    });
 }
 
 // When you click the test button, emit the "updateEventHistory" event with your payload.
