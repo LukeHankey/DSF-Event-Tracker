@@ -307,7 +307,7 @@ if (testEventButton && DEBUG) {
         if (!eventHistory) {
             const addTestEvent: EventRecord = {
                 id: uuid(),
-                type: "testing",
+                type: "addEvent",
                 event: "Testing",
                 world: "105",
                 duration: 15,
@@ -331,7 +331,7 @@ if (testEventButton && DEBUG) {
 
         const testEvent: EventRecord = {
             id: uuid(),
-            type: "testing",
+            type: "addEvent",
             event: selectedEvent,
             world: randomWorld,
             duration: eventDuration,

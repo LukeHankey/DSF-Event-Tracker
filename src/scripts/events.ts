@@ -8,7 +8,8 @@ export type EventKeys =
     | "Treasure Turtle"
     | "Whale"
     | "Whirlpool"
-    | "Testing";
+    | "Testing"
+    | "Unknown";
 
 type EventTimes = {
     [key in EventKeys]: number;
@@ -18,7 +19,7 @@ export type Events = {
     [key in EventKeys]: string[];
 };
 
-type EventRecordTypes = "addEvent" | "editEvent" | "testing";
+type EventRecordTypes = "addEvent" | "editEvent";
 
 // Gold text for event arrival is at the start of each value array
 // Fisherman text is at the end of events, if any
@@ -88,6 +89,7 @@ export const events: Events = {
         "I nearly fell in before, that was scary...",
     ],
     Testing: ["1", "Test", "Testing @@@@@ 123456789 abcdefghijklmnopqrstuvwxyz 123"],
+    Unknown: [],
 };
 
 export const eventExpiredText: Events = {
@@ -99,6 +101,7 @@ export const eventExpiredText: Events = {
     Whale: ["The whale has departed..."],
     Whirlpool: ["The whirlpool has disappeared..."],
     Testing: ["test"],
+    Unknown: [],
 };
 
 export const firstEventTexts = Object.values(events).map((texts) => texts[0]);
@@ -115,6 +118,7 @@ export const eventTimes: EventTimes = {
     Whirlpool: ONE_MINUTE * 5,
     "Treasure Turtle": ONE_MINUTE * 5,
     Testing: 30,
+    Unknown: ONE_MINUTE * 10,
 };
 
 export interface EventRecord {
