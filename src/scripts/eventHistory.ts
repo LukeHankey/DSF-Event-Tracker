@@ -642,7 +642,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     rowMap.set(event.id, row);
 }
 
-function removeEvent(event: EventRecord): void {
+export function removeEvent(event: EventRecord): void {
     eventHistory = eventHistory.filter((e) => e.id !== event.id);
     expiredEvents = expiredEvents.filter((e) => e.id !== event.id);
     saveEventHistory();
