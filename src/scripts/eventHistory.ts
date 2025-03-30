@@ -733,21 +733,38 @@ function editEvent(event: EventRecord): void {
 
         // Note: if the duration cell wasn’t changed, we want to keep the original duration value.
         const newDurationText = row.cells[3].textContent?.trim() || "";
-        let newDuration =
-            newDurationText === row.dataset.originalDuration?.trim() ? event.duration : parseDuration(newDurationText);
+        let newDuration: number;
+        let newTimestamp: number;
 
-        let newTimestamp = newDurationText === row.dataset.originalDuration?.trim() ? event.timestamp : Date.now();
-        if (newDuration > eventTimes[eventName] && eventName !== event.event) {
-            newDuration = eventTimes[eventName];
+        // Determine if duration or event changed
+        const durationChanged = newDurationText !== row.dataset.originalDuration?.trim();
+        const eventChanged = eventName !== event.event;
+
+        // Parse duration only if necessary
+        console.log(durationChanged, eventChanged);
+        if (durationChanged || eventChanged) {
+            newDuration = parseDuration(newDurationText);
             newTimestamp = Date.now();
-        } else if (newDuration > eventTimes[eventName] && eventName === event.event) {
-            row.cells[1].textContent = row.dataset.originalEvent ?? "";
-            row.cells[2].textContent = row.dataset.originalWorld ?? "";
-            row.cells[3].textContent = row.dataset.originalDuration ?? "";
-            if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
 
-            showToast("❌ Time left cannot be longer than a fresh spawn!", "error");
-            return;
+            console.log(newDuration, eventTimes[eventName], eventName, event.event);
+
+            if (newDuration > eventTimes[eventName] && eventName === event.event) {
+                showToast("❌ Time left cannot be longer than a fresh spawn!", "error");
+
+                // Revert all values
+                row.cells[1].textContent = row.dataset.originalEvent ?? "";
+                row.cells[2].textContent = row.dataset.originalWorld ?? "";
+                row.cells[3].textContent = row.dataset.originalDuration ?? "";
+                if (textSpan) textSpan.textContent = row.dataset.originalReportedBy ?? "";
+
+                return;
+            } else if (eventName !== event.event) {
+                console.log(eventTimes[eventName], newDuration);
+                newDuration = Math.min(eventTimes[eventName], newDuration);
+            }
+        } else {
+            newDuration = event.duration;
+            newTimestamp = event.timestamp;
         }
 
         const token = localStorage.getItem("accessToken");
