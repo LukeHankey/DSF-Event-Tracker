@@ -510,7 +510,11 @@ modGlobalDeleteBtn.addEventListener("click", () => {
         onConfirm: () => {
             if (!activeEventId) return;
             // 🔥 Replace this with your actual delete logic
-            // deleteEventGlobally(activeEventId);
+            const eventHistory: EventRecord[] = JSON.parse(localStorage.getItem("eventHistory") ?? "[]")
+            if (!eventHistory) return;
+            const event = eventHistory.find((e) => e.id === activeEventId)!
+            event.type = "deleteEvent"
+            wsClient.send(event)
         },
     });
 });
