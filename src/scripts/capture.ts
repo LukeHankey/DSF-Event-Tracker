@@ -325,6 +325,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             }
         } else {
             console.log("Unable to capture world number.");
+            sessionStorage.removeItem("currentWorld");
         }
         // After a world hop, don't process any lines and have a 5 second delay for any new ones
         lines = [];
