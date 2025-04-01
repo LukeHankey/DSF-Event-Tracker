@@ -151,6 +151,8 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
     const eventId = uuid();
+    const eventKey = matchingEvent === "Travelling merchant" ? "merchantCount" : "otherCount";
+    const profileEventKey = `${isFirstEvent ? "alt1First" : "alt1"}.${eventKey}`;
     const eventRecord: EventRecord = {
         id: eventId,
         type: "addEvent",
@@ -162,6 +164,7 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
         oldEvent: null,
         token: token,
         source: "alt1",
+        profileEventKey,
     };
 
     try {

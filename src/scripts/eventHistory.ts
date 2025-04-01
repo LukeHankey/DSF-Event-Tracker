@@ -823,6 +823,7 @@ function editEvent(event: EventRecord): void {
             oldEvent: event,
             token: token,
             source: event.source,
+            profileEventKey: event.profileEventKey,
         };
 
         rowMap.set(event.id, row);

@@ -373,6 +373,7 @@ if (testEventButton && DEBUG) {
                 oldEvent: null,
                 token: token,
                 source: "alt1",
+                profileEventKey: "alt1First.otherCount",
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
@@ -397,6 +398,7 @@ if (testEventButton && DEBUG) {
             oldEvent: null,
             token: token,
             source: "alt1",
+            profileEventKey: "alt1First.otherCount",
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
