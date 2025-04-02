@@ -469,6 +469,28 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
         removeBtn.addEventListener("click", () => removeEvent(event));
 
         buttonContainer.appendChild(removeBtn);
+
+        const modRoles = ["444972115180126228"]; // Mod role
+        const hasModPermission = userHasRequiredRole(modRoles);
+        if (hasModPermission) {
+            const modBtn = document.createElement("button");
+            modBtn.className = "btn-extra";
+            modBtn.title = "Mod actions";
+
+            const modIcon = document.createElement("img");
+            modIcon.src = "./rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
+            modIcon.alt = "Mod actions";
+
+            modBtn.appendChild(modIcon);
+
+            modBtn.addEventListener("click", () => {
+                // Open the modal and pass the event ID
+                window.openModActionModal(event.id);
+            });
+
+            buttonContainer.appendChild(modBtn);
+        }
+
         actionCell.appendChild(buttonContainer);
     }
 
@@ -531,6 +553,28 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
             buttonContainer.appendChild(editBtn);
         }
     }
+
+    const modRoles = ["444972115180126228"]; // Mod role
+    const hasModPermission = userHasRequiredRole(modRoles);
+    if (hasModPermission) {
+        const modBtn = document.createElement("button");
+        modBtn.className = "btn-extra";
+        modBtn.title = "Mod actions";
+
+        const modIcon = document.createElement("img");
+        modIcon.src = "./rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
+        modIcon.alt = "Mod actions";
+
+        modBtn.appendChild(modIcon);
+
+        modBtn.addEventListener("click", () => {
+            // Open the modal and pass the event ID
+            window.openModActionModal(event.id);
+        });
+
+        buttonContainer.appendChild(modBtn);
+    }
+
     buttonsTd.appendChild(buttonContainer);
     row.appendChild(buttonsTd);
 
@@ -779,6 +823,7 @@ function editEvent(event: EventRecord): void {
             oldEvent: event,
             token: token,
             source: event.source,
+            profileEventKey: event.profileEventKey,
         };
 
         rowMap.set(event.id, row);

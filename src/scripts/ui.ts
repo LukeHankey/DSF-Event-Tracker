@@ -9,7 +9,7 @@ import {
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient } from "./ws";
 import { DEBUG, ORIGIN, API_URL } from "../config";
-import { v4 as uuid } from "uuid";
+import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
@@ -294,9 +294,65 @@ if (hideExpiredCheckbox) {
     });
 }
 
+function showConfirmationModal({
+    title = "Confirm",
+    message = "Are you sure you want to proceed?",
+    confirmText = "Yes",
+    onConfirm,
+}: {
+    title?: string;
+    message?: string;
+    confirmText?: string;
+    onConfirm: () => void;
+}) {
+    const modal = document.getElementById("confirmModal") as HTMLElement;
+    const closeBtn = document.getElementById("confirmModalClose")!;
+    const yesBtn = document.getElementById("confirmModalYes")!;
+    const noBtn = document.getElementById("confirmModalNo")!;
+    const modalTitle = document.getElementById("confirmModalTitle")!;
+    const modalMessage = document.getElementById("confirmModalMessage")!;
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    yesBtn.textContent = confirmText;
+
+    modal.style.display = "block";
+
+    const cleanup = () => {
+        modal.style.display = "none";
+        yesBtn.removeEventListener("click", confirmHandler);
+        noBtn.removeEventListener("click", cleanup);
+        closeBtn.removeEventListener("click", cleanup);
+        window.removeEventListener("click", outsideClickHandler);
+    };
+
+    const confirmHandler = () => {
+        onConfirm();
+        cleanup();
+    };
+
+    const outsideClickHandler = (event: MouseEvent) => {
+        if (event.target === modal) {
+            cleanup();
+        }
+    };
+
+    yesBtn.addEventListener("click", confirmHandler);
+    noBtn.addEventListener("click", cleanup);
+    closeBtn.addEventListener("click", cleanup);
+    window.addEventListener("click", outsideClickHandler);
+}
+
 const clearAllBtn = document.getElementById("clearHistoryBtn") as HTMLButtonElement | null;
 if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => clearEventHistory());
+    clearAllBtn.addEventListener("click", () => {
+        showConfirmationModal({
+            title: "Confirm Clear",
+            message: "Are you sure you want to clear your entire event history? This cannot be undone.",
+            confirmText: "Yes, clear it",
+            onConfirm: () => clearEventHistory(),
+        });
+    });
 }
 
 // When you click the test button, emit the "updateEventHistory" event with your payload.
@@ -305,6 +361,7 @@ const eventSelect = document.getElementById("testEventSelect") as HTMLSelectElem
 if (testEventButton && DEBUG) {
     testEventButton.addEventListener("click", () => {
         const eventHistory = localStorage.getItem("eventHistory");
+        const token = localStorage.getItem("accessToken");
         if (!eventHistory) {
             const addTestEvent: EventRecord = {
                 id: uuid(),
@@ -315,8 +372,9 @@ if (testEventButton && DEBUG) {
                 reportedBy: "Me",
                 timestamp: Date.now(),
                 oldEvent: null,
-                token: null,
+                token: token,
                 source: "alt1",
+                profileEventKey: "alt1First.otherCount",
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
@@ -339,8 +397,9 @@ if (testEventButton && DEBUG) {
             reportedBy: "Test",
             timestamp: Date.now(),
             oldEvent: null,
-            token: null,
+            token: token,
             source: "alt1",
+            profileEventKey: "alt1First.otherCount",
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
@@ -411,5 +470,64 @@ window.addEventListener("DOMContentLoaded", () => {
             // Optionally, remove the value if the user clears the field
             localStorage.removeItem("rsn");
         }
+    });
+});
+
+declare global {
+    interface Window {
+        openModActionModal: (eventId: UUIDTypes) => void;
+    }
+}
+
+const modModal = document.getElementById("modActionModal") as HTMLElement;
+const closeBtn = document.getElementById("modActionClose")!;
+const modGlobalDeleteBtn = document.getElementById("modGlobalDeleteBtn")!;
+
+// Show the modal and store the event ID
+window.openModActionModal = (eventId: UUIDTypes) => {
+    modModal.style.display = "block";
+    modModal.dataset.eventId = String(eventId);
+};
+
+const closeModal = () => {
+    modModal.style.display = "none";
+};
+
+closeBtn.addEventListener("click", closeModal);
+
+window.addEventListener("click", (event) => {
+    if (event.target === modModal) {
+        closeModal();
+    }
+});
+
+modGlobalDeleteBtn.addEventListener("click", () => {
+    const eventId = modModal.dataset.eventId as UUIDTypes | undefined;
+    if (!eventId) return;
+
+    modModal.style.display = "none"; // 👈 hide the mod modal first
+
+    const confirmAndDelete = async () => {
+        const eventHistory: EventRecord[] = JSON.parse(localStorage.getItem("eventHistory") ?? "[]");
+        const event = eventHistory.find((e) => e.id === eventId);
+        if (!event) return;
+
+        const eventToSend = { ...event, type: "deleteEvent" } as EventRecord;
+
+        await axios.delete(`${API_URL}/worlds/${eventToSend.world}/event`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${eventToSend.token}`,
+            },
+        });
+
+        wsClient.send(eventToSend);
+    };
+
+    showConfirmationModal({
+        title: "Confirm Global Delete",
+        message: "Are you sure you want to remove this event from all clients?",
+        confirmText: "Delete for All",
+        onConfirm: confirmAndDelete,
     });
 });
