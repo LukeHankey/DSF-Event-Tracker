@@ -34,7 +34,7 @@ const prepareLog = (args: unknown[]): string => {
     return args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ");
 };
 
-async function refreshToken(): Promise<string | null> {
+export async function refreshToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
