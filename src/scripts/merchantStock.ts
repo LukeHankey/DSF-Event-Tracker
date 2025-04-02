@@ -186,7 +186,6 @@ export function renderStockTable(): void {
             const item = stock[slot];
             if (item) {
                 const img = document.createElement("img");
-                console.log(item, getImagePath(item));
                 img.src = getImagePath(item);
                 img.alt = item;
                 img.title = item;
