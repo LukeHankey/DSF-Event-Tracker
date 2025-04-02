@@ -40,6 +40,7 @@ let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
 let currentWorld: string | null = null;
+let maxBasey: number = 0
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -334,6 +335,16 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         lines = [];
         const futureTime = new Date(Number(new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`)) + 5000);
         sessionStorage.setItem("lastTimestamp", String(futureTime));
+    }
+
+    // Check before as a new line may not have timestamps but previous ones will
+    // Address a random edge case where the OCR reader reads a partial previous line
+    // which might match to an event
+    if (hasTimestamps) {
+        // If a lines basey is > 100 pixels out, then it is too far from the bottom
+        // of the chatbox (where new lines are read) so is probably a misread
+        // Allow 100 pixel distance for multiline text
+        lines = lines.filter((line) => line.basey > maxBasey - 100);
     }
 
     // Checks on every image captured whether there are timestamps in chat
