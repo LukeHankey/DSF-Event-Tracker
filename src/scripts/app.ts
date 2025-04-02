@@ -14,7 +14,7 @@ import "./ui";
 
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
-import { scheduleMidnightUpdate } from "./merchantStock"
+import { scheduleMidnightUpdate } from "./merchantStock";
 
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
