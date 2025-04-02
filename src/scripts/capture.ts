@@ -149,7 +149,10 @@ function processLine(
 
 async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
+    const token = localStorage.getItem("accessToken");
     const eventId = uuid();
+    const eventKey = matchingEvent === "Travelling merchant" ? "merchantCount" : "otherCount";
+    const profileEventKey = `${isFirstEvent ? "alt1First" : "alt1"}.${eventKey}`;
     const eventRecord: EventRecord = {
         id: eventId,
         type: "addEvent",
@@ -159,8 +162,9 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
         reportedBy: rsn,
         timestamp: Date.now(),
         oldEvent: null,
-        token: null,
+        token: token,
         source: "alt1",
+        profileEventKey,
     };
 
     try {
@@ -324,6 +328,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             }
         } else {
             console.log("Unable to capture world number.");
+            sessionStorage.removeItem("currentWorld");
         }
         // After a world hop, don't process any lines and have a 5 second delay for any new ones
         lines = [];

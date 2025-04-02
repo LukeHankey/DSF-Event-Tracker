@@ -132,4 +132,5 @@ export interface EventRecord {
     oldEvent: EventRecord | null;
     token: string | null;
     source: "alt1" | "discord";
+    profileEventKey: string;
 }
