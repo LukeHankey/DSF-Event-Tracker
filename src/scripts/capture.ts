@@ -45,9 +45,9 @@ let worldHopMessage = false;
 let mainboxRect = false;
 
 function updateMainTab(message: string): void {
-    const mainTabParagraph = document.querySelector("#mainTab p");
-    if (mainTabParagraph) {
-        mainTabParagraph.textContent = message;
+    const mainTabHeader = document.querySelector("#mainTab h2");
+    if (mainTabHeader) {
+        mainTabHeader.textContent = message;
     }
 }
 
@@ -82,7 +82,7 @@ export function initCapture(): void {
     if (localStorage.getItem("captureFrequency") == null) {
         localStorage.setItem("captureFrequency", "2");
     }
-    previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
+    previousMainContent = document.querySelector("#mainTab h2")!.innerHTML;
     loadEventHistory();
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
@@ -294,8 +294,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         console.log("Looking up world number for the first time: ", currentWorld);
     }
 
-    if (document.querySelector("#mainTab p")!.textContent === "Could not find chat box.") {
-        document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
+    if (document.querySelector("#mainTab h2")!.textContent === "Could not find chat box.") {
+        document.querySelector("#mainTab h2")!.innerHTML = previousMainContent;
     }
 
     let lines: ChatLine[] = [];
