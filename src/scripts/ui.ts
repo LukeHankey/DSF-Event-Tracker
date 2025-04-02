@@ -12,6 +12,7 @@ import { DEBUG, ORIGIN, API_URL } from "../config";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
+import { renderStockTable } from "./merchantStock";
 
 // You can define a union type for the status if you like:
 type StatusType = "ok" | "warning" | "error";
@@ -360,6 +361,7 @@ function populateEventDropdown() {
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
+    renderStockTable();
     const debugContainer = document.getElementById("debugContainer");
     if (debugContainer) {
         if (!DEBUG) {

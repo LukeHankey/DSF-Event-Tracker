@@ -34,12 +34,48 @@ body.nis {
 
 h2 {
     color: #0077cc;
-    margin-block-start: 0;
+    margin: 0;
 }
 
 a {
     text-decoration-color: blue;
     color: blue;
+}
+
+#mainTab {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* or any desired height */
+}
+
+/* Keep the h2 header at the top */
+#mainTab > h2 {
+    margin: 0;
+    padding: 10px;
+    flex: 0 0 auto;
+    padding: 5px;
+}
+
+/* Container for the stock table and footer */
+#stock-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* The table container grows and becomes scrollable when needed */
+.stock-table-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* The footer stays at the bottom */
+.event-footer {
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, 0.8);
+    border-top: 1px solid #ccc;
+    padding: 4px 8px;
 }
 
 /* -------------------------------------
@@ -76,7 +112,7 @@ a {
 /* Tab content */
 .tabs__content {
     margin-top: 0.2rem;
-    display: none;
+    display: none !important;
     padding: 10px;
     width: inherit;
     height: auto;
@@ -85,10 +121,121 @@ a {
 }
 
 .tabs__content--active {
-    display: block;
+    display: flex !important;
     overflow: auto;
 }
 
+/************************************
+ * MERCHANT MODAL POPUP
+ ************************************/
+.merchant-modal {
+    /* Hidden by default; show it via JS with `style.display = "flex"` */
+    display: none;
+    position: fixed;
+    inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
+  
+    /* Center the modal horizontally & vertically */
+    align-items: center;
+    justify-content: center;
+  
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+  
+    /* If content is taller than the screen, allow scrolling */
+    overflow: auto;
+}
+  
+.merchant-modal-content {
+    background-color: #1d1b17;
+    padding-bottom: 16px;
+    border: 2px solid #888;
+    border-radius: 4px;
+    color: #fff;
+    
+    /* Control the modal's max size so it doesn't overflow the screen */
+    overflow-y: auto;
+  
+    /* For spacing inside the modal */
+    display: flex;
+    flex-direction: column;
+}
+  
+.merchant-modal-content .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 8px;
+}
+  
+.merchant-modal-content .close:hover {
+    color: #fff;
+}
+  
+/* Example for the date heading to make it visible and centered */
+#merchantDateHeading {
+    color: #fdbf1c; /* bright gold */
+    margin: 0;
+    text-align: center;
+    font-size: 18px;
+}
+  
+/* Cards container */
+.merchant-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 10px;
+    column-gap: 10px;
+}
+  
+/* Each card */
+.merchant-card {
+    background: #2c2c2c;
+    border: 1px solid #444;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    text-align: center;
+    align-items: center;
+    width: 100px;
+    box-sizing: border-box;
+}
+  
+  
+  
+/* Item name */
+.merchant-card h4 {
+    margin: 5px 0;
+    color: silver;
+    min-height: 2.4em; /* ~2 lines at 1.2em line-height each */
+}
+  
+.merchant-item-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px; /* Optional: adds some spacing between the image and cost */
+}
+  
+/* You can also ensure the image has a fixed size */
+.merchant-item-info img {
+    width: 30px;
+    height: 30px;
+}
+  
+/* Optional: Style the cost element */
+.merchant-cost {
+    font-size: 14px;
+    color: #ccc;
+    /* If you want the cost to stick to the right, this is already handled by flex; 
+       you can add margin-left: auto; if needed */
+    margin-left: auto;
+}
+
+  
 /* -------------------------------------
 2b) SUB-TABS
 ------------------------------------- */
