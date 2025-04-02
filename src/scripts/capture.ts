@@ -377,8 +377,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     line.fragments[1]?.text === undefined,
             );
         }
+        // Filter out the lines which just have a timestamp and optional space
+        lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text))
 
         for (const line of lines) {
+            line.basey > maxBasey ? maxBasey = line.basey : maxBasey = maxBasey
             if (line.text === lastMessage) continue;
             const { updatedTimestamp, updatedLastMessage } = processLine(line, hasTimestamps);
 
