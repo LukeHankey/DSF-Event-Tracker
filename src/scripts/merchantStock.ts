@@ -173,9 +173,10 @@ export function renderStockTable(): void {
 
         // Create the Date cell. For today, display "Today", otherwise format the date.
         const dateCell = document.createElement("td");
-        const currentDate = new Date();
-        currentDate.setDate(currentDate.getDate() + i);
-        dateCell.textContent = i === 0 ? "Today" : formatDateWithOrdinal(currentDate);
+        const now = new Date();
+        // Create a UTC date with today's UTC year, month, and UTC date plus i days.
+        const currentDateUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));
+        dateCell.textContent = i === 0 ? "Today" : formatDateWithOrdinal(currentDateUTC);
         row.appendChild(dateCell);
 
         // For each slot (A, B, C, D), create a cell with the image.
