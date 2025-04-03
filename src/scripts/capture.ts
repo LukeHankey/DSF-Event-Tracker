@@ -40,7 +40,7 @@ let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
 let currentWorld: string | null = null;
-let maxBasey: number = 0
+let maxBasey: number = 0;
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -232,6 +232,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     if (!chatData) {
         updateMainTab("Could not find chat box.");
+        const futureTime = new Date(new Date().getTime() + 5000);
+        sessionStorage.setItem("lastTimestamp", String(futureTime));
         return;
     }
 
@@ -378,10 +380,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             );
         }
         // Filter out the lines which just have a timestamp and optional space
-        lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text))
+        lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text));
 
         for (const line of lines) {
-            line.basey > maxBasey ? maxBasey = line.basey : maxBasey = maxBasey
+            line.basey > maxBasey ? (maxBasey = line.basey) : (maxBasey = maxBasey);
             if (line.text === lastMessage) continue;
             const { updatedTimestamp, updatedLastMessage } = processLine(line, hasTimestamps);
 

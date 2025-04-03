@@ -512,7 +512,7 @@ modGlobalDeleteBtn.addEventListener("click", () => {
         const event = eventHistory.find((e) => e.id === eventId);
         if (!event) return;
 
-        const token = localStorage.getItem("accessToken")
+        const token = localStorage.getItem("accessToken");
         const eventToSend = { ...event, type: "deleteEvent", token } as EventRecord;
 
         try {
@@ -527,11 +527,11 @@ modGlobalDeleteBtn.addEventListener("click", () => {
                 console.error(error);
                 const status = error.response?.status;
                 const message = error.response?.data?.detail;
-                if (status === 401 && message === 'Token has expired') {
+                if (status === 401 && message === "Token has expired") {
                     await refreshToken();
                     await confirmAndDelete();
                 } else {
-                    return showToast(message, "error")
+                    return showToast(message, "error");
                 }
             } else {
                 console.error("Unexpected error", error);
