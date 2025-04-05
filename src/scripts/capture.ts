@@ -11,6 +11,7 @@ import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
+import { startCapturingMisty } from "./mistyDialog";
 
 /**
  * ChatBoxReader & color definitions
@@ -39,7 +40,7 @@ let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
-let currentWorld: string | null = null;
+export let currentWorld: string | null = null;
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -147,7 +148,11 @@ function processLine(
     };
 }
 
-async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
+export async function reportEvent(
+    matchingEvent: EventKeys,
+    isFirstEvent: boolean,
+    currentWorld: string,
+): Promise<void> {
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
     const eventId = uuid();
@@ -313,6 +318,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1]?.text;
     worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
     if (worldHopMessage) {
+        startCapturingMisty();
         worldHopMessage = false;
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
         await delay(6000);
