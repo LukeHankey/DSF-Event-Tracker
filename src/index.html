@@ -20,14 +20,39 @@
         <!-- Main Tab Content -->
         <div id="mainTab" class="tabs__content tabs__content--active">
             <h2>DSF Event Tracker</h2>
-            <p>Welcome to the DSF Event Tracker!</p>
-            <p>
-                To provide any suggestions, bugs, or feedback, please message in the
-                <a href="https://discord.com/channels/420803245758480405/1302436627972358204"
-                    target="_blank" title="Join the discussion on Discord">
-                alt1 calls channel.
-                </a>
-            </p>
+            <div id="stock-table" class="stock-table-container">
+                <div class="table-scroll">
+                  <table class="event-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Slot A</th>
+                        <th>Slot B</th>
+                        <th>Slot C</th>
+                        <th>Slot D</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- JavaScript will populate rows for the 7 days here -->
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+            <div class="event-footer">
+                <label for="datePicker">Select Date for more information: </label>
+                <input type="date" id="datePicker">
+            </div>
+            <!-- The Modal (hidden by default) -->
+            <div id="merchantModal" class="merchant-modal">
+                <div class="merchant-modal-content">
+                <!-- Close button -->
+                <span class="close" id="merchantModalClose">&times;</span>
+                <h3 id="merchantDateHeading"></h3>
+                <div id="merchantCardsContainer" class="merchant-cards">
+                    <!-- Cards will be populated dynamically -->
+                </div>
+                </div>
+            </div>
         </div>
         <!-- Settings Tab Content -->
         <div id="settingsTab" class="tabs__content">
