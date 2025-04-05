@@ -41,14 +41,15 @@ let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
 export let currentWorld: string | null = null;
+let maxBasey: number = 0;
 
 let worldHopMessage = false;
 let mainboxRect = false;
 
 function updateMainTab(message: string): void {
-    const mainTabParagraph = document.querySelector("#mainTab p");
-    if (mainTabParagraph) {
-        mainTabParagraph.textContent = message;
+    const mainTabHeader = document.querySelector("#mainTab h2");
+    if (mainTabHeader) {
+        mainTabHeader.textContent = message;
     }
 }
 
@@ -83,7 +84,7 @@ export function initCapture(): void {
     if (localStorage.getItem("captureFrequency") == null) {
         localStorage.setItem("captureFrequency", "2");
     }
-    previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
+    previousMainContent = document.querySelector("#mainTab h2")!.innerHTML;
     loadEventHistory();
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
@@ -236,6 +237,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
     if (!chatData) {
         updateMainTab("Could not find chat box.");
+        const futureTime = new Date(new Date().getTime() + 5000);
+        sessionStorage.setItem("lastTimestamp", String(futureTime));
         return;
     }
 
@@ -303,8 +306,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         console.log("Looking up world number for the first time: ", currentWorld);
     }
 
-    if (document.querySelector("#mainTab p")!.textContent === "Could not find chat box.") {
-        document.querySelector("#mainTab p")!.innerHTML = previousMainContent;
+    if (document.querySelector("#mainTab h2")!.textContent === "Could not find chat box.") {
+        document.querySelector("#mainTab h2")!.innerHTML = previousMainContent;
     }
 
     let lines: ChatLine[] = [];
@@ -342,6 +345,16 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         sessionStorage.setItem("lastTimestamp", String(futureTime));
     }
 
+    // Check before as a new line may not have timestamps but previous ones will
+    // Address a random edge case where the OCR reader reads a partial previous line
+    // which might match to an event
+    if (hasTimestamps) {
+        // If a lines basey is > 100 pixels out, then it is too far from the bottom
+        // of the chatbox (where new lines are read) so is probably a misread
+        // Allow 100 pixel distance for multiline text
+        lines = lines.filter((line) => line.basey > maxBasey - 100);
+    }
+
     // Checks on every image captured whether there are timestamps in chat
     // Every image capture in case a user decides to turn it on/off
     hasTimestamps = detectTimestamps(lines);
@@ -372,8 +385,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     line.fragments[1]?.text === undefined,
             );
         }
+        // Filter out the lines which just have a timestamp and optional space
+        lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text));
 
         for (const line of lines) {
+            line.basey > maxBasey ? (maxBasey = line.basey) : (maxBasey = maxBasey);
             if (line.text === lastMessage) continue;
             const { updatedTimestamp, updatedLastMessage } = processLine(line, hasTimestamps);
 
