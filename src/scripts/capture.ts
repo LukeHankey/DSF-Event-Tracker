@@ -153,6 +153,7 @@ export async function reportEvent(
     matchingEvent: EventKeys,
     isFirstEvent: boolean,
     currentWorld: string,
+    overrides: Partial<EventRecord> = {},
 ): Promise<void> {
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
@@ -171,6 +172,7 @@ export async function reportEvent(
         token: token,
         source: "alt1",
         profileEventKey,
+        ...overrides,
     };
 
     try {
