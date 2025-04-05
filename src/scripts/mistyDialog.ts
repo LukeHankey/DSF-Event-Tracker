@@ -160,7 +160,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 export async function readTextFromDialogBox(): Promise<null> {
     if (reader.find()) {
         const color = a1lib.mixColor(255, 0, 0);
-        alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 5000, 1);
+        alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
         const dialogReadable = reader.read();
         if (!dialogReadable || !dialogReadable.text) {
             showToast("Unable to read Misty dialog", "error");
@@ -174,6 +174,9 @@ export async function readTextFromDialogBox(): Promise<null> {
                 newLine = reReadDialogBox();
             } catch (err) {
                 console.log("Unable to capture text from dialog");
+                showToast("Unable to capture text from dialog", "error");
+                stopCapturingMisty();
+                return null;
             }
             dialogReadable.text.push(newLine);
         }
