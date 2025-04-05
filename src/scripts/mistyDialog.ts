@@ -136,7 +136,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
         if (axiosErr.response?.status === 404 && status === "active") {
             // Misty says it's active, but no active event is known → create it
-            await reportEvent(eventName ?? "Unknown", false, world);
+            await reportEvent(eventName ?? "Unknown", false, world, { duration: seconds });
             showToast(`Event added from Misty on world ${world}`);
             console.log(`Event added from Misty on world ${world}`);
             stopCapturingMisty();
