@@ -169,7 +169,12 @@ export async function readTextFromDialogBox(): Promise<null> {
 
         if (dialogReadable.title.toLowerCase() === "misty" && dialogReadable.text.length === 1) {
             // Incomplete read
-            const newLine = reReadDialogBox();
+            let newLine = "";
+            try {
+                newLine = reReadDialogBox();
+            } catch (err) {
+                console.log("Unable to capture text from dialog");
+            }
             dialogReadable.text.push(newLine);
         }
 
