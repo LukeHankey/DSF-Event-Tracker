@@ -32,6 +32,5 @@ if (window.alt1) {
 // When the RuneScape client gains focus, start capturing
 a1lib.on("rsfocus", () => {
     startCapturing();
-    startCapturingMisty();
     // Optionally restore main content if needed
 });
