@@ -214,7 +214,9 @@ export async function reportEvent(
             clearEventTimerResponse.status === 200 &&
             clearEventTimerResponse.data.message === "Event successfully removed"
         ) {
-            console.log(`${matchingEvent} on world ${currentWorld} has been queued for ${eventTime} seconds.`);
+            console.log(
+                `${matchingEvent} on world ${currentWorld} has been queued for ${eventRecord.duration} seconds.`,
+            );
         }
     } catch (err) {
         if ((err as AxiosError).status === 409) {
