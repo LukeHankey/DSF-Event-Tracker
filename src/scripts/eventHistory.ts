@@ -165,6 +165,24 @@ export function updateTableRowCells(
             });
         }
 
+        if (update.cellIndex === 2) {
+            cell.textContent = update.newContent;
+            if (update.newClass !== undefined) {
+                cell.className = update.newClass;
+            }
+            if (update.newStyle !== undefined) {
+                Object.assign(cell.style, update.newStyle);
+            }
+        }
+
+        if (update.cellIndex === 3) {
+            const toggleMistyTimer = document.getElementById("toggleMistyTimer") as HTMLInputElement | null;
+            if (!toggleMistyTimer) return;
+            const mistyTimer = toggleMistyTimer.checked;
+
+            updateTimer(row, update, mistyTimer);
+        }
+
         if (update.cellIndex === 4) {
             // Special handling for the reportedBy cell.
             // Check for an existing icon.
@@ -190,14 +208,6 @@ export function updateTableRowCells(
                 }
                 textSpan.textContent = update.newContent || "Unknown";
             }
-        } else {
-            cell.textContent = update.newContent;
-            if (update.newClass !== undefined) {
-                cell.className = update.newClass;
-            }
-            if (update.newStyle !== undefined) {
-                Object.assign(cell.style, update.newStyle);
-            }
         }
     });
 }
@@ -219,6 +229,36 @@ export function updateHideExpiredRows(): void {
         } else {
             row.style.display = "";
         }
+    }
+}
+
+function updateTimer(
+    row: HTMLTableRowElement,
+    update: { cellIndex: number; newContent: string },
+    mistyChecked: boolean = false,
+): void {
+    const cells = row.getElementsByTagName("td");
+    const timeLeftText = cells[3].textContent?.trim() || "";
+    const eventName = (cells[1].textContent?.trim() || "Unknown") as EventKeys;
+    const maxDuration = eventTimes[eventName];
+
+    if (mistyChecked) {
+        // Count up
+        let remainingSeconds: number;
+        if (timeLeftText === "Expired") {
+            remainingSeconds = 0;
+        } else {
+            remainingSeconds = parseDuration(update.newContent);
+        }
+        const elapsed = maxDuration - remainingSeconds;
+        if (elapsed <= 0) {
+            cells[3].textContent = "Event starting";
+        } else {
+            cells[3].textContent = elapsed === maxDuration ? "Expired" : formatTimeLeftValue(elapsed);
+        }
+    } else {
+        // Count down
+        cells[3].textContent = update.newContent;
     }
 }
 
@@ -610,6 +650,11 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
 
     // Finally, add this cell to the row.
     row.appendChild(reportedByCell);
+
+    const toggleMistyTimer = document.getElementById("toggleMistyTimer") as HTMLInputElement | null;
+    if (toggleMistyTimer && toggleMistyTimer.checked) {
+        updateTimer(row, { cellIndex: 3, newContent: formatTimeLeft(event) }, true);
+    }
 
     // If current event is a pinned event or the event mode is not set to pin, add it to the top
     const favMode = localStorage.getItem("favoriteEventsMode");
