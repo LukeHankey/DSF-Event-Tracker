@@ -160,8 +160,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
 export async function readTextFromDialogBox(): Promise<null> {
     if (reader.find()) {
-        const color = a1lib.mixColor(255, 0, 0);
-        alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
         const dialogReadable = reader.read();
         if (!dialogReadable || !dialogReadable.text) {
             showToast("Unable to read Misty dialog", "error");
@@ -190,7 +188,12 @@ export async function readTextFromDialogBox(): Promise<null> {
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
 
-        await updateTimersFromMisty({ seconds, status, eventName });
+        if (dialogReadable.title.toLowerCase() === "misty") {
+            const color = a1lib.mixColor(255, 0, 0);
+            alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
+            await updateTimersFromMisty({ seconds, status, eventName });
+        }
+
         return null;
     } else {
         return null;
