@@ -134,38 +134,7 @@ export function updateTableRowCells(
         const cell = row.cells[update.cellIndex];
         if (!cell) return;
 
-        if (update.cellIndex === 1) {
-            // Clear the cell
-            cell.innerHTML = "";
-
-            // Create a <select> element
-            const select = document.createElement("select");
-            select.classList.add("event-dropdown");
-            // Populate with known events
-            KNOWN_EVENTS.forEach((eventName) => {
-                const option = document.createElement("option");
-                option.value = eventName;
-                option.textContent = eventName;
-
-                // Mark the current event as selected
-                if (eventName === update.newContent) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
-
-            // Append the dropdown to the cell
-            cell.appendChild(select);
-
-            // (Optional) Listen for changes in the dropdown
-            // so you can immediately handle updates if you wish:
-            select.addEventListener("change", () => {
-                console.log("Selected event changed to:", select.value);
-                // e.g., update your local event data or call a function
-            });
-        }
-
-        if (update.cellIndex === 2) {
+        if ([1, 2].includes(update.cellIndex)) {
             cell.textContent = update.newContent;
             if (update.newClass !== undefined) {
                 cell.className = update.newClass;
@@ -244,18 +213,15 @@ function updateTimer(
 
     if (mistyChecked) {
         // Count up
-        let remainingSeconds: number;
-        if (timeLeftText === "Expired") {
-            remainingSeconds = 0;
+        let elapsed: number;
+        if (["Expired", "Event starting"].includes(update.newContent)) {
+            cells[3].textContent = update.newContent;
+            return;
         } else {
-            remainingSeconds = parseDuration(update.newContent);
+            elapsed = parseDuration(update.newContent);
         }
-        const elapsed = maxDuration - remainingSeconds;
-        if (elapsed <= 0) {
-            cells[3].textContent = "Event starting";
-        } else {
-            cells[3].textContent = elapsed === maxDuration ? "Expired" : formatTimeLeftValue(elapsed);
-        }
+
+        cells[3].textContent = elapsed >= maxDuration ? "Expired" : formatTimeLeftValue(elapsed);
     } else {
         // Count down
         cells[3].textContent = update.newContent;
@@ -415,18 +381,20 @@ export function updateEvent(event: EventRecord): void {
 
 export function updateEventTimers(): void {
     const now = Date.now();
+    const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
 
     eventHistory.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
-        let remaining = event.duration - elapsed;
+        const maxDuration = eventTimes[event.event];
+        let remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
 
         const row = rowMap.get(event.id);
         if (row) {
             if (row && row.classList.contains("editing")) return;
-            updateTableRowCells(row, [{ cellIndex: 3, newContent: formatTimeLeftValue(remaining) }]);
+            updateTableRowCells(row, [{ cellIndex: 3, newContent: formatTimeLeft(event) }]);
         }
 
-        if (remaining < 0) {
+        if ((remaining < 0 && !mistyToggle) || (mistyToggle && maxDuration < remaining)) {
             const alreadyExpired = expiredEvents.some((e) => e.id === event.id);
             if (!alreadyExpired) {
                 expiredEvents.push(event);
@@ -777,6 +745,7 @@ function editEvent(event: EventRecord): void {
                 // For cell 1, if it contains a dropdown, replace it with its selected value.
                 const select = cell.querySelector("select");
                 if (select) {
+                    cell.innerHTML = "";
                     cell.textContent = select.value;
                 }
             } else if (index > 0) {
@@ -828,16 +797,14 @@ function editEvent(event: EventRecord): void {
         // Determine if duration or event changed
         const durationChanged = newDurationText !== row.dataset.originalDuration?.trim();
         const eventChanged = eventName !== event.event;
+        const maxDuration = eventTimes[eventName];
 
         // Parse duration only if necessary
-        console.log(durationChanged, eventChanged);
         if (durationChanged || eventChanged) {
             newDuration = parseDuration(newDurationText);
             newTimestamp = Date.now();
 
-            console.log(newDuration, eventTimes[eventName], eventName, event.event);
-
-            if (newDuration > eventTimes[eventName] && eventName === event.event) {
+            if (newDuration > maxDuration && eventName === event.event) {
                 showToast("❌ Time left cannot be longer than a fresh spawn!", "error");
 
                 // Revert all values
@@ -848,12 +815,16 @@ function editEvent(event: EventRecord): void {
 
                 return;
             } else if (eventName !== event.event) {
-                console.log(eventTimes[eventName], newDuration);
-                newDuration = Math.min(eventTimes[eventName], newDuration);
+                newDuration = Math.min(maxDuration, newDuration);
             }
         } else {
             newDuration = event.duration;
             newTimestamp = event.timestamp;
+        }
+
+        const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
+        if (mistyToggle) {
+            newDuration = maxDuration - newDuration;
         }
 
         const token = localStorage.getItem("accessToken");
@@ -885,15 +856,25 @@ function editEvent(event: EventRecord): void {
 }
 
 function formatTimeLeft(event: EventRecord): string {
+    const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
     const now = Date.now();
     const elapsed = (now - event.timestamp) / 1000;
-    let remaining = event.duration - elapsed;
-    if (remaining < 0) remaining = 0;
-    return formatTimeLeftValue(remaining);
+    const maxDuration = eventTimes[event.event];
+    let remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
+    if (remaining < 0 && !mistyToggle) {
+        return formatTimeLeftValue(0);
+    } else if (remaining < 0 && mistyToggle) {
+        return "Event starting";
+    } else if (mistyToggle) {
+        return remaining > maxDuration ? "Expired" : formatTimeLeftValue(remaining);
+    } else {
+        return formatTimeLeftValue(remaining);
+    }
 }
 
 function formatTimeLeftValue(seconds: number): string {
-    if (seconds <= 0) return "Expired";
+    const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
+    if (seconds <= 0 && !mistyToggle) return "Expired";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}m ${secs}s`;
