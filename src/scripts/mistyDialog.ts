@@ -1,5 +1,5 @@
 import DialogReader from "alt1/dialog";
-import { EventKeys, eventTimes } from "./events";
+import { EventKeys, EventRecord, eventTimes } from "./events";
 import * as a1lib from "alt1";
 import * as OCR from "alt1/ocr";
 import { currentWorld, reportEvent } from "./capture";
@@ -7,6 +7,7 @@ import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
 import fontmono2 from "alt1/fonts/chatbox/12pt.js";
+import { wsClient } from "./ws";
 
 type TimerData = {
     seconds: number;
@@ -115,7 +116,9 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         console.log("Misty time not updated - world not found.");
         return;
     }
+    stopCapturingMisty();
 
+    const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
     try {
         const event = await axios.get(`${API_URL}/worlds/${world}/event`);
 
@@ -127,10 +130,19 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
                     Origin: ORIGIN,
                 },
             });
+            const activeEventStatus = event.data.message[0];
+            const eventRecord = JSON.parse(activeEventStatus.event_record);
+            const mistyEditEvent: EventRecord = { ...eventRecord };
+            mistyEditEvent.token = localStorage.getItem("accessToken") ?? "";
+            mistyEditEvent.type = "editEvent";
+            mistyEditEvent.duration = newDuration;
+            mistyEditEvent.timestamp = Date.now();
+            mistyEditEvent.oldEvent = eventRecord;
+
+            wsClient.send(mistyEditEvent);
         }
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
-        stopCapturingMisty();
     } catch (err) {
         const axiosErr = err as AxiosError;
 
@@ -140,7 +152,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration });
             showToast(`Event added from Misty on world ${world}`);
             console.log(`Event added from Misty on world ${world}`);
-            stopCapturingMisty();
         } else if (axiosErr.response?.status === 404 && status === "inactive") {
             // Misty says it's inactive, and no event exists → just update the timer
             await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`, {
@@ -151,7 +162,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             });
             showToast(`Misty time updated for world ${world}`);
             console.log(`Misty time updated for world ${world}`);
-            stopCapturingMisty();
         } else {
             console.error("Unhandled error from world event:", axiosErr);
         }
@@ -188,7 +198,7 @@ export async function readTextFromDialogBox(): Promise<null> {
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
 
-        if (dialogReadable.title.toLowerCase() === "misty") {
+        if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
             const color = a1lib.mixColor(255, 0, 0);
             alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
             await updateTimersFromMisty({ seconds, status, eventName });
