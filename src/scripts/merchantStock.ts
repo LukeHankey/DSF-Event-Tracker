@@ -264,7 +264,7 @@ function showDetailedStockForDate(selectedDate: Date): void {
     // Finally, show the modal.
     const merchantModal = document.getElementById("merchantModal");
     if (merchantModal) {
-        merchantModal.style.display = "block";
+        merchantModal.style.display = "flex";
     }
 }
 
