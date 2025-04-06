@@ -342,7 +342,7 @@ function showConfirmationModal({
     modalMessage.textContent = message;
     yesBtn.textContent = confirmText;
 
-    modal.style.display = "block";
+    modal.style.display = "flex";
 
     const cleanup = () => {
         modal.style.display = "none";
@@ -461,7 +461,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Show the modal when the info button is clicked
     infoButton.addEventListener("click", function () {
-        modal.style.display = "block";
+        modal.style.display = "flex";
     });
 
     // Hide the modal when the close button (×) is clicked
