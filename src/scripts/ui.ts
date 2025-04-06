@@ -301,7 +301,7 @@ if (toggleMistyTimer) {
     toggleMistyTimer.checked = storedState === "true";
 
     // Update the header text on load based on the saved state.
-    const table = document.querySelector(".event-table") as HTMLTableElement | null;
+    const table = document.querySelector("#eventHistoryTab table.event-table") as HTMLTableElement | null;
     if (table && table.tHead && table.tHead.rows.length > 0) {
         const timerHeaderCell = table.tHead.rows[0].cells[3];
         timerHeaderCell.textContent = toggleMistyTimer.checked ? "Misty Timer" : "Time Left";
@@ -312,7 +312,7 @@ if (toggleMistyTimer) {
         // Save the new state to localStorage
         localStorage.setItem("toggleMistyTimer", checkbox.checked ? "true" : "false");
 
-        const table = document.querySelector(".event-table") as HTMLTableElement | null;
+        const table = document.querySelector("#eventHistoryTab table.event-table") as HTMLTableElement | null;
         if (table && table.tHead && table.tHead.rows.length > 0) {
             // Update the header cell text based on the toggle state.
             const timerHeaderCell = table.tHead.rows[0].cells[3];
