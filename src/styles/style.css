@@ -138,6 +138,8 @@ a {
     display: none;
     position: fixed;
     inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
+    width: 100%;
+    height: 100%;
   
     /* Center the modal horizontally & vertically */
     align-items: center;
@@ -152,7 +154,7 @@ a {
   
 .merchant-modal-content {
     background-color: #1d1b17;
-    padding-bottom: 16px;
+    padding: 0px 20px 20px 20px;
     border: 2px solid #888;
     border-radius: 4px;
     color: #fff;
@@ -164,6 +166,13 @@ a {
     display: flex;
     flex-direction: column;
 }
+
+.merchant-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* pushes close to the right */
+}
+  
   
 .merchant-modal-content .close {
     color: #aaa;
@@ -171,7 +180,7 @@ a {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    margin-left: 8px;
+    margin-left: auto;
 }
   
 .merchant-modal-content .close:hover {
