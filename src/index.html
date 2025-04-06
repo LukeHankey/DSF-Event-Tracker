@@ -142,6 +142,10 @@
                             <input type="checkbox" id="hideExpiredCheckbox" />
                             Hide Expired
                             </label>
+                            <label>
+                            <input type="checkbox" id="toggleMistyTimer" />
+                            Misty Timers
+                            </label>
                             <label id="debugContainer">
                             <select id="testEventSelect"></select>
                             <button id="testWS">WS Event</button>
@@ -203,8 +207,11 @@
         <div id="infoModal" class="modal">
             <div class="modal-content">
                 <span class="close" title="Close">&times;</span>
-                <h2>Tracker Information</h2>
-                <p>Buttons:</p>
+                <h2>Event History Information</h2>
+                <p>The <strong>Hide Expired</strong> checkbox hides any Expired events.</p>
+                <p>The <strong>Misty Timers</strong> checkbox will change the Time Left column to Misty Timer. If editing the event with this checked, you should input the time that Misty provides.</p>
+                <p>The <strong>Clear All</strong> button will remove all events.</p>
+                <h3>Button Icons:</h3>
                 <ul>
                     <li>
                         <img

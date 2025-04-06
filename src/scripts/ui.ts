@@ -294,6 +294,33 @@ if (hideExpiredCheckbox) {
     });
 }
 
+const toggleMistyTimer = document.getElementById("toggleMistyTimer") as HTMLInputElement | null;
+if (toggleMistyTimer) {
+    // Initialize the toggle from localStorage (defaults to unchecked if not set)
+    const storedState = localStorage.getItem("toggleMistyTimer");
+    toggleMistyTimer.checked = storedState === "true";
+
+    // Update the header text on load based on the saved state.
+    const table = document.querySelector(".event-table") as HTMLTableElement | null;
+    if (table && table.tHead && table.tHead.rows.length > 0) {
+        const timerHeaderCell = table.tHead.rows[0].cells[3];
+        timerHeaderCell.textContent = toggleMistyTimer.checked ? "Misty Timer" : "Time Left";
+    }
+
+    toggleMistyTimer.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        // Save the new state to localStorage
+        localStorage.setItem("toggleMistyTimer", checkbox.checked ? "true" : "false");
+
+        const table = document.querySelector(".event-table") as HTMLTableElement | null;
+        if (table && table.tHead && table.tHead.rows.length > 0) {
+            // Update the header cell text based on the toggle state.
+            const timerHeaderCell = table.tHead.rows[0].cells[3];
+            timerHeaderCell.textContent = checkbox.checked ? "Misty Timer" : "Time Left";
+        }
+    });
+}
+
 function showConfirmationModal({
     title = "Confirm",
     message = "Are you sure you want to proceed?",
@@ -316,7 +343,7 @@ function showConfirmationModal({
     modalMessage.textContent = message;
     yesBtn.textContent = confirmText;
 
-    modal.style.display = "block";
+    modal.style.display = "flex";
 
     const cleanup = () => {
         modal.style.display = "none";
@@ -436,7 +463,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Show the modal when the info button is clicked
     infoButton.addEventListener("click", function () {
-        modal.style.display = "block";
+        modal.style.display = "flex";
     });
 
     // Hide the modal when the close button (×) is clicked
