@@ -433,7 +433,7 @@ const modGlobalDeleteBtn = document.getElementById("modGlobalDeleteBtn")!;
 
 // Show the modal and store the event ID
 window.openModActionModal = (eventId: UUIDTypes) => {
-    modModal.style.display = "block";
+    modModal.style.display = "flex";
     modModal.dataset.eventId = String(eventId);
 };
 
