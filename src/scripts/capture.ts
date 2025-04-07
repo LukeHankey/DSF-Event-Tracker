@@ -11,6 +11,7 @@ import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
+import { renderMistyTimers, startMistyimerRefresh } from "./mistyTimers";
 
 /**
  * ChatBoxReader & color definitions
@@ -84,10 +85,16 @@ export function initCapture(): void {
     }
     previousMainContent = document.querySelector("#mainTab p")!.innerHTML;
     loadEventHistory();
+    renderMistyTimers();
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
     if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
         startEventTimerRefresh();
+    }
+
+    const mistyTab = document.getElementById("mistyTimersTab");
+    if (mistyTab?.classList.contains("sub-tab__content--active")) {
+        startMistyimerRefresh();
     }
 }
 
