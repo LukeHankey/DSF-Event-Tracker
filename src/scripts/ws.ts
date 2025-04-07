@@ -5,8 +5,9 @@ import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
+import { WorldEventStatus, updateWorld } from "./mistyTimers";
 
-type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[];
+type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
 
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
@@ -155,10 +156,12 @@ export class WebSocketClient {
                         console.log("✅ Event sent successfully");
                     }
                 }
-            } else if (parsedData.type === "clientProfileUpdate") {
+            } else if ("type" in parsedData && parsedData.type === "clientProfileUpdate") {
                 this.processProfileUpdate(parsedData);
-            } else {
+            } else if ("type" in parsedData) {
                 this.processEvent(parsedData);
+            } else {
+                updateWorld(parsedData);
             }
         } catch (error) {
             console.error("⚠️ Failed to parse WebSocket message:", error);
