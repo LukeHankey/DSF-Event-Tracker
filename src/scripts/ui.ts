@@ -13,9 +13,6 @@ import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
 
-// You can define a union type for the status if you like:
-type StatusType = "ok" | "warning" | "error";
-
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
 tabs.forEach((tab) => {
@@ -60,53 +57,6 @@ tabs.forEach((tab) => {
         }
     });
 });
-
-// Query the status tab and notification
-const statusTab = document.querySelector<HTMLElement>('[data-tab="statusTab"]');
-const statusNotification = document.getElementById("statusNotification") as HTMLElement | null;
-
-// Function to update status dynamically using new BEM classes for status
-function updateStatus(status: StatusType): void {
-    const statusMessage = document.getElementById("statusMessage") as HTMLElement | null;
-    const statusIcon = document.getElementById("statusIcon") as HTMLElement | null;
-    if (!statusMessage || !statusIcon) return;
-
-    // Set base class for the status icon
-    statusIcon.className = "status__icon";
-
-    // Set new status based on value and add the appropriate modifier
-    if (status === "ok") {
-        statusIcon.textContent = "✅";
-        statusMessage.textContent = "Everything is running smoothly.";
-        statusIcon.classList.add("status--ok");
-    } else if (status === "warning") {
-        statusIcon.textContent = "⚠️";
-        statusMessage.textContent = "There might be minor issues.";
-        statusIcon.classList.add("status--warning");
-    } else if (status === "error") {
-        statusIcon.textContent = "❌";
-        statusMessage.textContent = "Critical issues detected!";
-        statusIcon.classList.add("status--error");
-    }
-
-    // Show notification dot if not already on the Status tab
-    if (statusTab && !statusTab.classList.contains("tabs__tab--active") && statusNotification) {
-        statusNotification.style.display = "inline-block";
-    }
-}
-
-// Hide notification when the user clicks on the Status tab
-statusTab?.addEventListener("click", () => {
-    if (statusNotification) {
-        statusNotification.style.display = "none"; // Hide the notification
-    }
-});
-
-// Simulate a backend status update (replace with a real API call)
-setTimeout(() => {
-    // Change this value to "warning" or "error" to test different states
-    updateStatus("ok");
-}, 5000);
 
 // Load settings from localStorage, if available
 const discordIDInput = document.getElementById("discordID") as HTMLInputElement | null;
@@ -428,12 +378,12 @@ window.addEventListener("DOMContentLoaded", () => {
             populateEventDropdown();
         }
     }
-    const infoButton = document.getElementById("infoButton") as HTMLElement;
+    const infoButtonEventHistory = document.getElementById("infoButtonEventHistory") as HTMLElement;
     const modal = document.getElementById("infoModal") as HTMLElement;
     const closeModal = modal.querySelector(".close") as Element;
 
     // Show the modal when the info button is clicked
-    infoButton.addEventListener("click", function () {
+    infoButtonEventHistory.addEventListener("click", function () {
         modal.style.display = "block";
     });
 
