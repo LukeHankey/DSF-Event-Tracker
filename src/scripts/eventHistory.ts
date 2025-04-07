@@ -847,7 +847,7 @@ function formatTimeLeft(event: EventRecord): string {
     return formatTimeLeftValue(remaining);
 }
 
-function formatTimeLeftValue(seconds: number): string {
+export function formatTimeLeftValue(seconds: number): string {
     if (seconds <= 0) return "Expired";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
