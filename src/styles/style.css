@@ -581,3 +581,14 @@ MOD ACTIONS MODAL
 .toast--error {
     background-color: #dc3545; /* red for error */
 }
+
+#mistyTimersTab.sub-tab__content--active {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+#mistyTab.tabs__content--active {
+    display: flex !important;
+}
