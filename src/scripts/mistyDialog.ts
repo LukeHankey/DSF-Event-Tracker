@@ -168,7 +168,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-export async function readTextFromDialogBox(): Promise<null> {
+async function readTextFromDialogBox(): Promise<null> {
     if (reader.find()) {
         const dialogReadable = reader.read();
         if (!dialogReadable || !dialogReadable.text) {
@@ -176,7 +176,11 @@ export async function readTextFromDialogBox(): Promise<null> {
             return null;
         }
 
-        if (dialogReadable.title.toLowerCase() === "misty" && dialogReadable.text.length === 1) {
+        if (
+            dialogReadable.title.toLowerCase() === "misty" &&
+            dialogReadable.text.length === 1 &&
+            !dialogReadable.text[0].endsWith(".")
+        ) {
             // Incomplete read
             let newLine = "";
             try {
