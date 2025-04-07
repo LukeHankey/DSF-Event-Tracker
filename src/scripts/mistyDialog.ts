@@ -105,7 +105,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     const { seconds, status, eventName } = timerData;
 
     const world =
-        Number(currentWorld) === alt1.currentWorld
+        Number(currentWorld) === alt1.currentWorld && alt1.currentWorld > 0
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
