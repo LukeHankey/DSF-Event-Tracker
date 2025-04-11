@@ -178,7 +178,11 @@ export async function readTextFromDialogBox(): Promise<void> {
             return;
         }
 
-        if (dialogReadable.title.toLowerCase() === "misty" && dialogReadable.text.length === 1) {
+        if (
+            dialogReadable.title.toLowerCase() === "misty" &&
+            dialogReadable.text.length === 1 &&
+            !dialogReadable.text[0].endsWith(".")
+        ) {
             // Incomplete read
             let newLine = "";
             try {
