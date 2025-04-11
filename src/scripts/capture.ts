@@ -325,11 +325,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1]?.text;
     worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
     if (worldHopMessage) {
-        startCapturingMisty();
         worldHopMessage = false;
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
         await delay(6000);
         console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
+        startCapturingMisty();
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
 
         if (currentWorld && Number(currentWorld) > 0) {
@@ -520,7 +520,7 @@ function matchesEventEnd(lineText: string): boolean {
 /**
  * Find the current world number in the friend list
  */
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
+export const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
     const imageRef = imgs.runescapeWorldPretext;
     const pos = img.findSubimage(imageRef);
     const buffData: ImageData = img.toData();
