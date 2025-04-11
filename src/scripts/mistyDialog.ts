@@ -208,8 +208,8 @@ export async function readTextFromDialogBox(): Promise<void> {
         if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
             const color = a1lib.mixColor(255, 0, 0);
             alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
-            await updateTimersFromMisty({ seconds, status, eventName });
             console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
+            await updateTimersFromMisty({ seconds, status, eventName });
         }
 
         return;
