@@ -105,13 +105,11 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     const { seconds, status, eventName } = timerData;
 
     const world =
-        Number(currentWorld) === alt1.currentWorld && alt1.currentWorld > 0
+        Number(currentWorld) === alt1.currentWorld
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
-              : sessionStorage.getItem("currentWorld")
-                ? sessionStorage.getItem("currentWorld")
-                : await findWorldNumber(a1lib.captureHoldFullRs());
+              : await findWorldNumber(a1lib.captureHoldFullRs());
 
     if (!world) {
         showToast("Misty time not updated - world not found.", "error");
@@ -208,8 +206,8 @@ export async function readTextFromDialogBox(): Promise<void> {
         if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
             const color = a1lib.mixColor(255, 0, 0);
             alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
-            await updateTimersFromMisty({ seconds, status, eventName });
             console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
+            await updateTimersFromMisty({ seconds, status, eventName });
         }
 
         return;
