@@ -105,13 +105,11 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     const { seconds, status, eventName } = timerData;
 
     const world =
-        Number(currentWorld) === alt1.currentWorld && alt1.currentWorld > 0
+        Number(currentWorld) === alt1.currentWorld
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
-              : sessionStorage.getItem("currentWorld")
-                ? sessionStorage.getItem("currentWorld")
-                : await findWorldNumber(a1lib.captureHoldFullRs());
+              : await findWorldNumber(a1lib.captureHoldFullRs());
 
     if (!world) {
         showToast("Misty time not updated - world not found.", "error");
