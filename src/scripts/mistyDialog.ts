@@ -196,14 +196,16 @@ export async function readTextFromDialogBox(): Promise<null> {
         const seconds = parseTimeToSeconds(dialogText);
         if (!seconds) return null;
 
-        const eventName = getValidEventNames().find((event) => dialogText.includes(event)) ?? null;
+        let eventName = getValidEventNames().find((event) => dialogText.includes(event));
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
+        eventName ??= "Unknown";
 
         if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
             const color = a1lib.mixColor(255, 0, 0);
             alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
             await updateTimersFromMisty({ seconds, status, eventName });
+            console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
         }
 
         return null;
