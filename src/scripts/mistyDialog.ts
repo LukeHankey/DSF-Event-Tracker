@@ -170,12 +170,12 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-export async function readTextFromDialogBox(): Promise<null> {
+export async function readTextFromDialogBox(): Promise<void> {
     if (reader.find()) {
         const dialogReadable = reader.read();
         if (!dialogReadable || !dialogReadable.text) {
             showToast("Unable to read Misty dialog", "error");
-            return null;
+            return;
         }
 
         if (dialogReadable.title.toLowerCase() === "misty" && dialogReadable.text.length === 1) {
@@ -187,14 +187,14 @@ export async function readTextFromDialogBox(): Promise<null> {
                 console.log("Unable to capture text from dialog");
                 showToast("Unable to capture text from dialog", "error");
                 stopCapturingMisty();
-                return null;
+                return;
             }
             dialogReadable.text.push(newLine);
         }
 
         const dialogText = dialogReadable.text.join(" ");
         const seconds = parseTimeToSeconds(dialogText);
-        if (!seconds) return null;
+        if (!seconds) return;
 
         let eventName = getValidEventNames().find((event) => dialogText.includes(event));
 
@@ -208,8 +208,6 @@ export async function readTextFromDialogBox(): Promise<null> {
             console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
         }
 
-        return null;
-    } else {
-        return null;
+        return;
     }
 }
