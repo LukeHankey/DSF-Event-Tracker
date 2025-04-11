@@ -2,7 +2,7 @@ import DialogReader from "alt1/dialog";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import * as a1lib from "alt1";
 import * as OCR from "alt1/ocr";
-import { currentWorld, reportEvent } from "./capture";
+import { currentWorld, reportEvent, findWorldNumber } from "./capture";
 import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
@@ -109,12 +109,14 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
-              : sessionStorage.getItem("currentWorld");
+              : sessionStorage.getItem("currentWorld")
+                ? sessionStorage.getItem("currentWorld")
+                : await findWorldNumber(a1lib.captureHoldFullRs());
 
     if (!world) {
         showToast("Misty time not updated - world not found.", "error");
         console.log("Misty time not updated - world not found.");
-        return;
+        return stopCapturingMisty();
     }
     stopCapturingMisty();
 
