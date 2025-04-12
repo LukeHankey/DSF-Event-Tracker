@@ -872,7 +872,7 @@ function formatTimeLeft(event: EventRecord): string {
     }
 }
 
-function formatTimeLeftValue(seconds: number): string {
+export function formatTimeLeftValue(seconds: number): string {
     const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
     if (seconds <= 0 && !mistyToggle) return "Expired";
     const mins = Math.floor(seconds / 60);
