@@ -11,6 +11,7 @@ import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
+import { startCapturingMisty } from "./mistyDialog";
 
 /**
  * ChatBoxReader & color definitions
@@ -39,7 +40,7 @@ let previousMainContent: string;
 let hasTimestamps: boolean;
 let lastTimestamp: Date;
 let lastMessage: string;
-let currentWorld: string | null = null;
+export let currentWorld: string | null = null;
 
 let worldHopMessage = false;
 let mainboxRect = false;
@@ -147,7 +148,12 @@ function processLine(
     };
 }
 
-async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, currentWorld: string): Promise<void> {
+export async function reportEvent(
+    matchingEvent: EventKeys,
+    isFirstEvent: boolean,
+    currentWorld: string,
+    overrides: Partial<EventRecord> = {},
+): Promise<void> {
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
     const eventId = uuid();
@@ -165,6 +171,7 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
         token: token,
         source: "alt1",
         profileEventKey,
+        ...overrides,
     };
 
     try {
@@ -207,7 +214,9 @@ async function reportEvent(matchingEvent: EventKeys, isFirstEvent: boolean, curr
             clearEventTimerResponse.status === 200 &&
             clearEventTimerResponse.data.message === "Event successfully removed"
         ) {
-            console.log(`${matchingEvent} on world ${currentWorld} has been queued for ${eventTime} seconds.`);
+            console.log(
+                `${matchingEvent} on world ${currentWorld} has been queued for ${eventRecord.duration} seconds.`,
+            );
         }
     } catch (err) {
         if ((err as AxiosError).status === 409) {
@@ -317,6 +326,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
         await delay(6000);
         console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
+        startCapturingMisty();
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
 
         if (currentWorld && Number(currentWorld) > 0) {
@@ -494,7 +504,7 @@ function matchesEventEnd(lineText: string): boolean {
 /**
  * Find the current world number in the friend list
  */
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
+export const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
     const imageRef = imgs.runescapeWorldPretext;
     const pos = img.findSubimage(imageRef);
     const buffData: ImageData = img.toData();
