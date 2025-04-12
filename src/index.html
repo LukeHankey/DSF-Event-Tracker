@@ -151,20 +151,8 @@
                             <button id="testWS">WS Event</button>
                             </label>
                         </div>
-                        <div class="event-footer">
-                            <div class="footer-left">
-                                <label>
-                                <input type="checkbox" id="hideExpiredCheckbox" />
-                                Hide Expired
-                                </label>
-                                <label id="debugContainer">
-                                <select id="testEventSelect"></select>
-                                <button id="testWS">WS Event</button>
-                                </label>
-                            </div>
-                            <div class="footer-right">
-                                <button id="clearHistoryBtn" type="button">Clear All</button>
-                            </div>
+                        <div class="footer-right">
+                            <button id="clearHistoryBtn" type="button">Clear All</button>
                         </div>
                     </div>
                 </div>
@@ -212,7 +200,7 @@
         <div id="mistyTab" class="tabs__content">
             <div id="mistyTimersTab" class="sub-tab__content sub-tab__content--active">
                 <div class="table-scroll">
-                    <table class="event-table">
+                    <table class="event-table" id="mistyTimersTable">
                         <thead>
                             <tr>
                                 <th>
@@ -229,15 +217,6 @@
                     </table>
                 </div>
                 <div class="event-footer">
-                    <div class="footer-left">
-                        <label>
-                        <input type="checkbox" id="hideExpiredCheckbox" />
-                        Hide Expired
-                        </label>
-                    </div>
-                    <div class="footer-right">
-                        <button id="clearHistoryBtn" type="button">Clear All</button>
-                    </div>
                 </div>
             </div>
         </div>

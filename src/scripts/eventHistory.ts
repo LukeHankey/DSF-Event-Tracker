@@ -4,6 +4,7 @@ import { wsClient } from "./ws";
 import { DEBUG } from "../config";
 import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
+import { updateWorld } from "./mistyTimers";
 
 export let eventHistory: EventRecord[] = [];
 export let expiredEvents: EventRecord[] = [];
@@ -399,6 +400,13 @@ export function updateEventTimers(): void {
             if (!alreadyExpired) {
                 expiredEvents.push(event);
                 moveExpiredEventBelowActiveEvents(event);
+                console.log(`Adding world ${event.world} to Misty tab.`);
+                updateWorld({
+                    world: Number(event.world),
+                    status: "Inactive",
+                    last_update_timestamp: Date.now(),
+                    inactive_time: 0,
+                });
             }
         }
     });

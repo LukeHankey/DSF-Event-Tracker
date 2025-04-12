@@ -39,6 +39,16 @@ export type WorldEventStatus =
 
 type NonActiveWorldEventStatus = Exclude<WorldEventStatus, ActiveWorldEventStatus>;
 
+enum TableColumn {
+    // Assuming the first column (index 0) is unused.
+    World = 1,
+    Status = 2,
+    InactiveFor = 3,
+}
+
+type TableColumnName = keyof typeof TableColumn;
+type TableSortOrder = "asc" | "desc";
+
 export const worldMap = new Map<number, WorldEventStatus>();
 const worldsOnDisplay = new Set<number>();
 let refreshIntervalMisty: NodeJS.Timeout | null = null;
@@ -52,13 +62,15 @@ export async function renderMistyTimers(): Promise<void> {
         });
 
         const currentWorldEvents: WorldEventStatus[] = currentWorldEventsAxios.data.message;
+        const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
+        const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
         for (const currentWorldEvent of currentWorldEvents) {
             worldMap.set(currentWorldEvent.world, currentWorldEvent);
             if (currentWorldEvent.status === "Active") continue;
-            appendEventRow(currentWorldEvent);
+            appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
         }
-        initTableSorting();
+        initTableSorting(tableSort, tableSortOrder);
     } catch (err) {
         console.error(err);
     }
@@ -72,69 +84,65 @@ export function startMistyimerRefresh(): void {
     }
 }
 
-// Timer function to update the world timers:
+function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventStatus, now: number): void {
+    const lastUpdate = worldEventStatus.last_update_timestamp;
+    const secondsElapsed = (now - lastUpdate) / 1000;
+    const cells = row.getElementsByTagName("td");
+    const timerCell = cells[3];
+    const statusCell = cells[2];
+
+    // If the elapsed time has reached or exceeded 2 hours 16 minutes (8160 seconds)
+    if (secondsElapsed >= 8160) {
+        // If status hasn't already been updated to "Unknown", update it.
+        if (worldEventStatus.status !== "Unknown") {
+            const updatedEvent: UnknownWorldEventStatus = {
+                world: worldEventStatus.world,
+                last_update_timestamp: worldEventStatus.last_update_timestamp,
+                status: "Unknown",
+            };
+            worldMap.set(worldEventStatus.world, updatedEvent);
+        }
+        // Mark the row as "stopped" to skip further updates.
+        row.setAttribute("data-timer-stopped", "true");
+
+        // Freeze the timer cell at 2:16:00
+        const fixedTime = formatTimeLeftValueMisty(8160);
+        if (timerCell) {
+            timerCell.textContent = fixedTime;
+        }
+        // Update the status cell to "Unknown"
+        if (statusCell) {
+            statusCell.textContent = "Unknown";
+        }
+        return;
+    }
+
+    // Otherwise, update normally.
+    const formattedTime = formatTimeLeftValueMisty(secondsElapsed);
+    if (timerCell) {
+        timerCell.textContent = formattedTime;
+    }
+    if (statusCell) {
+        statusCell.textContent = worldEventStatus.status;
+    }
+}
+
 function updateWorldTimers(): void {
     const tbody = document.getElementById("mistyTimerBody");
     if (!tbody) return;
-
     const now = Date.now();
     const rows = Array.from(tbody.getElementsByTagName("tr"));
 
     for (const row of rows) {
-        // If this row’s timer is already stopped, skip it.
+        // Skip this row if it has already been stopped.
         if (row.getAttribute("data-timer-stopped") === "true") continue;
 
-        // Assuming the world id is stored as a data attribute:
+        // Assuming the world id is stored as a data attribute on the row.
         const world = Number(row.dataset.world);
         const worldEventStatus = worldMap.get(world);
         if (!worldEventStatus) continue;
 
-        const lastUpdate = worldEventStatus.last_update_timestamp;
-        if (!lastUpdate) continue;
-
-        // Calculate elapsed time in seconds.
-        const secondsElapsed = (now - lastUpdate) / 1000;
-
-        const cells = row.getElementsByTagName("td");
-        const timerCell = cells[3];
-        const statusCell = cells[2];
-
-        // Check if the elapsed time is >= 2 hours 16 minutes (8160 seconds).
-        if (secondsElapsed >= 8160) {
-            // Update the status to "Unknown" if it isn’t already.
-            if (worldEventStatus.status !== "Unknown") {
-                const updatedEvent: UnknownWorldEventStatus = {
-                    world,
-                    last_update_timestamp: worldEventStatus.last_update_timestamp,
-                    status: "Unknown",
-                };
-                worldMap.set(world, updatedEvent);
-            }
-            // Mark this row as stopped so it won't be updated further.
-            row.setAttribute("data-timer-stopped", "true");
-
-            // Option 1: Freeze the timer cell at 2:16:00.
-            const fixedTime = formatTimeLeftValueMisty(8160);
-            if (timerCell) {
-                timerCell.textContent = fixedTime;
-            }
-            // Update the status cell to "Unknown".
-            const statusCell = cells[2];
-            if (statusCell) {
-                statusCell.textContent = "Unknown";
-            }
-            // Skip further processing for this row.
-            continue;
-        }
-
-        // Otherwise, update the timer as usual.
-        const formattedTime = formatTimeLeftValueMisty(secondsElapsed);
-        if (timerCell) {
-            timerCell.textContent = formattedTime;
-        }
-        if (statusCell) {
-            statusCell.textContent = worldEventStatus.status;
-        }
+        updateRowTimer(row, worldEventStatus, now);
     }
 }
 
@@ -153,9 +161,10 @@ function formatTimeLeftValueMisty(seconds: number): string {
 }
 
 export function updateWorld(worldEvent: WorldEventStatus): void {
-    console.log(2, worldEvent, worldsOnDisplay);
     // Update the stored status for the world.
     worldMap.set(worldEvent.world, worldEvent);
+    const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
+    const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
     if (worldEvent.status === "Active") {
         // If the world is now active, remove its row from the table.
@@ -170,11 +179,30 @@ export function updateWorld(worldEvent: WorldEventStatus): void {
         worldsOnDisplay.delete(worldEvent.world);
     } else if (!worldsOnDisplay.has(worldEvent.world)) {
         // If the world is not active and not already displayed, append its row.
-        appendEventRow(worldEvent as NonActiveWorldEventStatus);
+        appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
+    } else {
+        // This is the case for an update on an already-displayed non-active world.
+        const tbody = document.getElementById("mistyTimerBody");
+        if (tbody) {
+            // Get the row for the current world.
+            const row = tbody.querySelector(`tr[data-world="${worldEvent.world}"]`) as HTMLTableRowElement | null;
+            if (row) {
+                // Remove the "stopped" attribute so the row updates again.
+                row.removeAttribute("data-timer-stopped");
+                // Update this row with the latest timing info immediately.
+                updateRowTimer(row, worldEvent, Date.now());
+            }
+        }
+        const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
+        sortTableByColumn(table, TableColumn[tableSort], tableSortOrder === "asc");
     }
 }
 
-function appendEventRow(worldEvent: NonActiveWorldEventStatus): void {
+function appendEventRow(
+    worldEvent: NonActiveWorldEventStatus,
+    sortBy: TableColumnName,
+    sortOrder: TableSortOrder,
+): void {
     const tbody = document.getElementById("mistyTimerBody");
     if (!tbody) return;
 
@@ -203,18 +231,29 @@ function appendEventRow(worldEvent: NonActiveWorldEventStatus): void {
     // Append the row to the table body
     tbody.appendChild(row);
     worldsOnDisplay.add(worldEvent.world);
+
+    // Map the sortBy option (e.g. "World" | "Status" | "InactiveFor") to its numeric index.
+    const columnIndex = TableColumn[sortBy];
+
+    // Re-sort the table based on the given column.
+    const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
+    if (table) {
+        // Here we assume ascending order; you might want to extend this to include a direction parameter.
+        sortTableByColumn(table, columnIndex, sortOrder === "asc");
+    }
 }
 
 // Initialize sorting for each header cell.
-function initTableSorting(): void {
-    const table = document.getElementById("mistyTimersTab") as HTMLTableElement;
+function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): void {
+    const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
     if (!table) return;
     const headers = table.querySelectorAll("th");
     headers.forEach((header, index) => {
+        if (index === 0) return;
         header.addEventListener("click", () => {
             // Toggle sort direction using a data attribute.
             const currentDir = header.getAttribute("data-sort-dir") || "asc";
-            const newDir = currentDir === "asc" ? "desc" : "asc";
+            const newDir: TableSortOrder = currentDir === "asc" ? "desc" : "asc";
             header.setAttribute("data-sort-dir", newDir);
 
             // Update icon in this header.
@@ -223,23 +262,76 @@ function initTableSorting(): void {
                 icon.textContent = newDir === "asc" ? "▲" : "▼";
             }
 
-            sortTableByColumn(table, index, newDir === "asc");
+            // Map the header index to our enum.
+            let column: TableColumn;
+            switch (index) {
+                case 1:
+                    column = TableColumn.World;
+                    break;
+                case 2:
+                    column = TableColumn.Status;
+                    break;
+                case 3:
+                    column = TableColumn.InactiveFor;
+                    break;
+                default:
+                    console.warn(`No sortable column defined for header index ${index}`);
+                    return;
+            }
+
+            localStorage.setItem("tableSort", TableColumn[column]);
+            localStorage.setItem("tableSortOrder", newDir);
+
+            sortTableByColumn(table, column, newDir === "asc");
         });
+
+        // On startup, if this header corresponds to the stored sort column, update its UI.
+        let column: TableColumn | undefined;
+        switch (index) {
+            case 1:
+                column = TableColumn.World;
+                break;
+            case 2:
+                column = TableColumn.Status;
+                break;
+            case 3:
+                column = TableColumn.InactiveFor;
+                break;
+            default:
+                return;
+        }
+
+        // TableColumn[column] converts the numeric enum value to its key name.
+        const columnName = TableColumn[column] as string;
+        if (sortBy && sortBy === columnName) {
+            header.setAttribute("data-sort-dir", sortOrder);
+            const icon = header.querySelector(".sort-icon");
+            if (icon) {
+                icon.textContent = sortOrder === "asc" ? "▲" : "▼";
+            }
+        }
+
+        // If a stored sort column exists, convert it back to a TableColumn enum value and sort.
+        if (sortBy) {
+            // Convert the stored sort (e.g., "World") to the enum numeric value.
+            const sortColumn = (TableColumn as any)[sortBy] as TableColumn;
+            sortTableByColumn(table, sortColumn, sortOrder === "asc");
+        }
     });
 }
 
 // Sort the table rows by a specific column index.
-function sortTableByColumn(table: HTMLTableElement, columnIndex: number, asc: boolean): void {
+function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: boolean): void {
     const tbody = table.querySelector("tbody");
     if (!tbody) return;
     const rows = Array.from(tbody.querySelectorAll("tr"));
 
     rows.sort((rowA, rowB) => {
-        const cellA = rowA.children[columnIndex].textContent?.trim() || "";
-        const cellB = rowB.children[columnIndex].textContent?.trim() || "";
+        const cellA = rowA.children[column].textContent?.trim() || "";
+        const cellB = rowB.children[column].textContent?.trim() || "";
 
         // For the timer column, parse the timer strings.
-        if (columnIndex === 3) {
+        if (column === TableColumn.InactiveFor) {
             const timeA = parseTimerString(cellA);
             const timeB = parseTimerString(cellB);
             return asc ? timeA - timeB : timeB - timeA;
