@@ -368,3 +368,25 @@ function parseTimerString(timerStr: string): number {
     }
     return totalSeconds;
 }
+
+const hideInactiveWorlds = document.getElementById("hideInactiveWorlds") as HTMLInputElement | null;
+if (hideInactiveWorlds) {
+    hideInactiveWorlds.addEventListener("change", () => {
+        const hideInactive = hideInactiveWorlds.checked;
+        const tbody = document.getElementById("mistyTimersTable");
+        if (!tbody) return;
+
+        // Iterate over each row in the misty timers table.
+        const rows = Array.from(tbody.getElementsByTagName("tr"));
+        for (const row of rows) {
+            const cells = row.getElementsByTagName("td");
+            if (!cells.length) continue;
+            const status = cells[2].textContent?.trim() || "";
+            if (hideInactive && status === "Inactive") {
+                row.style.display = "none";
+            } else {
+                row.style.display = "";
+            }
+        }
+    });
+}
