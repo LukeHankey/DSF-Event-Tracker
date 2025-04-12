@@ -164,7 +164,7 @@
                             <!-- Header: Profile Info and Total Events -->
                             <div class="profile-header">
                                 <div class="profile-info">Your Profile</div>
-                                <div class="total-events" id="totalEvents">120</div>
+                                <div class="total-events" id="totalEvents">0</div>
                             </div>
                             <!-- 2x2 Stats Grid -->
                             <div class="stats-grid">
@@ -255,16 +255,24 @@
                             />
                         Allows you to update or correct an existing event. Available only to Scouters.
                     </li>
+                    <li>
+                        <img
+                            src="./rotten_potato.png"
+                            alt="Mod Actions"
+                            class="button-icon"
+                            />
+                        Allows moderators to perform a Global Delete Action.
+                    </li>
                 </ul>
             </div>
         </div>
         <!--  Modal for a confirmation -->
         <div id="confirmModal" class="modal">
             <div class="modal-content">
-              <span class="close" id="confirmModalClose" title="Close">&times;</span>
-              <h2 id="confirmModalTitle">Confirm</h2>
-              <p id="confirmModalMessage">Are you sure?</p>
-              <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <span class="close" id="confirmModalClose" title="Close">&times;</span>
+                <h2 id="confirmModalTitle">Confirm</h2>
+                <p id="confirmModalMessage">Are you sure?</p>
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
                     <button id="confirmModalYes">Yes</button>
                     <button id="confirmModalNo">Cancel</button>
                 </div>
@@ -273,13 +281,13 @@
         <!-- Mod Actions Modal -->
         <div id="modActionModal" class="modal">
             <div class="modal-content mod-modal">
-            <span class="close" id="modActionClose" title="Close">&times;</span>
-            <h3>Mod Actions</h3>
-            <div class="mod-actions">
-                <button id="modGlobalDeleteBtn">
+                <span class="close" id="modActionClose" title="Close">&times;</span>
+                <h3>Mod Actions</h3>
+                <div class="mod-actions">
+                    <button id="modGlobalDeleteBtn">
                     <span class="mod-icon">📢</span> Global Delete
-                </button>
-            </div>
+                    </button>
+                </div>
             </div>
         </div>
         <!-- External JavaScript -->
