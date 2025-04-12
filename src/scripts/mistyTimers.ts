@@ -153,6 +153,7 @@ function formatTimeLeftValueMisty(seconds: number): string {
 }
 
 export function updateWorld(worldEvent: WorldEventStatus): void {
+    console.log(2, worldEvent, worldsOnDisplay);
     // Update the stored status for the world.
     worldMap.set(worldEvent.world, worldEvent);
 
