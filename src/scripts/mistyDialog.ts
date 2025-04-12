@@ -16,6 +16,7 @@ type TimerData = {
 };
 
 let mistyInterval: NodeJS.Timeout | null;
+let retryCount: number = 0;
 
 // Initialize the DialogReader
 const reader = new DialogReader();
@@ -186,7 +187,15 @@ export async function readTextFromDialogBox(): Promise<void> {
             try {
                 newLine = reReadDialogBox();
             } catch (err) {
-                console.log("Unable to capture text from dialog");
+                console.log(`Unable to capture text from dialog, retry=${retryCount + 1}`, dialogReadable);
+                if (
+                    dialogReadable.text[0] === "No, I've been watching closely, and nothing has happened" &&
+                    retryCount < 3
+                ) {
+                    retryCount += 1;
+                    readTextFromDialogBox();
+                }
+                retryCount = 0;
                 showToast("Unable to capture text from dialog", "error");
                 stopCapturingMisty();
                 return;
