@@ -7,11 +7,12 @@ import {
     MEMBER_WORLDS,
 } from "./eventHistory";
 import { EventKeys, EventRecord, eventTimes } from "./events";
-import { wsClient } from "./ws";
+import { wsClient, refreshToken } from "./ws";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
+import { renderStockTable } from "./merchantStock";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -396,6 +397,7 @@ function populateEventDropdown() {
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
+    renderStockTable();
     const debugContainer = document.getElementById("debugContainer");
     if (debugContainer) {
         if (!DEBUG) {
@@ -487,14 +489,31 @@ modGlobalDeleteBtn.addEventListener("click", () => {
         const event = eventHistory.find((e) => e.id === eventId);
         if (!event) return;
 
-        const eventToSend = { ...event, type: "deleteEvent" } as EventRecord;
+        const token = localStorage.getItem("accessToken");
+        const eventToSend = { ...event, type: "deleteEvent", token } as EventRecord;
 
-        await axios.delete(`${API_URL}/worlds/${eventToSend.world}/event`, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${eventToSend.token}`,
-            },
-        });
+        try {
+            await axios.delete(`${API_URL}/worlds/${eventToSend.world}/event`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${eventToSend.token}`,
+                },
+            });
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error(error);
+                const status = error.response?.status;
+                const message = error.response?.data?.detail;
+                if (status === 401 && message === "Token has expired") {
+                    await refreshToken();
+                    await confirmAndDelete();
+                } else {
+                    return showToast(message, "error");
+                }
+            } else {
+                console.error("Unexpected error", error);
+            }
+        }
 
         wsClient.send(eventToSend);
     };

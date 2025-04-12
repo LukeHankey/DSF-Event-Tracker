@@ -14,6 +14,7 @@ import "./ui";
 
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
+import { scheduleMidnightUpdate } from "./merchantStock";
 import { startCapturingMisty } from "./mistyDialog";
 
 // If running in Alt1, identify and start capturing
@@ -21,11 +22,13 @@ if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
+    // Call scheduleMidnightUpdate once when your app starts.
+    scheduleMidnightUpdate();
     startCapturingMisty();
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-    document.querySelector("#mainTab p")!.innerHTML =
+    document.querySelector("#mainTab h2")!.innerHTML =
         `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
 }
 
