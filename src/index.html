@@ -10,13 +10,13 @@
     <body class="nis body" id="body">
         <!-- Tabs Navigation -->
         <div class="tabs">
-            <div class="tabs__tab tabs__tab--active" data-tab="mainTab">Main</div>
-            <div class="tabs__tab" data-tab="settingsTab">Settings</div>
-            <div class="tabs__tab" data-tab="scoutsTab">Scouts</div>
+            <div class="tabs__tab tabs__tab--active" data-tab="scoutsTab">Scouts</div>
             <div class="tabs__tab" data-tab="mistyTab">Misty</div>
+            <div class="tabs__tab" data-tab="mainTab">Merch Stock</div>
+            <div class="tabs__tab" data-tab="settingsTab">Settings</div>
         </div>
         <!-- Main Tab Content -->
-        <div id="mainTab" class="tabs__content tabs__content--active">
+        <div id="mainTab" class="tabs__content">
             <h2>DSF Event Tracker</h2>
             <div id="stock-table" class="stock-table-container">
                 <div class="table-scroll">
@@ -109,50 +109,51 @@
             </form>
         </div>
         <!-- Scouts Tab Content -->
-        <div id="scoutsTab" class="tabs__content">
-        <div class="sub-tabs">
-            <div class="sub-tab sub-tab--active" data-subtab="eventHistoryTab">Event History</div>
-            <div class="sub-tab" data-subtab="profileTab">Profile</div>
-        </div>
-        <div class="sub-tab__content__container">
-            <!-- Event History Sub-Tab -->
-            <div id="eventHistoryWrapper" class="event-history-wrapper">
-                <div id="eventHistoryTab" class="sub-tab__content sub-tab__content--active">
-                    <div class="table-scroll">
-                        <table class="event-table">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <button id="infoButtonEventHistory" class="info-button" title="Click for info">ℹ️</button>
-                                    </th>
-                                    <th>Event</th>
-                                    <th>World</th>
-                                    <th>Time Left</th>
-                                    <th>Reported By</th>
-                                </tr>
-                            </thead>
-                            <tbody id="eventHistoryBody">
-                                <!-- JS will insert rows here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="event-footer">
-                        <div class="footer-left">
-                            <label>
-                            <input type="checkbox" id="hideExpiredCheckbox" />
-                            Hide Expired
-                            </label>
-                            <label>
-                            <input type="checkbox" id="toggleMistyTimer" />
-                            Misty Timers
-                            </label>
-                            <label id="debugContainer">
-                            <select id="testEventSelect"></select>
-                            <button id="testWS">WS Event</button>
-                            </label>
+        <div id="scoutsTab" class="tabs__content tabs__content--active">
+            <div class="sub-tabs">
+                <div class="sub-tab sub-tab--active" data-subtab="eventHistoryTab">Event History</div>
+                <div class="sub-tab" data-subtab="profileTab">Profile</div>
+            </div>
+            <div class="sub-tab__content__container">
+                <!-- Event History Sub-Tab -->
+                <div id="eventHistoryWrapper" class="event-history-wrapper">
+                    <div id="eventHistoryTab" class="sub-tab__content sub-tab__content--active">
+                        <div class="table-scroll">
+                            <table class="event-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <button id="infoButtonEventHistory" class="info-button" title="Click for info">ℹ️</button>
+                                        </th>
+                                        <th>Event</th>
+                                        <th>World</th>
+                                        <th>Time Left</th>
+                                        <th>Reported By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventHistoryBody">
+                                    <!-- JS will insert rows here -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="footer-right">
-                            <button id="clearHistoryBtn" type="button">Clear All</button>
+                        <div class="event-footer">
+                            <div class="footer-left">
+                                <label>
+                                <input type="checkbox" id="hideExpiredCheckbox" />
+                                Hide Expired
+                                </label>
+                                <label>
+                                <input type="checkbox" id="toggleMistyTimer" />
+                                Misty Timers
+                                </label>
+                                <label id="debugContainer">
+                                <select id="testEventSelect"></select>
+                                <button id="testWS">WS Event</button>
+                                </label>
+                            </div>
+                            <div class="footer-right">
+                                <button id="clearHistoryBtn" type="button">Clear All</button>
+                            </div>
                         </div>
                     </div>
                 </div>
