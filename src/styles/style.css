@@ -35,6 +35,12 @@ body.nis {
 h2 {
     color: #0077cc;
     margin: 0;
+    margin-block-start: 0;
+    margin-bottom: 5px;
+}
+
+h3 {
+    margin: 0
 }
 
 a {
@@ -625,7 +631,7 @@ small {
 /* Modal content box */
 .modal-content {
     background-color: #fefefe;
-    margin: 10% auto; /* 10% from the top, centered */
+    margin: auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%; /* Adjust as needed */
@@ -656,13 +662,17 @@ small {
 .modal-content li {
     margin-bottom: 0.5rem; /* Spacing between items */
 }
+
+.modal-content p {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
   
   /* Ensure images line up well with text */
 .button-icon {
     vertical-align: middle; 
-    width: 16px; /* Adjust as needed */
-    height: 16px; /* Adjust as needed */
-    margin-right: 8px; /* Space between the icon and the text */
+    width: 14px; /* Adjust as needed */
+    height: 14px; /* Adjust as needed */
 }
 
 
@@ -738,51 +748,13 @@ MOD ACTIONS MODAL
     background-color: #dc3545; /* red for error */
 }
 
-
-/* -------------------------------------
-6) STATUS
-------------------------------------- */
-.status {
-    display: flex; /* use flex layout */
-    align-items: center; /* vertically center icon and text */
-    justify-content: flex-start; /* left-align contents */
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    margin: auto; /* keeps the .status box centered on the page */
+#mistyTimersTab.sub-tab__content--active {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
 }
 
-.status__icon {
-    font-size: 24px;
-    margin-right: 8px; /* space between icon and text */
+#mistyTab.tabs__content--active {
+    display: flex !important;
 }
-
-/* Modifiers for status color states */
-.status--ok {
-    color: #28a745; /* Green ✅ */
-}
-
-.status--warning {
-    color: #ffc107; /* Yellow ⚠️ */
-}
-
-.status--error {
-    color: #dc3545; /* Red ❌ */
-}
-
-/* Notification Dot */
-.status__notification {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: red;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 50%;
-    display: none; /* Hidden by default */
-}
-

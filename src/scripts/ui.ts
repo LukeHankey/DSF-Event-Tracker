@@ -14,9 +14,6 @@ import axios from "axios";
 import { showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
 
-// You can define a union type for the status if you like:
-type StatusType = "ok" | "warning" | "error";
-
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
 tabs.forEach((tab) => {
@@ -61,53 +58,6 @@ tabs.forEach((tab) => {
         }
     });
 });
-
-// Query the status tab and notification
-const statusTab = document.querySelector<HTMLElement>('[data-tab="statusTab"]');
-const statusNotification = document.getElementById("statusNotification") as HTMLElement | null;
-
-// Function to update status dynamically using new BEM classes for status
-function updateStatus(status: StatusType): void {
-    const statusMessage = document.getElementById("statusMessage") as HTMLElement | null;
-    const statusIcon = document.getElementById("statusIcon") as HTMLElement | null;
-    if (!statusMessage || !statusIcon) return;
-
-    // Set base class for the status icon
-    statusIcon.className = "status__icon";
-
-    // Set new status based on value and add the appropriate modifier
-    if (status === "ok") {
-        statusIcon.textContent = "✅";
-        statusMessage.textContent = "Everything is running smoothly.";
-        statusIcon.classList.add("status--ok");
-    } else if (status === "warning") {
-        statusIcon.textContent = "⚠️";
-        statusMessage.textContent = "There might be minor issues.";
-        statusIcon.classList.add("status--warning");
-    } else if (status === "error") {
-        statusIcon.textContent = "❌";
-        statusMessage.textContent = "Critical issues detected!";
-        statusIcon.classList.add("status--error");
-    }
-
-    // Show notification dot if not already on the Status tab
-    if (statusTab && !statusTab.classList.contains("tabs__tab--active") && statusNotification) {
-        statusNotification.style.display = "inline-block";
-    }
-}
-
-// Hide notification when the user clicks on the Status tab
-statusTab?.addEventListener("click", () => {
-    if (statusNotification) {
-        statusNotification.style.display = "none"; // Hide the notification
-    }
-});
-
-// Simulate a backend status update (replace with a real API call)
-setTimeout(() => {
-    // Change this value to "warning" or "error" to test different states
-    updateStatus("ok");
-}, 5000);
 
 // Load settings from localStorage, if available
 const discordIDInput = document.getElementById("discordID") as HTMLInputElement | null;
@@ -294,6 +244,33 @@ if (hideExpiredCheckbox) {
     });
 }
 
+const toggleMistyTimer = document.getElementById("toggleMistyTimer") as HTMLInputElement | null;
+if (toggleMistyTimer) {
+    // Initialize the toggle from localStorage (defaults to unchecked if not set)
+    const storedState = localStorage.getItem("toggleMistyTimer");
+    toggleMistyTimer.checked = storedState === "true";
+
+    // Update the header text on load based on the saved state.
+    const table = document.querySelector("#eventHistoryTab table.event-table") as HTMLTableElement | null;
+    if (table && table.tHead && table.tHead.rows.length > 0) {
+        const timerHeaderCell = table.tHead.rows[0].cells[3];
+        timerHeaderCell.textContent = toggleMistyTimer.checked ? "Misty Timer" : "Time Left";
+    }
+
+    toggleMistyTimer.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        // Save the new state to localStorage
+        localStorage.setItem("toggleMistyTimer", checkbox.checked ? "true" : "false");
+
+        const table = document.querySelector("#eventHistoryTab table.event-table") as HTMLTableElement | null;
+        if (table && table.tHead && table.tHead.rows.length > 0) {
+            // Update the header cell text based on the toggle state.
+            const timerHeaderCell = table.tHead.rows[0].cells[3];
+            timerHeaderCell.textContent = checkbox.checked ? "Misty Timer" : "Time Left";
+        }
+    });
+}
+
 function showConfirmationModal({
     title = "Confirm",
     message = "Are you sure you want to proceed?",
@@ -316,7 +293,7 @@ function showConfirmationModal({
     modalMessage.textContent = message;
     yesBtn.textContent = confirmText;
 
-    modal.style.display = "block";
+    modal.style.display = "flex";
 
     const cleanup = () => {
         modal.style.display = "none";
@@ -430,13 +407,13 @@ window.addEventListener("DOMContentLoaded", () => {
             populateEventDropdown();
         }
     }
-    const infoButton = document.getElementById("infoButton") as HTMLElement;
+    const infoButtonEventHistory = document.getElementById("infoButtonEventHistory") as HTMLElement;
     const modal = document.getElementById("infoModal") as HTMLElement;
     const closeModal = modal.querySelector(".close") as Element;
 
     // Show the modal when the info button is clicked
-    infoButton.addEventListener("click", function () {
-        modal.style.display = "block";
+    infoButtonEventHistory.addEventListener("click", function () {
+        modal.style.display = "flex";
     });
 
     // Hide the modal when the close button (×) is clicked
@@ -485,7 +462,7 @@ const modGlobalDeleteBtn = document.getElementById("modGlobalDeleteBtn")!;
 
 // Show the modal and store the event ID
 window.openModActionModal = (eventId: UUIDTypes) => {
-    modModal.style.display = "block";
+    modModal.style.display = "flex";
     modModal.dataset.eventId = String(eventId);
 };
 
