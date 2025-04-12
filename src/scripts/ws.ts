@@ -6,6 +6,7 @@ import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
 import { WorldEventStatus, updateWorld } from "./mistyTimers";
+import { WorldRecord } from "./mistyDialog";
 
 type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
 
@@ -161,6 +162,7 @@ export class WebSocketClient {
             } else if ("type" in parsedData) {
                 this.processEvent(parsedData);
             } else {
+                console.log(1, parsedData);
                 updateWorld(parsedData);
             }
         } catch (error) {
@@ -192,7 +194,7 @@ export class WebSocketClient {
         }
     }
 
-    send(data: EventRecord): void {
+    send(data: EventRecord | WorldRecord): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(data));
         } else {
