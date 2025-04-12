@@ -207,7 +207,8 @@ export async function readTextFromDialogBox(): Promise<void> {
         const seconds = parseTimeToSeconds(dialogText);
         if (!seconds) return;
 
-        let eventName = getValidEventNames().find((event) => dialogText.includes(event));
+        // Misty reports Sea Monster as Sea monster. Lower all text
+        let eventName = getValidEventNames().find((event) => dialogText.toLowerCase().includes(event.toLowerCase()));
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
         eventName ??= "Unknown";
