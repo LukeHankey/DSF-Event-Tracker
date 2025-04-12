@@ -323,7 +323,11 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     }
 
     const lastGameTimestamp = lines.slice(-1)[0]?.fragments[1]?.text;
-    worldHopMessage = lines.some((line) => line.text.includes("Attempting to switch worlds..."));
+    worldHopMessage = lines.some(
+        (line) =>
+            line.text.includes("Attempting to switch worlds...") ||
+            line.text.includes("Attempting to change worlds..."),
+    );
     if (worldHopMessage) {
         worldHopMessage = false;
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
