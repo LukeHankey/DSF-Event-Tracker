@@ -2,7 +2,7 @@ import DialogReader from "alt1/dialog";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import * as a1lib from "alt1";
 import * as OCR from "alt1/ocr";
-import { currentWorld, reportEvent } from "./capture";
+import { currentWorld, reportEvent, findWorldNumber } from "./capture";
 import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
@@ -20,6 +20,7 @@ export interface WorldRecord {
 }
 
 let mistyInterval: NodeJS.Timeout | null;
+let retryCount: number = 0;
 
 // Initialize the DialogReader
 const reader = new DialogReader();
@@ -109,16 +110,16 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     const { seconds, status, eventName } = timerData;
 
     const world =
-        Number(currentWorld) === alt1.currentWorld && alt1.currentWorld > 0
+        Number(currentWorld) === alt1.currentWorld
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
-              : sessionStorage.getItem("currentWorld");
+              : await findWorldNumber(a1lib.captureHoldFullRs());
 
     if (!world) {
         showToast("Misty time not updated - world not found.", "error");
         console.log("Misty time not updated - world not found.");
-        return;
+        return stopCapturingMisty();
     }
     stopCapturingMisty();
 
@@ -173,12 +174,12 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-async function readTextFromDialogBox(): Promise<null> {
+export async function readTextFromDialogBox(): Promise<void> {
     if (reader.find()) {
         const dialogReadable = reader.read();
         if (!dialogReadable || !dialogReadable.text) {
             showToast("Unable to read Misty dialog", "error");
-            return null;
+            return;
         }
 
         if (
@@ -191,30 +192,39 @@ async function readTextFromDialogBox(): Promise<null> {
             try {
                 newLine = reReadDialogBox();
             } catch (err) {
-                console.log("Unable to capture text from dialog");
+                console.log(`Unable to capture text from dialog, retry=${retryCount + 1}`, dialogReadable);
+                if (
+                    dialogReadable.text[0] === "No, I've been watching closely, and nothing has happened" &&
+                    retryCount < 3
+                ) {
+                    retryCount += 1;
+                    readTextFromDialogBox();
+                }
+                retryCount = 0;
                 showToast("Unable to capture text from dialog", "error");
                 stopCapturingMisty();
-                return null;
+                return;
             }
             dialogReadable.text.push(newLine);
         }
 
         const dialogText = dialogReadable.text.join(" ");
         const seconds = parseTimeToSeconds(dialogText);
-        if (!seconds) return null;
+        if (!seconds) return;
 
-        const eventName = getValidEventNames().find((event) => dialogText.includes(event)) ?? null;
+        // Misty reports Sea Monster as Sea monster. Lower all text
+        let eventName = getValidEventNames().find((event) => dialogText.toLowerCase().includes(event.toLowerCase()));
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
+        eventName ??= "Unknown";
 
         if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
             const color = a1lib.mixColor(255, 0, 0);
             alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
+            console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
             await updateTimersFromMisty({ seconds, status, eventName });
         }
 
-        return null;
-    } else {
-        return null;
+        return;
     }
 }

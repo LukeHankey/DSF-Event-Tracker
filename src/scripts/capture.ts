@@ -510,7 +510,7 @@ function matchesEventEnd(lineText: string): boolean {
 /**
  * Find the current world number in the friend list
  */
-const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
+export const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
     const imageRef = imgs.runescapeWorldPretext;
     const pos = img.findSubimage(imageRef);
     const buffData: ImageData = img.toData();
