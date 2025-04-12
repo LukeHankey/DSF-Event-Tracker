@@ -176,55 +176,69 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
 export async function readTextFromDialogBox(): Promise<void> {
     if (reader.find()) {
-        const dialogReadable = reader.read();
-        if (!dialogReadable || !dialogReadable.text) {
-            showToast("Unable to read Misty dialog", "error");
-            return;
-        }
-
-        if (
-            dialogReadable.title.toLowerCase() === "misty" &&
-            dialogReadable.text.length === 1 &&
-            !dialogReadable.text[0].endsWith(".")
-        ) {
-            // Incomplete read
-            let newLine = "";
-            try {
-                newLine = reReadDialogBox();
-            } catch (err) {
-                console.log(`Unable to capture text from dialog, retry=${retryCount + 1}`, dialogReadable);
-                if (
-                    dialogReadable.text[0] === "No, I've been watching closely, and nothing has happened" &&
-                    retryCount < 3
-                ) {
-                    retryCount += 1;
-                    readTextFromDialogBox();
-                }
-                retryCount = 0;
-                showToast("Unable to capture text from dialog", "error");
-                stopCapturingMisty();
+        try {
+            const dialogReadable = reader.read();
+            if (!dialogReadable || !dialogReadable.text) {
+                showToast("Unable to read Misty dialog", "error");
                 return;
             }
-            dialogReadable.text.push(newLine);
+
+            if (
+                dialogReadable.title.toLowerCase() === "misty" &&
+                dialogReadable.text.length === 1 &&
+                !dialogReadable.text[0].endsWith(".")
+            ) {
+                // Incomplete read
+                let newLine = "";
+                try {
+                    newLine = reReadDialogBox();
+                } catch (err) {
+                    console.log(`Unable to capture text from dialog, retry=${retryCount + 1}`, dialogReadable);
+                    if (
+                        dialogReadable.text[0] === "No, I've been watching closely, and nothing has happened" &&
+                        retryCount < 3
+                    ) {
+                        retryCount += 1;
+                        readTextFromDialogBox();
+                    }
+                    retryCount = 0;
+                    showToast("Unable to capture text from dialog", "error");
+                    stopCapturingMisty();
+                    return;
+                }
+                dialogReadable.text.push(newLine);
+            }
+
+            const dialogText = dialogReadable.text.join(" ");
+            const seconds = parseTimeToSeconds(dialogText);
+            if (!seconds) return;
+
+            // Misty reports Sea Monster as Sea monster. Lower all text
+            let eventName = getValidEventNames().find((event) =>
+                dialogText.toLowerCase().includes(event.toLowerCase()),
+            );
+
+            const status: "active" | "inactive" = eventName ? "active" : "inactive";
+            eventName ??= "Unknown";
+
+            if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
+                const color = a1lib.mixColor(255, 0, 0);
+                alt1.overLayRect(
+                    color,
+                    reader.pos?.x!,
+                    reader.pos?.y!,
+                    reader.pos?.width!,
+                    reader.pos?.height!,
+                    2000,
+                    1,
+                );
+                console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
+                await updateTimersFromMisty({ seconds, status, eventName });
+            }
+
+            return;
+        } catch (err) {
+            return;
         }
-
-        const dialogText = dialogReadable.text.join(" ");
-        const seconds = parseTimeToSeconds(dialogText);
-        if (!seconds) return;
-
-        // Misty reports Sea Monster as Sea monster. Lower all text
-        let eventName = getValidEventNames().find((event) => dialogText.toLowerCase().includes(event.toLowerCase()));
-
-        const status: "active" | "inactive" = eventName ? "active" : "inactive";
-        eventName ??= "Unknown";
-
-        if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
-            const color = a1lib.mixColor(255, 0, 0);
-            alt1.overLayRect(color, reader.pos?.x!, reader.pos?.y!, reader.pos?.width!, reader.pos?.height!, 2000, 1);
-            console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
-            await updateTimersFromMisty({ seconds, status, eventName });
-        }
-
-        return;
     }
 }
