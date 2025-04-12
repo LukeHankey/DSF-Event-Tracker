@@ -15,6 +15,10 @@ type TimerData = {
     eventName: EventKeys | null;
 };
 
+export interface WorldRecord {
+    world: number;
+}
+
 let mistyInterval: NodeJS.Timeout | null;
 let retryCount: number = 0;
 
@@ -161,6 +165,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
                     Origin: ORIGIN,
                 },
             });
+            wsClient.send({ world: Number(world) } as WorldRecord);
             showToast(`Misty time updated for world ${world}`);
             console.log(`Misty time updated for world ${world}`);
         } else {

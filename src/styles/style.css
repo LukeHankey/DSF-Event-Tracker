@@ -591,51 +591,13 @@ MOD ACTIONS MODAL
     background-color: #dc3545; /* red for error */
 }
 
-
-/* -------------------------------------
-6) STATUS
-------------------------------------- */
-.status {
-    display: flex; /* use flex layout */
-    align-items: center; /* vertically center icon and text */
-    justify-content: flex-start; /* left-align contents */
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    margin: auto; /* keeps the .status box centered on the page */
+#mistyTimersTab.sub-tab__content--active {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
 }
 
-.status__icon {
-    font-size: 24px;
-    margin-right: 8px; /* space between icon and text */
+#mistyTab.tabs__content--active {
+    display: flex !important;
 }
-
-/* Modifiers for status color states */
-.status--ok {
-    color: #28a745; /* Green ✅ */
-}
-
-.status--warning {
-    color: #ffc107; /* Yellow ⚠️ */
-}
-
-.status--error {
-    color: #dc3545; /* Red ❌ */
-}
-
-/* Notification Dot */
-.status__notification {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: red;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 50%;
-    display: none; /* Hidden by default */
-}
-
