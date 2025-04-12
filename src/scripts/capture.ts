@@ -205,10 +205,9 @@ export async function reportEvent(
 
         wsClient.send(eventRecord);
 
-        const eventTime = eventTimes[matchingEvent];
         const eventWorld = `${matchingEvent}_${currentWorld}`;
         const clearEventTimerResponse = await axios.post(
-            `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventTime}`,
+            `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventRecord.duration}`,
             {
                 headers: {
                     "Content-Type": "application/json",
