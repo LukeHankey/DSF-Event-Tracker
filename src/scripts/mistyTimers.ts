@@ -350,6 +350,9 @@ function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: bo
 
     // Reattach the rows in sorted order.
     rows.forEach((row) => tbody.appendChild(row));
+
+    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
+    if (hideInactiveWorldsElement.checked) hideInactiveWorlds();
 }
 
 function parseTimerString(timerStr: string): number {
@@ -369,24 +372,34 @@ function parseTimerString(timerStr: string): number {
     return totalSeconds;
 }
 
-const hideInactiveWorlds = document.getElementById("hideInactiveWorlds") as HTMLInputElement | null;
-if (hideInactiveWorlds) {
-    hideInactiveWorlds.addEventListener("change", () => {
-        const hideInactive = hideInactiveWorlds.checked;
-        const tbody = document.getElementById("mistyTimersTable");
-        if (!tbody) return;
+function hideInactiveWorlds(): void {
+    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
+    const hideInactive = hideInactiveWorldsElement.checked;
+    const tbody = document.getElementById("mistyTimersTable");
+    if (!tbody) return;
 
-        // Iterate over each row in the misty timers table.
-        const rows = Array.from(tbody.getElementsByTagName("tr"));
-        for (const row of rows) {
-            const cells = row.getElementsByTagName("td");
-            if (!cells.length) continue;
-            const status = cells[2].textContent?.trim() || "";
-            if (hideInactive && status === "Inactive") {
-                row.style.display = "none";
-            } else {
-                row.style.display = "";
-            }
+    // Iterate over each row in the misty timers table.
+    const rows = Array.from(tbody.getElementsByTagName("tr"));
+    for (const row of rows) {
+        const cells = row.getElementsByTagName("td");
+        if (!cells.length) continue;
+        const status = cells[2].textContent?.trim() || "";
+        if (hideInactive && status === "Inactive") {
+            row.style.display = "none";
+        } else {
+            row.style.display = "";
         }
+    }
+}
+
+const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement | null;
+if (hideInactiveWorldsElement) {
+    const storedState = localStorage.getItem("hideInactiveWorlds");
+    hideInactiveWorldsElement.checked = storedState === "true";
+
+    hideInactiveWorldsElement.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        localStorage.setItem("hideInactiveWorlds", checkbox.checked ? "true" : "false");
+        hideInactiveWorlds();
     });
 }

@@ -239,7 +239,12 @@ sub_tabs.forEach((subTab) => {
 
 const hideExpiredCheckbox = document.getElementById("hideExpiredCheckbox") as HTMLInputElement | null;
 if (hideExpiredCheckbox) {
-    hideExpiredCheckbox.addEventListener("change", () => {
+    const storedState = localStorage.getItem("hideExpiredRows");
+    hideExpiredCheckbox.checked = storedState === "true";
+
+    hideExpiredCheckbox.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        localStorage.setItem("hideExpiredRows", checkbox.checked ? "true" : "false");
         updateHideExpiredRows();
     });
 }
