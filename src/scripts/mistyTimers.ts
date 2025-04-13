@@ -106,7 +106,7 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
         row.setAttribute("data-timer-stopped", "true");
 
         // Freeze the timer cell at 2:16:00
-        const fixedTime = formatTimeLeftValueMisty(8160);
+        const fixedTime = formatTimeLeftValueMisty(-1);
         if (timerCell) {
             timerCell.textContent = fixedTime;
         }
@@ -147,7 +147,7 @@ function updateWorldTimers(): void {
 }
 
 function formatTimeLeftValueMisty(seconds: number): string {
-    const totalMinutes = Math.floor(seconds / 60);
+    const totalMinutes = Math.floor(Math.abs(seconds) / 60);
     const secs = Math.floor(seconds % 60);
 
     // If total minutes exceed 59, calculate hours.
