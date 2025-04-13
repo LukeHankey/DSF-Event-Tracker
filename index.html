@@ -223,14 +223,18 @@
                         <input type="checkbox" id="hideInactiveWorlds" />
                         Hide Inactive
                         </label>
+                        <label>
+                        <input type="checkbox" id="hideUnknownWorlds" />
+                        Hide Unknown
+                        </label>
                     </div>
                     <div class="footer-right">
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Modal for displaying button info -->
-        <div id="infoModal" class="modal">
+        <!-- Modal for displaying button info on Scouts Tab-->
+        <div id="infoModalScouts" class="modal">
             <div class="modal-content">
                 <span class="close" title="Close">&times;</span>
                 <h2>Event History Information</h2>
@@ -262,6 +266,25 @@
                             class="button-icon"
                             />
                         Allows moderators to perform a Global Delete Action.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Modal for displaying button info on Misty Tab -->
+        <div id="infoModalMisty" class="modal">
+            <div class="modal-content">
+                <span class="close" title="Close">&times;</span>
+                <h2>Misty Timers Information</h2>
+                <p>The <strong>Hide Inactive/Unknown</strong> checkbox hides any Inactive/Unknown worlds.</p>
+                <h3>Button Icons:</h3>
+                <ul>
+                    <li>
+                        <img
+                            src="./edit_button.png"
+                            alt="Edit Event Button"
+                            class="button-icon"
+                            />
+                        Allows you to update or correct an existing world timer. Available only to Scouters.
                     </li>
                 </ul>
             </div>
