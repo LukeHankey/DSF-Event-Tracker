@@ -163,7 +163,7 @@ export class WebSocketClient {
                 this.processEvent(parsedData);
             } else {
                 console.log(1, parsedData);
-                updateWorld(parsedData);
+                await updateWorld(parsedData);
             }
         } catch (error) {
             console.error("⚠️ Failed to parse WebSocket message:", error);
