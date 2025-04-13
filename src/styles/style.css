@@ -758,3 +758,15 @@ MOD ACTIONS MODAL
 #mistyTab.tabs__content--active {
     display: flex !important;
 }
+
+.misty-timer-hour {
+    width: 4ch;    /* Enough room for two digits; adjust as needed */
+    text-align: center; 
+    box-sizing: content-box; /* Ensure width is strictly for text, not including padding/border */
+}
+
+.misty-timer-minute, .misty-timer-second {
+    width: 4.5ch;
+    text-align: center; 
+    box-sizing: content-box;
+}

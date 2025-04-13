@@ -1,5 +1,9 @@
 import axios from "axios";
-import { API_URL } from "../config";
+import { API_URL, ORIGIN } from "../config";
+import { userHasRequiredRole } from "./permissions";
+import { showToast } from "./notifications";
+import { wsClient } from "./ws";
+import { WorldRecord } from "./mistyDialog";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -68,7 +72,7 @@ export async function renderMistyTimers(): Promise<void> {
         for (const currentWorldEvent of currentWorldEvents) {
             worldMap.set(currentWorldEvent.world, currentWorldEvent);
             if (currentWorldEvent.status === "Active") continue;
-            appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
+            await appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
         }
         initTableSorting(tableSort, tableSortOrder);
     } catch (err) {
@@ -136,6 +140,7 @@ function updateWorldTimers(): void {
     for (const row of rows) {
         // Skip this row if it has already been stopped.
         if (row.getAttribute("data-timer-stopped") === "true") continue;
+        if (row.classList.contains("editing")) continue;
 
         // Assuming the world id is stored as a data attribute on the row.
         const world = Number(row.dataset.world);
@@ -148,7 +153,9 @@ function updateWorldTimers(): void {
 
 function formatTimeLeftValueMisty(seconds: number): string {
     const totalMinutes = Math.floor(Math.abs(seconds) / 60);
-    const secs = Math.floor(seconds % 60);
+    const secs = Math.floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
 
     // If total minutes exceed 59, calculate hours.
     if (totalMinutes > 59) {
@@ -160,7 +167,7 @@ function formatTimeLeftValueMisty(seconds: number): string {
     return `${totalMinutes}m ${secs}s`;
 }
 
-export function updateWorld(worldEvent: WorldEventStatus): void {
+export async function updateWorld(worldEvent: WorldEventStatus): Promise<void> {
     // Update the stored status for the world.
     worldMap.set(worldEvent.world, worldEvent);
     const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
@@ -179,7 +186,7 @@ export function updateWorld(worldEvent: WorldEventStatus): void {
         worldsOnDisplay.delete(worldEvent.world);
     } else if (!worldsOnDisplay.has(worldEvent.world)) {
         // If the world is not active and not already displayed, append its row.
-        appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
+        await appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
     } else {
         // This is the case for an update on an already-displayed non-active world.
         const tbody = document.getElementById("mistyTimerBody");
@@ -198,11 +205,11 @@ export function updateWorld(worldEvent: WorldEventStatus): void {
     }
 }
 
-function appendEventRow(
+async function appendEventRow(
     worldEvent: NonActiveWorldEventStatus,
     sortBy: TableColumnName,
     sortOrder: TableSortOrder,
-): void {
+): Promise<void> {
     const tbody = document.getElementById("mistyTimerBody");
     if (!tbody) return;
 
@@ -221,8 +228,30 @@ function appendEventRow(
         return cell;
     };
 
+    const allowedRoles = ["775940649802793000"]; // Scouter role
+    const hasEditPermission = userHasRequiredRole(allowedRoles);
+
+    const buttonsTd = document.createElement("td");
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "action-buttons";
+
+    if (hasEditPermission) {
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn-extra";
+        editBtn.title = "Edit Misty Timer";
+        const editImg = document.createElement("img");
+        editImg.src = "./edit_button.png";
+        editImg.alt = "Edit action";
+        editBtn.appendChild(editImg);
+        editBtn.addEventListener("click", () => {
+            editMistyTimer(worldEvent.world);
+        });
+        buttonContainer.appendChild(editBtn);
+    }
+    buttonsTd.appendChild(buttonContainer);
+
     // Empty cell for now
-    row.appendChild(document.createElement("td"));
+    row.appendChild(buttonsTd);
     // Create cells for world, status, and the calculated inactive time.
     row.appendChild(createElement(String(worldEvent.world)));
     row.appendChild(createElement(worldEvent.status));
@@ -420,4 +449,197 @@ if (hideUnknownWorldsElement) {
         localStorage.setItem("hideUnknownWorlds", checkbox.checked ? "true" : "false");
         hideWorlds();
     });
+}
+
+/**
+ * Toggle editing mode for a misty timer row based on the world number.
+ *
+ * The original timer format is "Xh XXm XXs" but it may be incomplete (e.g., "05m 30s" or "30s").
+ * On entering edit mode, the status cell is replaced with a dropdown and the timer cell with three number inputs.
+ * - Hour input: type="number", min="0", max="2"
+ * - Minute input: type="number", min="0", max="59"
+ * - Second input: type="number", min="0", max="59"
+ *
+ * When saving, the function formats the value conditionally:
+ * - If hour > 0, include the hour part ("Xh ")
+ * - If hour or minute is nonzero, include the minute part ("XXm ")
+ * - Always include seconds ("XXs")
+ *
+ * @param world - The world number used to identify which row to edit.
+ */
+async function editMistyTimer(world: number): Promise<void> {
+    // Retrieve the table row using the data attribute.
+    const row = document.querySelector(`tr[data-world="${world}"]`) as HTMLTableRowElement;
+    if (!row) return;
+
+    // Retrieve the world event information from worldMap.
+    const worldEvent = worldMap.get(world);
+    if (!worldEvent) return;
+
+    // Check if the row is not yet being edited.
+    if (!row.classList.contains("editing")) {
+        row.classList.add("editing");
+
+        // Save the original values for the editable cells.
+        // Column 2: Status, Column 3: Misty Timer
+        row.dataset.originalStatus = row.cells[2].textContent || "";
+        row.dataset.originalTimer = row.cells[3].textContent || "";
+
+        // --- Column 2: Status (dropdown) ---
+        row.cells[2].innerHTML = "";
+        const statusSelect = document.createElement("select");
+        statusSelect.classList.add("misty-status-dropdown");
+
+        // Define known statuses (adjust if necessary).
+        const KNOWN_STATUSES: Exclude<WorldStatus, "Active">[] = ["Inactive", "Spawnable", "Unknown"];
+        KNOWN_STATUSES.forEach((status) => {
+            const option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+            if (status === row.dataset.originalStatus) {
+                option.selected = true;
+            }
+            statusSelect.appendChild(option);
+        });
+        row.cells[2].appendChild(statusSelect);
+
+        // --- Column 3: Misty Timer (numeric inputs) ---
+        // Parse original format "Xh XXm XXs", which may be incomplete (e.g., "05m 30s" or "30s").
+        const originalTimer = row.dataset.originalTimer || "0h 00m 00s";
+        const tokens = originalTimer.split(" ");
+        let hoursStr = "0";
+        let minutesStr = "0";
+        let secondsStr = "0";
+
+        tokens.forEach((token) => {
+            if (token.endsWith("h")) {
+                hoursStr = token.slice(0, -1);
+            } else if (token.endsWith("m")) {
+                minutesStr = token.slice(0, -1);
+            } else if (token.endsWith("s")) {
+                secondsStr = token.slice(0, -1);
+            }
+        });
+
+        row.cells[3].innerHTML = "";
+
+        // Hour input.
+        const hourInput = document.createElement("input");
+        hourInput.type = "number";
+        hourInput.classList.add("misty-timer-hour");
+        hourInput.value = hoursStr;
+        hourInput.min = "0";
+        hourInput.max = "2";
+        hourInput.step = "1";
+        hourInput.size = 1; // This provides a hint for one-digit input.
+        row.cells[3].appendChild(hourInput);
+
+        // Hour label.
+        const hourLabel = document.createElement("span");
+        hourLabel.textContent = "h ";
+        row.cells[3].appendChild(hourLabel);
+
+        // Minute input.
+        const minuteInput = document.createElement("input");
+        minuteInput.type = "number";
+        minuteInput.classList.add("misty-timer-minute");
+        minuteInput.value = minutesStr;
+        minuteInput.min = "0";
+        minuteInput.max = "59";
+        minuteInput.step = "1";
+        minuteInput.size = 2;
+        row.cells[3].appendChild(minuteInput);
+
+        // Minute label.
+        const minuteLabel = document.createElement("span");
+        minuteLabel.textContent = "m ";
+        row.cells[3].appendChild(minuteLabel);
+
+        // Second input.
+        const secondInput = document.createElement("input");
+        secondInput.type = "number";
+        secondInput.classList.add("misty-timer-second");
+        secondInput.value = secondsStr;
+        secondInput.min = "0";
+        secondInput.max = "59";
+        secondInput.step = "1";
+        secondInput.size = 2;
+        row.cells[3].appendChild(secondInput);
+
+        // Second label.
+        const secondLabel = document.createElement("span");
+        secondLabel.textContent = "s";
+        row.cells[3].appendChild(secondLabel);
+    } else {
+        // Commit the changes and exit editing mode.
+        row.classList.remove("editing");
+        const MAX_SECONDS_ALLOWED = 2 * 3600 + 16 * 60; // 8160 seconds
+
+        // --- Column 2: Commit the Status change ---
+        const statusCell = row.cells[2];
+        const statusSelectEl = statusCell.querySelector("select");
+        if (statusSelectEl) {
+            statusCell.textContent = statusSelectEl.value;
+        }
+
+        // --- Column 3: Update Misty Timer ---
+        const timerCell = row.cells[3];
+        const hourInputEl = timerCell.querySelector("input.misty-timer-hour") as HTMLInputElement;
+        const minuteInputEl = timerCell.querySelector("input.misty-timer-minute") as HTMLInputElement;
+        const secondInputEl = timerCell.querySelector("input.misty-timer-second") as HTMLInputElement;
+        let totalSeconds = 0;
+        if (hourInputEl && minuteInputEl && secondInputEl) {
+            // Parse numbers for conditional formatting.
+            const hour = parseInt(hourInputEl.value, 10) || 0;
+            const minute = parseInt(minuteInputEl.value, 10) || 0;
+            const second = parseInt(secondInputEl.value, 10) || 0;
+
+            let parts: string[] = [];
+            // Include hour if it's greater than 0.
+            if (hour > 0) {
+                parts.push(`${hour}h`);
+            }
+            // Include minute if there's an hour or if minute > 0.
+            if (hour > 0 || minute > 0) {
+                parts.push(`${minute.toString().padStart(2, "0")}m`);
+            }
+            // Always include seconds.
+            parts.push(`${second.toString().padStart(2, "0")}s`);
+
+            const formattedTimer = parts.join(" ");
+            timerCell.textContent = formattedTimer;
+            totalSeconds = hour * 3600 + minute * 60 + second;
+        }
+
+        // --- Optional: Check if values have changed ---
+        const newStatus = row.cells[2].textContent?.trim() || "";
+        const newTimer = row.cells[3].textContent?.trim() || "";
+
+        const unchanged =
+            newStatus === (row.dataset.originalStatus?.trim() || "") &&
+            newTimer === (row.dataset.originalTimer?.trim() || "");
+
+        if (unchanged) {
+            // If nothing has changed, do nothing further.
+            return;
+        }
+
+        if (totalSeconds > MAX_SECONDS_ALLOWED) {
+            // Revert cells to the original values if the new total exceeds the limit.
+            row.cells[2].textContent = row.dataset.originalStatus || "";
+            row.cells[3].textContent = row.dataset.originalTimer || "";
+            showToast("❌ Timer value exceeds maximum allowed (2h 16m 00s)", "error");
+            return;
+        }
+
+        await axios.patch(`${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`, {
+            headers: {
+                "Content-Type": "application/json",
+                Origin: ORIGIN,
+            },
+        });
+        wsClient.send({ world: Number(world) } as WorldRecord);
+        showToast(`Misty time updated for world ${world}`);
+        console.log(`Misty time updated for world ${world}`);
+    }
 }
