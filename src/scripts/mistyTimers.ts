@@ -1,5 +1,9 @@
 import axios from "axios";
-import { API_URL } from "../config";
+import { API_URL, ORIGIN } from "../config";
+import { userHasRequiredRole } from "./permissions";
+import { showToast } from "./notifications";
+import { wsClient } from "./ws";
+import { WorldRecord } from "./mistyDialog";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -68,7 +72,7 @@ export async function renderMistyTimers(): Promise<void> {
         for (const currentWorldEvent of currentWorldEvents) {
             worldMap.set(currentWorldEvent.world, currentWorldEvent);
             if (currentWorldEvent.status === "Active") continue;
-            appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
+            await appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
         }
         initTableSorting(tableSort, tableSortOrder);
     } catch (err) {
@@ -136,6 +140,7 @@ function updateWorldTimers(): void {
     for (const row of rows) {
         // Skip this row if it has already been stopped.
         if (row.getAttribute("data-timer-stopped") === "true") continue;
+        if (row.classList.contains("editing")) continue;
 
         // Assuming the world id is stored as a data attribute on the row.
         const world = Number(row.dataset.world);
@@ -148,7 +153,9 @@ function updateWorldTimers(): void {
 
 function formatTimeLeftValueMisty(seconds: number): string {
     const totalMinutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
+    const secs = Math.floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
 
     // If total minutes exceed 59, calculate hours.
     if (totalMinutes > 59) {
@@ -160,7 +167,7 @@ function formatTimeLeftValueMisty(seconds: number): string {
     return `${totalMinutes}m ${secs}s`;
 }
 
-export function updateWorld(worldEvent: WorldEventStatus): void {
+export async function updateWorld(worldEvent: WorldEventStatus): Promise<void> {
     // Update the stored status for the world.
     worldMap.set(worldEvent.world, worldEvent);
     const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
@@ -179,7 +186,7 @@ export function updateWorld(worldEvent: WorldEventStatus): void {
         worldsOnDisplay.delete(worldEvent.world);
     } else if (!worldsOnDisplay.has(worldEvent.world)) {
         // If the world is not active and not already displayed, append its row.
-        appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
+        await appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
     } else {
         // This is the case for an update on an already-displayed non-active world.
         const tbody = document.getElementById("mistyTimerBody");
@@ -198,11 +205,11 @@ export function updateWorld(worldEvent: WorldEventStatus): void {
     }
 }
 
-function appendEventRow(
+async function appendEventRow(
     worldEvent: NonActiveWorldEventStatus,
     sortBy: TableColumnName,
     sortOrder: TableSortOrder,
-): void {
+): Promise<void> {
     const tbody = document.getElementById("mistyTimerBody");
     if (!tbody) return;
 
@@ -221,8 +228,30 @@ function appendEventRow(
         return cell;
     };
 
+    const allowedRoles = ["775940649802793000"]; // Scouter role
+    const hasEditPermission = userHasRequiredRole(allowedRoles);
+
+    const buttonsTd = document.createElement("td");
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "action-buttons";
+
+    if (hasEditPermission) {
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn-extra";
+        editBtn.title = "Edit Misty Timer";
+        const editImg = document.createElement("img");
+        editImg.src = "./edit_button.png";
+        editImg.alt = "Edit action";
+        editBtn.appendChild(editImg);
+        editBtn.addEventListener("click", () => {
+            editMistyTimer(worldEvent.world);
+        });
+        buttonContainer.appendChild(editBtn);
+    }
+    buttonsTd.appendChild(buttonContainer);
+
     // Empty cell for now
-    row.appendChild(document.createElement("td"));
+    row.appendChild(buttonsTd);
     // Create cells for world, status, and the calculated inactive time.
     row.appendChild(createElement(String(worldEvent.world)));
     row.appendChild(createElement(worldEvent.status));
