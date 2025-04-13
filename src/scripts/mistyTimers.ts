@@ -419,3 +419,196 @@ if (hideInactiveWorlds) {
         }
     });
 }
+
+/**
+ * Toggle editing mode for a misty timer row based on the world number.
+ *
+ * The original timer format is "Xh XXm XXs" but it may be incomplete (e.g., "05m 30s" or "30s").
+ * On entering edit mode, the status cell is replaced with a dropdown and the timer cell with three number inputs.
+ * - Hour input: type="number", min="0", max="2"
+ * - Minute input: type="number", min="0", max="59"
+ * - Second input: type="number", min="0", max="59"
+ *
+ * When saving, the function formats the value conditionally:
+ * - If hour > 0, include the hour part ("Xh ")
+ * - If hour or minute is nonzero, include the minute part ("XXm ")
+ * - Always include seconds ("XXs")
+ *
+ * @param world - The world number used to identify which row to edit.
+ */
+async function editMistyTimer(world: number): Promise<void> {
+    // Retrieve the table row using the data attribute.
+    const row = document.querySelector(`tr[data-world="${world}"]`) as HTMLTableRowElement;
+    if (!row) return;
+
+    // Retrieve the world event information from worldMap.
+    const worldEvent = worldMap.get(world);
+    if (!worldEvent) return;
+
+    // Check if the row is not yet being edited.
+    if (!row.classList.contains("editing")) {
+        row.classList.add("editing");
+
+        // Save the original values for the editable cells.
+        // Column 2: Status, Column 3: Misty Timer
+        row.dataset.originalStatus = row.cells[2].textContent || "";
+        row.dataset.originalTimer = row.cells[3].textContent || "";
+
+        // --- Column 2: Status (dropdown) ---
+        row.cells[2].innerHTML = "";
+        const statusSelect = document.createElement("select");
+        statusSelect.classList.add("misty-status-dropdown");
+
+        // Define known statuses (adjust if necessary).
+        const KNOWN_STATUSES: Exclude<WorldStatus, "Active">[] = ["Inactive", "Spawnable", "Unknown"];
+        KNOWN_STATUSES.forEach((status) => {
+            const option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+            if (status === row.dataset.originalStatus) {
+                option.selected = true;
+            }
+            statusSelect.appendChild(option);
+        });
+        row.cells[2].appendChild(statusSelect);
+
+        // --- Column 3: Misty Timer (numeric inputs) ---
+        // Parse original format "Xh XXm XXs", which may be incomplete (e.g., "05m 30s" or "30s").
+        const originalTimer = row.dataset.originalTimer || "0h 00m 00s";
+        const tokens = originalTimer.split(" ");
+        let hoursStr = "0";
+        let minutesStr = "0";
+        let secondsStr = "0";
+
+        tokens.forEach((token) => {
+            if (token.endsWith("h")) {
+                hoursStr = token.slice(0, -1);
+            } else if (token.endsWith("m")) {
+                minutesStr = token.slice(0, -1);
+            } else if (token.endsWith("s")) {
+                secondsStr = token.slice(0, -1);
+            }
+        });
+
+        row.cells[3].innerHTML = "";
+
+        // Hour input.
+        const hourInput = document.createElement("input");
+        hourInput.type = "number";
+        hourInput.classList.add("misty-timer-hour");
+        hourInput.value = hoursStr;
+        hourInput.min = "0";
+        hourInput.max = "2";
+        hourInput.step = "1";
+        hourInput.size = 1; // This provides a hint for one-digit input.
+        row.cells[3].appendChild(hourInput);
+
+        // Hour label.
+        const hourLabel = document.createElement("span");
+        hourLabel.textContent = "h ";
+        row.cells[3].appendChild(hourLabel);
+
+        // Minute input.
+        const minuteInput = document.createElement("input");
+        minuteInput.type = "number";
+        minuteInput.classList.add("misty-timer-minute");
+        minuteInput.value = minutesStr;
+        minuteInput.min = "0";
+        minuteInput.max = "59";
+        minuteInput.step = "1";
+        minuteInput.size = 2;
+        row.cells[3].appendChild(minuteInput);
+
+        // Minute label.
+        const minuteLabel = document.createElement("span");
+        minuteLabel.textContent = "m ";
+        row.cells[3].appendChild(minuteLabel);
+
+        // Second input.
+        const secondInput = document.createElement("input");
+        secondInput.type = "number";
+        secondInput.classList.add("misty-timer-second");
+        secondInput.value = secondsStr;
+        secondInput.min = "0";
+        secondInput.max = "59";
+        secondInput.step = "1";
+        secondInput.size = 2;
+        row.cells[3].appendChild(secondInput);
+
+        // Second label.
+        const secondLabel = document.createElement("span");
+        secondLabel.textContent = "s";
+        row.cells[3].appendChild(secondLabel);
+    } else {
+        // Commit the changes and exit editing mode.
+        row.classList.remove("editing");
+        const MAX_SECONDS_ALLOWED = 2 * 3600 + 16 * 60; // 8160 seconds
+
+        // --- Column 2: Commit the Status change ---
+        const statusCell = row.cells[2];
+        const statusSelectEl = statusCell.querySelector("select");
+        if (statusSelectEl) {
+            statusCell.textContent = statusSelectEl.value;
+        }
+
+        // --- Column 3: Update Misty Timer ---
+        const timerCell = row.cells[3];
+        const hourInputEl = timerCell.querySelector("input.misty-timer-hour") as HTMLInputElement;
+        const minuteInputEl = timerCell.querySelector("input.misty-timer-minute") as HTMLInputElement;
+        const secondInputEl = timerCell.querySelector("input.misty-timer-second") as HTMLInputElement;
+        let totalSeconds = 0;
+        if (hourInputEl && minuteInputEl && secondInputEl) {
+            // Parse numbers for conditional formatting.
+            const hour = parseInt(hourInputEl.value, 10) || 0;
+            const minute = parseInt(minuteInputEl.value, 10) || 0;
+            const second = parseInt(secondInputEl.value, 10) || 0;
+
+            let parts: string[] = [];
+            // Include hour if it's greater than 0.
+            if (hour > 0) {
+                parts.push(`${hour}h`);
+            }
+            // Include minute if there's an hour or if minute > 0.
+            if (hour > 0 || minute > 0) {
+                parts.push(`${minute.toString().padStart(2, "0")}m`);
+            }
+            // Always include seconds.
+            parts.push(`${second.toString().padStart(2, "0")}s`);
+
+            const formattedTimer = parts.join(" ");
+            timerCell.textContent = formattedTimer;
+            totalSeconds = hour * 3600 + minute * 60 + second;
+        }
+
+        // --- Optional: Check if values have changed ---
+        const newStatus = row.cells[2].textContent?.trim() || "";
+        const newTimer = row.cells[3].textContent?.trim() || "";
+
+        const unchanged =
+            newStatus === (row.dataset.originalStatus?.trim() || "") &&
+            newTimer === (row.dataset.originalTimer?.trim() || "");
+
+        if (unchanged) {
+            // If nothing has changed, do nothing further.
+            return;
+        }
+
+        if (totalSeconds > MAX_SECONDS_ALLOWED) {
+            // Revert cells to the original values if the new total exceeds the limit.
+            row.cells[2].textContent = row.dataset.originalStatus || "";
+            row.cells[3].textContent = row.dataset.originalTimer || "";
+            showToast("❌ Timer value exceeds maximum allowed (2h 16m 00s)", "error");
+            return;
+        }
+
+        await axios.patch(`${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`, {
+            headers: {
+                "Content-Type": "application/json",
+                Origin: ORIGIN,
+            },
+        });
+        wsClient.send({ world: Number(world) } as WorldRecord);
+        showToast(`Misty time updated for world ${world}`);
+        console.log(`Misty time updated for world ${world}`);
+    }
+}
