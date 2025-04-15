@@ -67,6 +67,11 @@ export async function renderMistyTimers(): Promise<void> {
         const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
         if (hasEditPermission) {
+            const mistyTableBody = document.getElementById("mistyTimerBody");
+            if (!mistyTableBody) return;
+
+            // Reset the layout before adding new rows
+            mistyTableBody.innerHTML = "";
             // User has the required role:
             // Remove the locked overlay if present.
             const lockedOverlay = document.querySelector("#mistyTab .locked-overlay");
