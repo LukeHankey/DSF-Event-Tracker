@@ -352,6 +352,7 @@ if (testEventButton && DEBUG) {
                 token: token,
                 source: "alt1",
                 profileEventKey: "alt1First.otherCount",
+                mistyUpdate: false,
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
@@ -377,6 +378,7 @@ if (testEventButton && DEBUG) {
             token: token,
             source: "alt1",
             profileEventKey: "alt1First.otherCount",
+            mistyUpdate: false,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
