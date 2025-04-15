@@ -133,4 +133,5 @@ export interface EventRecord {
     token: string | null;
     source: "alt1" | "discord";
     profileEventKey: string;
+    mistyUpdate: boolean;
 }

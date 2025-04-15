@@ -400,13 +400,15 @@ export function updateEventTimers(): void {
             if (!alreadyExpired) {
                 expiredEvents.push(event);
                 moveExpiredEventBelowActiveEvents(event);
-                console.log(`Adding world ${event.world} to Misty tab.`);
-                updateWorld({
-                    world: Number(event.world),
-                    status: "Inactive",
-                    last_update_timestamp: Date.now(),
-                    inactive_time: 0,
-                });
+                if (!event.mistyUpdate) {
+                    console.log(`Adding world ${event.world} to Misty tab.`);
+                    updateWorld({
+                        world: Number(event.world),
+                        status: "Inactive",
+                        last_update_timestamp: Date.now(),
+                        inactive_time: 0,
+                    });
+                }
             }
         }
     });
@@ -848,6 +850,7 @@ function editEvent(event: EventRecord): void {
             token: token,
             source: event.source,
             profileEventKey: event.profileEventKey,
+            mistyUpdate: false,
         };
 
         rowMap.set(event.id, row);

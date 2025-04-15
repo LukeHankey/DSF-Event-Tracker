@@ -179,6 +179,7 @@ export async function reportEvent(
         token: token,
         source: "alt1",
         profileEventKey,
+        mistyUpdate: false,
         ...overrides,
     };
 

@@ -8,6 +8,7 @@ import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
 import fontmono2 from "alt1/fonts/chatbox/12pt.js";
 import { wsClient } from "./ws";
+import { eventHistory } from "./eventHistory";
 
 type TimerData = {
     seconds: number;
@@ -126,25 +127,28 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
     try {
         const event = await axios.get(`${API_URL}/worlds/${world}/event`);
+        console.log(event);
 
         // Active check
         if (event.data && event.data.message) {
+            const activeEventStatus = event.data.message[0];
+            const eventRecord = JSON.parse(activeEventStatus.event_record);
+            const mistyEditEvent: EventRecord = { ...eventRecord };
+            mistyEditEvent.token = localStorage.getItem("accessToken") ?? "";
+            mistyEditEvent.type = "editEvent";
+            mistyEditEvent.duration = status === "active" ? newDuration : 0;
+            mistyEditEvent.timestamp = Date.now();
+            mistyEditEvent.oldEvent = eventRecord;
+            mistyEditEvent.mistyUpdate = true;
+
+            wsClient.send(mistyEditEvent);
+
             await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`, {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
                 },
             });
-            const activeEventStatus = event.data.message[0];
-            const eventRecord = JSON.parse(activeEventStatus.event_record);
-            const mistyEditEvent: EventRecord = { ...eventRecord };
-            mistyEditEvent.token = localStorage.getItem("accessToken") ?? "";
-            mistyEditEvent.type = "editEvent";
-            mistyEditEvent.duration = newDuration;
-            mistyEditEvent.timestamp = Date.now();
-            mistyEditEvent.oldEvent = eventRecord;
-
-            wsClient.send(mistyEditEvent);
         }
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
@@ -154,7 +158,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         if (axiosErr.response?.status === 404 && status === "active") {
             // Misty says it's active, but no active event is known → create it
             const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
-            await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration });
+            await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration, mistyUpdate: true });
             showToast(`Event added from Misty on world ${world}`);
             console.log(`Event added from Misty on world ${world}`);
         } else if (axiosErr.response?.status === 404 && status === "inactive") {
@@ -165,6 +169,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
                     Origin: ORIGIN,
                 },
             });
+
             wsClient.send({ world: Number(world) } as WorldRecord);
             showToast(`Misty time updated for world ${world}`);
             console.log(`Misty time updated for world ${world}`);
