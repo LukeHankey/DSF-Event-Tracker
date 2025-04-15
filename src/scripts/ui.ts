@@ -13,6 +13,7 @@ import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
+import { renderMistyTimers } from "./mistyTimers";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -191,6 +192,7 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
 
         // Update discord_id to websocket and load profile
         wsClient.reconnect();
+        await renderMistyTimers();
 
         // Show success toast
         showToast("✅ Verified successfully!");
@@ -357,6 +359,7 @@ if (testEventButton && DEBUG) {
                 token: token,
                 source: "alt1",
                 profileEventKey: "alt1First.otherCount",
+                mistyUpdate: false,
             };
             localStorage.setItem("eventHistory", JSON.stringify([addTestEvent]));
         }
@@ -382,6 +385,7 @@ if (testEventButton && DEBUG) {
             token: token,
             source: "alt1",
             profileEventKey: "alt1First.otherCount",
+            mistyUpdate: false,
         };
         console.log("Emitting event_data", testEvent);
         wsClient.send(testEvent);
