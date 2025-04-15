@@ -4,6 +4,7 @@ import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
 import { wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
+import { MEMBER_WORLDS } from "./eventHistory";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -59,20 +60,55 @@ let refreshIntervalMisty: NodeJS.Timeout | null = null;
 
 export async function renderMistyTimers(): Promise<void> {
     try {
-        const currentWorldEventsAxios = await axios.get(`${API_URL}/events/current`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        const currentWorldEvents: WorldEventStatus[] = currentWorldEventsAxios.data.message;
+        const allowedRoles = ["775940649802793000"]; // Scouter role
+        const hasEditPermission = userHasRequiredRole(allowedRoles);
         const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
         const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
-        for (const currentWorldEvent of currentWorldEvents) {
-            worldMap.set(currentWorldEvent.world, currentWorldEvent);
-            if (currentWorldEvent.status === "Active") continue;
-            await appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
+        if (hasEditPermission) {
+            // User has the required role:
+            // Remove the locked overlay if present.
+            const lockedOverlay = document.querySelector("#mistyTab .locked-overlay");
+            if (lockedOverlay) {
+                lockedOverlay.remove();
+            }
+            // Remove the blur class (or you could remove the CSS blur filter style) so the table is fully functional.
+            const blurredWrapper = document.querySelector("#mistyTab .misty-blurred");
+            if (blurredWrapper) {
+                const parent = blurredWrapper.parentNode!;
+                // Move each child of the blurred wrapper directly under the parent.
+                while (blurredWrapper.firstChild) {
+                    parent.insertBefore(blurredWrapper.firstChild, blurredWrapper);
+                }
+                // Now remove the empty blurred wrapper.
+                parent.removeChild(blurredWrapper);
+            }
+
+            const currentWorldEventsAxios = await axios.get(`${API_URL}/events/current`, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const currentWorldEvents: WorldEventStatus[] = currentWorldEventsAxios.data.message;
+
+            for (const currentWorldEvent of currentWorldEvents) {
+                worldMap.set(currentWorldEvent.world, currentWorldEvent);
+                if (currentWorldEvent.status === "Active") continue;
+                await appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
+            }
+        } else {
+            let dummyData = {
+                status: "Inactive",
+                last_update_timestamp: Date.now(),
+                inactive_time: 0,
+            } as InactiveWorldEventStatus;
+            for (const world_str of MEMBER_WORLDS) {
+                const world = Number(world_str);
+                dummyData = { ...dummyData, world };
+                worldMap.set(world, dummyData);
+                await appendEventRow(dummyData, tableSort, tableSortOrder);
+            }
         }
         initTableSorting(tableSort, tableSortOrder);
     } catch (err) {

@@ -757,6 +757,7 @@ MOD ACTIONS MODAL
 
 #mistyTab.tabs__content--active {
     display: flex !important;
+    position: relative;
 }
 
 .misty-timer-hour {
@@ -770,3 +771,34 @@ MOD ACTIONS MODAL
     text-align: center; 
     box-sizing: content-box;
 }
+
+
+/* The content container is blurred */
+.misty-blurred {
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    pointer-events: none; /* If you want to disable interaction */
+    user-select: none;
+    overflow: auto;
+    position: relative;
+    display: flex;
+}
+
+/* The overlay sits above the blurred content */
+.locked-overlay {
+    position: absolute;  /* Position overlay relative to its container */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;       /* Use flexbox to center content */
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 1.5rem;   /* Adjust font size as needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent overlay */
+    pointer-events: none; /* So the overlay doesn't block other pointer settings if needed */
+    z-index: 2;          /* Ensure the overlay is above other content */
+}
+  
