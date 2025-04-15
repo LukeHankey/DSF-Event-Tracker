@@ -162,7 +162,6 @@ export class WebSocketClient {
             } else if ("type" in parsedData) {
                 this.processEvent(parsedData);
             } else {
-                console.log(1, parsedData);
                 await updateWorld(parsedData);
             }
         } catch (error) {

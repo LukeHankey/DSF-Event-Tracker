@@ -154,7 +154,7 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
         row.setAttribute("data-timer-stopped", "true");
 
         // Freeze the timer cell at 2:16:00
-        const fixedTime = formatTimeLeftValueMisty(8160);
+        const fixedTime = formatTimeLeftValueMisty(-1);
         if (timerCell) {
             timerCell.textContent = fixedTime;
         }
@@ -196,7 +196,7 @@ function updateWorldTimers(): void {
 }
 
 function formatTimeLeftValueMisty(seconds: number): string {
-    const totalMinutes = Math.floor(seconds / 60);
+    const totalMinutes = Math.floor(Math.abs(seconds) / 60);
     const secs = Math.floor(seconds % 60)
         .toString()
         .padStart(2, "0");
@@ -423,6 +423,10 @@ function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: bo
 
     // Reattach the rows in sorted order.
     rows.forEach((row) => tbody.appendChild(row));
+
+    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
+    const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement;
+    if (hideInactiveWorldsElement.checked || hideUnknownWorldsElement.checked) hideWorlds();
 }
 
 function parseTimerString(timerStr: string): number {
@@ -442,25 +446,52 @@ function parseTimerString(timerStr: string): number {
     return totalSeconds;
 }
 
-const hideInactiveWorlds = document.getElementById("hideInactiveWorlds") as HTMLInputElement | null;
-if (hideInactiveWorlds) {
-    hideInactiveWorlds.addEventListener("change", () => {
-        const hideInactive = hideInactiveWorlds.checked;
-        const tbody = document.getElementById("mistyTimersTable");
-        if (!tbody) return;
+function hideWorlds(): void {
+    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
+    const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement;
+    const hideInactive = hideInactiveWorldsElement.checked;
+    const hideUnknown = hideUnknownWorldsElement.checked;
+    const tbody = document.getElementById("mistyTimersTable");
+    if (!tbody) return;
 
-        // Iterate over each row in the misty timers table.
-        const rows = Array.from(tbody.getElementsByTagName("tr"));
-        for (const row of rows) {
-            const cells = row.getElementsByTagName("td");
-            if (!cells.length) continue;
-            const status = cells[2].textContent?.trim() || "";
-            if (hideInactive && status === "Inactive") {
-                row.style.display = "none";
-            } else {
-                row.style.display = "";
-            }
+    // Iterate over each row in the misty timers table.
+    const rows = Array.from(tbody.getElementsByTagName("tr"));
+    for (const row of rows) {
+        const cells = row.getElementsByTagName("td");
+        if (!cells.length) continue;
+
+        const status = cells[2].textContent?.trim() || "";
+        if (hideInactive && status === "Inactive") {
+            row.style.display = "none";
+        } else if (hideUnknown && status === "Unknown") {
+            row.style.display = "none";
+        } else {
+            row.style.display = "";
         }
+    }
+}
+
+const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement | null;
+if (hideInactiveWorldsElement) {
+    const storedState = localStorage.getItem("hideInactiveWorlds");
+    hideInactiveWorldsElement.checked = storedState === "true";
+
+    hideInactiveWorldsElement.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        localStorage.setItem("hideInactiveWorlds", checkbox.checked ? "true" : "false");
+        hideWorlds();
+    });
+}
+
+const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement | null;
+if (hideUnknownWorldsElement) {
+    const storedState = localStorage.getItem("hideUnknownWorlds");
+    hideUnknownWorldsElement.checked = storedState === "true";
+
+    hideUnknownWorldsElement.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        localStorage.setItem("hideUnknownWorlds", checkbox.checked ? "true" : "false");
+        hideWorlds();
     });
 }
 
