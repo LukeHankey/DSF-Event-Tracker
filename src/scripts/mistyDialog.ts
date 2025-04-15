@@ -7,8 +7,7 @@ import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
 import fontmono2 from "alt1/fonts/chatbox/12pt.js";
-import { wsClient } from "./ws";
-import { eventHistory } from "./eventHistory";
+import { refreshToken, wsClient } from "./ws";
 
 type TimerData = {
     seconds: number;
@@ -126,15 +125,20 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
     const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
     try {
-        const event = await axios.get(`${API_URL}/worlds/${world}/event`);
-        console.log(event);
+        const token = localStorage.getItem("accessToken");
+        const event = await axios.get(`${API_URL}/worlds/${world}/event`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
         // Active check
         if (event.data && event.data.message) {
             const activeEventStatus = event.data.message[0];
             const eventRecord = JSON.parse(activeEventStatus.event_record);
             const mistyEditEvent: EventRecord = { ...eventRecord };
-            mistyEditEvent.token = localStorage.getItem("accessToken") ?? "";
+            mistyEditEvent.token = token ?? "";
             mistyEditEvent.type = "editEvent";
             mistyEditEvent.duration = status === "active" ? newDuration : 0;
             mistyEditEvent.timestamp = Date.now();
@@ -153,7 +157,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
     } catch (err) {
-        const axiosErr = err as AxiosError;
+        const axiosErr = err as AxiosError<{ detail?: string }>;
 
         if (axiosErr.response?.status === 404 && status === "active") {
             // Misty says it's active, but no active event is known → create it
@@ -173,6 +177,16 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             wsClient.send({ world: Number(world) } as WorldRecord);
             showToast(`Misty time updated for world ${world}`);
             console.log(`Misty time updated for world ${world}`);
+        } else if (axiosErr.response?.status === 401 && axiosErr.response?.data.detail === "Token has expired") {
+            retryCount += 1;
+            if (retryCount < 3) {
+                await refreshToken();
+                await updateTimersFromMisty(timerData);
+            } else {
+                retryCount = 0;
+                showToast(`Unable to update world ${world}`, "error");
+                console.error(err);
+            }
         } else {
             console.error("Unhandled error from world event:", axiosErr);
         }
