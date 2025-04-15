@@ -62,6 +62,7 @@ export async function renderMistyTimers(): Promise<void> {
     try {
         const allowedRoles = ["775940649802793000"]; // Scouter role
         const hasEditPermission = userHasRequiredRole(allowedRoles);
+
         const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
         const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
@@ -84,9 +85,11 @@ export async function renderMistyTimers(): Promise<void> {
                 parent.removeChild(blurredWrapper);
             }
 
+            const token = localStorage.getItem("accessToken");
             const currentWorldEventsAxios = await axios.get(`${API_URL}/events/current`, {
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
