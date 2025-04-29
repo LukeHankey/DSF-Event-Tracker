@@ -241,7 +241,12 @@ sub_tabs.forEach((subTab) => {
 
 const hideExpiredCheckbox = document.getElementById("hideExpiredCheckbox") as HTMLInputElement | null;
 if (hideExpiredCheckbox) {
-    hideExpiredCheckbox.addEventListener("change", () => {
+    const storedState = localStorage.getItem("hideExpiredRows");
+    hideExpiredCheckbox.checked = storedState === "true";
+
+    hideExpiredCheckbox.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        localStorage.setItem("hideExpiredRows", checkbox.checked ? "true" : "false");
         updateHideExpiredRows();
     });
 }
@@ -412,23 +417,44 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }
     const infoButtonEventHistory = document.getElementById("infoButtonEventHistory") as HTMLElement;
-    const modal = document.getElementById("infoModal") as HTMLElement;
-    const closeModal = modal.querySelector(".close") as Element;
+    const modalScouts = document.getElementById("infoModalScouts") as HTMLElement;
+    const closeModalScouts = modalScouts.querySelector(".close") as Element;
 
     // Show the modal when the info button is clicked
     infoButtonEventHistory.addEventListener("click", function () {
-        modal.style.display = "flex";
+        modalScouts.style.display = "flex";
     });
 
     // Hide the modal when the close button (×) is clicked
-    closeModal.addEventListener("click", function () {
-        modal.style.display = "none";
+    closeModalScouts.addEventListener("click", function () {
+        modalScouts.style.display = "none";
     });
 
     // Hide the modal when clicking outside of the modal content
     window.addEventListener("click", function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
+        if (event.target === modalScouts) {
+            modalScouts.style.display = "none";
+        }
+    });
+
+    const infoButtonMistyTimers = document.getElementById("infoButtonMistyTimers") as HTMLElement;
+    const modalMisty = document.getElementById("infoModalMisty") as HTMLElement;
+    const closeModalMisty = modalMisty.querySelector(".close") as Element;
+
+    // Show the modal when the info button is clicked
+    infoButtonMistyTimers.addEventListener("click", function () {
+        modalMisty.style.display = "flex";
+    });
+
+    // Hide the modal when the close button (×) is clicked
+    closeModalMisty.addEventListener("click", function () {
+        modalMisty.style.display = "none";
+    });
+
+    // Hide the modal when clicking outside of the modal content
+    window.addEventListener("click", function (event) {
+        if (event.target === modalMisty) {
+            modalMisty.style.display = "none";
         }
     });
 
