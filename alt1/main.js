@@ -1053,7 +1053,7 @@ eval("module.exports=(__webpack_require__(/*! alt1/base */ \"../node_modules/alt
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   API_URL: () => (/* binding */ API_URL),\n/* harmony export */   DEBUG: () => (/* binding */ DEBUG),\n/* harmony export */   ORIGIN: () => (/* binding */ ORIGIN)\n/* harmony export */ });\nconst DEBUG = true;\nconst ORIGIN = DEBUG ? document.location.href : \"https://www.dsfeventtracker.com/alt1\";\nconst API_URL = DEBUG ? \"http:localhost:8000\" : \"https://api.dsfeventtracker.com\";\n\n\n//# sourceURL=webpack://DSFEventTracker/./config.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   API_URL: () => (/* binding */ API_URL),\n/* harmony export */   DEBUG: () => (/* binding */ DEBUG),\n/* harmony export */   ORIGIN: () => (/* binding */ ORIGIN)\n/* harmony export */ });\nconst DEBUG = false;\nconst ORIGIN = DEBUG ? document.location.href : \"https://www.dsfeventtracker.com/alt1\";\nconst API_URL = DEBUG ? \"http:localhost:8000\" : \"https://api.dsfeventtracker.com\";\n\n\n//# sourceURL=webpack://DSFEventTracker/./config.ts?");
 
 /***/ }),
 
