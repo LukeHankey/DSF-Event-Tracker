@@ -14,7 +14,7 @@ This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneSc
   - Event calls are relayed to and from Discord for a wider reach.
   - Both Alt1 and Discord are kept in sync.
 
-![App showcase](./src/assets/app_showcase.gif)
+![App showcase](./alt1/assets/app_showcase.gif)
 
 ## 🛠 How to Use
 
@@ -47,7 +47,7 @@ If the **Alt1 AfkWarden** app works for you, this app will too — it uses the s
 
 To install the DSF Event Tracker, open one of the following URLs in your browser:
 
-- [alt1://addapp/https://www.dsfeventtracker.com/appconfig.json](alt1://addapp/https://www.dsfeventtracker.com/appconfig.json)
-- [https://www.dsfeventtracker.com/](https://www.dsfeventtracker.com/)
+- [alt1://addapp/https://www.dsfeventtracker.com/alt1/appconfig.json](alt1://addapp/https://www.dsfeventtracker.com/alt1/appconfig.json)
+- [https://www.dsfeventtracker.com/alt1/](https://www.dsfeventtracker.com/alt1/)
 
 When prompted during installation, **enable all 3 permissions**. The app will not function properly without them.

@@ -1,21 +1,21 @@
 const path = require("path");
-const { DefinePlugin } = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 /**
  * @type {import("webpack").Configuration}
  */
 module.exports = {
     //tell webpack where to look for source files
-    context: path.resolve(__dirname, "src"),
+    context: path.resolve(__dirname, "alt1"),
     entry: {
         //each entrypoint results in an output file
-        //so this results in an output file called 'main.js' which is built from src/app.ts
+        //so this results in an output file called 'main.js' which is built from alt1/app.ts
         main: "./scripts/app.ts",
     },
     output: {
-        path: path.resolve(__dirname, "dist"),
-        // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.TestApp
-        library: { type: "umd", name: "TestApp" },
+        path: path.resolve(__dirname, "dist/alt1"),
+        // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.DSFEventTracker
+        library: { type: "umd", name: "DSFEventTracker" },
     },
     devtool: "eval",
     // devtool: "source-map",
@@ -26,8 +26,13 @@ module.exports = {
         extensions: [".wasm", ".tsx", ".ts", ".mjs", ".jsx", ".js"],
     },
     plugins: [
-        new DefinePlugin({
-            "process.env.WEBHOOK_CHANNEL": JSON.stringify(process.env.WEBHOOK_CHANNEL),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, "alt1/assets"),
+                    to: path.resolve(__dirname, "dist/alt1/assets"),
+                },
+            ],
         }),
     ],
     module: {
@@ -35,16 +40,6 @@ module.exports = {
         rules: [
             { test: /\.tsx?$/, loader: "ts-loader" },
             { test: /\.css$/, use: ["style-loader", "css-loader"] },
-            {
-                test: /\.scss$/,
-                use: ["style-loader", "css-loader", "sass-loader"],
-            },
-            // type:"asset" means that webpack copies the file and gives you an url to them when you import them from js
-            {
-                test: /\.(png|jpg|jpeg|gif|webp)$/,
-                type: "asset/resource",
-                generator: { filename: "[base]" },
-            },
             {
                 test: /\.(html|json)$/,
                 type: "asset/resource",

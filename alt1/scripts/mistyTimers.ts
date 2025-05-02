@@ -284,7 +284,7 @@ async function appendEventRow(
         editBtn.className = "btn-extra";
         editBtn.title = "Edit Misty Timer";
         const editImg = document.createElement("img");
-        editImg.src = "./edit_button.png";
+        editImg.src = "./assets/edit_button.png";
         editImg.alt = "Edit action";
         editBtn.appendChild(editImg);
         editBtn.addEventListener("click", () => {
