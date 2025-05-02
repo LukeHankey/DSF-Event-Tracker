@@ -15,5 +15,5 @@ As long as the alt1 app is open (can be minimized), events from Misty will be ca
 
 To install the DSF Event Tracker, go to either URL in your browser:
 
-- [alt1://addapp/https://lukehankey.github.io/DSF-Event-Tracker/appconfig.json](alt1://addapp/https://lukehankey.github.io/DSF-Event-Tracker/appconfig.json)
-- [https://lukehankey.github.io/DSF-Event-Tracker/](https://lukehankey.github.io/DSF-Event-Tracker/)
+- [alt1://addapp/https://www.dsfeventtracker.com/appconfig.json](alt1://addapp/https://www.dsfeventtracker.com/appconfig.json)
+- [https://www.dsfeventtracker.com/](https://www.dsfeventtracker.com/)
