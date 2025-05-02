@@ -14,6 +14,8 @@ This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneSc
   - Event calls are relayed to and from Discord for a wider reach.
   - Both Alt1 and Discord are kept in sync.
 
+![App showcase](./src/assets/app_showcase.gif)
+
 ## 🛠 How to Use
 
 After installing the app, every user will have basic access to the tracker. Some specific actions (like advanced scouting tools) require you to validate your Discord ID — this is mainly for active volunteers.  
