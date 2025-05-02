@@ -6,8 +6,8 @@ import { currentWorld, reportEvent, findWorldNumber } from "./capture";
 import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
-import fontmono2 from "alt1/fonts/chatbox/12pt.js";
 import { refreshToken, wsClient } from "./ws";
+import { createWorker, Worker } from "tesseract.js";
 
 type TimerData = {
     seconds: number;
@@ -24,6 +24,16 @@ let retryCount: number = 0;
 
 // Initialize the DialogReader
 const reader = new DialogReader();
+let worker: Worker | null = null;
+
+async function setupWorker() {
+    if (!worker) {
+        worker = await createWorker("eng", 1, {
+            workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js",
+            corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@6.0.0/tesseract-core.wasm.js",
+        });
+    }
+}
 
 export function startCapturingMisty(): void {
     if (mistyInterval) return; // already running
@@ -59,48 +69,6 @@ function getValidEventNames(): EventKeys[] {
     return Object.keys(eventTimes).filter((key): key is EventKeys => key !== "Testing" && key !== "Unknown");
 }
 
-function reReadDialogBox(): string {
-    const pos = reader.pos;
-    const imgref = a1lib.captureHold(pos!.x!, pos!.y!, pos!.width!, pos!.height!);
-    const buf = imgref.toData(pos!.x!, pos!.y! + 33, pos!.width!, 80);
-    const lines = [];
-    let chr = null;
-    for (let y = 0; y < buf.height; y++) {
-        let hastext = false;
-        for (let x = 200; x < 300; x++) {
-            let i = x * 4 + y * 4 * buf.width;
-            if (buf.data[i] + buf.data[i + 1] + buf.data[i + 2] < 50) {
-                hastext = true;
-                break;
-            }
-        }
-        if (hastext) {
-            chr = chr || OCR.findChar(buf, fontmono2, [0, 0, 0], 192, y + 5, 12, 3);
-            chr = chr || OCR.findChar(buf, fontmono2, [0, 0, 0], 246, y + 5, 12, 3);
-            chr = chr || OCR.findChar(buf, fontmono2, [0, 0, 0], 310, y + 5, 12, 3);
-            if (chr) {
-                let read = OCR.readLine(buf, fontmono2, [0, 0, 0], chr.x, chr.y, true, true);
-                if (read.text.length >= 3) {
-                    lines.push(read.text);
-                }
-                y = chr.y + 5;
-                break;
-            }
-        }
-    }
-    let newLine = "";
-    // Loop through x until a match
-    for (let xi = 0; xi < 100; xi++) {
-        // +16 on y seems to fit the line below the captured line.
-        const textLine = OCR.readLine(buf, fontmono2, [0, 0, 0], chr!.x! + xi, chr!.y! + 16, true, true).text;
-        if (textLine.match(/\b(\d+)\s*minutes?\s*and\s*(\d+)\s*seconds?\b/)) {
-            newLine = textLine;
-            break;
-        }
-    }
-    return newLine;
-}
-
 async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     if (!timerData) {
         showToast("Misty time not updated - failed reading dialog", "error");
@@ -129,7 +97,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         const event = await axios.get(`${API_URL}/worlds/${world}/event`, {
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -194,6 +161,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 }
 
 export async function readTextFromDialogBox(): Promise<void> {
+    await setupWorker();
     if (reader.find()) {
         try {
             const dialogReadable = reader.read();
@@ -210,17 +178,15 @@ export async function readTextFromDialogBox(): Promise<void> {
                 // Incomplete read
                 let newLine = "";
                 try {
-                    newLine = reReadDialogBox();
+                    const pos = reader.pos;
+                    const imgref = a1lib.captureHold(pos!.x, pos!.y, pos!.width, pos!.height);
+                    const alt1ImageData = imgref.toData().toPngBase64();
+
+                    const {
+                        data: { text },
+                    } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
+                    newLine = text.trim();
                 } catch (err) {
-                    console.log(`Unable to capture text from dialog, retry=${retryCount + 1}`, dialogReadable);
-                    if (
-                        dialogReadable.text[0] === "No, I've been watching closely, and nothing has happened" &&
-                        retryCount < 3
-                    ) {
-                        retryCount += 1;
-                        readTextFromDialogBox();
-                    }
-                    retryCount = 0;
                     showToast("Unable to capture text from dialog", "error");
                     stopCapturingMisty();
                     return;
