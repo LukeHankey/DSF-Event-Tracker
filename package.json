@@ -1,7 +1,7 @@
 {
     "scripts": {
         "build": "webpack && npm run postbuild",
-        "postbuild": "cp index.md _config.yml README.md favicon.ico dist/ && cp -r faq dist/",
+        "postbuild": "cp index.md _config.yml README.md favicon.ico CNAME dist/ && cp -r faq dist/",
         "watch": "webpack --watch",
         "deploy": "gh-pages -d dist",
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\""
