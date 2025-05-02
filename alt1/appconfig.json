@@ -3,7 +3,7 @@
     "description": "Detects DSF events via the chat",
     "appUrl": "./index.html",
     "configUrl": "./appconfig.json",
-    "iconUrl": "./icon.png",
+    "iconUrl": "./assets/icon.png",
     "defaultWidth": 375,
     "defaultHeight": 215,
     "minWidth": 250,
