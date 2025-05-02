@@ -97,7 +97,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         const event = await axios.get(`${API_URL}/worlds/${world}/event`, {
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
         });
 
