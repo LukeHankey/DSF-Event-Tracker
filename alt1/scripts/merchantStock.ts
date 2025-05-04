@@ -87,8 +87,8 @@ const slotConstants: Record<Exclude<Slot, "A">, [number, number]> = {
     D: [5, 13],
 };
 
-const getRuneDate = (): number => {
-    const initialRuneDate = Date.parse("27 Feb 2002"); // Base date
+const getRuneDate = () => {
+    const initialRuneDate = Date.UTC(2002, 1, 27); // Base date
     const now = new Date();
     return Math.floor((now.getTime() - initialRuneDate) / (1000 * 3600 * 24));
 };
