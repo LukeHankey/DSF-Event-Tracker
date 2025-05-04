@@ -145,7 +145,7 @@ function getImagePath(item: string): string {
     fileName = fileName.replace(/[()]/g, "");
     // Remove any accidental duplicate underscores.
     fileName = fileName.replace(/_+/g, "_");
-    return `stock_icons/${fileName}.png`;
+    return `assets/stock_icons/${fileName}.png`;
 }
 
 export function renderStockTable(): void {

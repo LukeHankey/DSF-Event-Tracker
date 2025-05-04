@@ -160,10 +160,10 @@ export function updateTableRowCells(
             if (!icon) {
                 icon = document.createElement("img");
                 icon.style.marginRight = "5px"; // Adjust spacing as needed.
-                icon.src = "./Alt1_icon.png";
+                icon.src = "./assets/Alt1_icon.png";
                 icon.alt = "Alt1";
                 if (update.newContent === "discord") {
-                    icon.src = "./Discord_icon.png";
+                    icon.src = "./assets/Discord_icon.png";
                     icon.alt = "Discord";
                 }
                 // Insert the icon at the beginning of the cell.
@@ -479,7 +479,7 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
         removeBtn.title = "Clear this event";
 
         const closeImg = document.createElement("img");
-        closeImg.src = "./close_button.png";
+        closeImg.src = "./assets/close_button.png";
         closeImg.alt = "Close event";
 
         removeBtn.appendChild(closeImg);
@@ -496,7 +496,7 @@ function moveExpiredEventBelowActiveEvents(event: EventRecord): void {
             modBtn.title = "Mod actions";
 
             const modIcon = document.createElement("img");
-            modIcon.src = "./rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
+            modIcon.src = "./assets/rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
             modIcon.alt = "Mod actions";
 
             modBtn.appendChild(modIcon);
@@ -547,7 +547,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
         removeBtn.className = "btn-close";
         removeBtn.title = "Clear this event";
         const closeImg = document.createElement("img");
-        closeImg.src = "./close_button.png";
+        closeImg.src = "./assets/close_button.png";
         closeImg.alt = "Close event";
         removeBtn.appendChild(closeImg);
         removeBtn.addEventListener("click", () => removeEvent(event));
@@ -559,7 +559,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
             editBtn.className = "btn-extra";
             editBtn.title = "Edit event";
             const editImg = document.createElement("img");
-            editImg.src = "./edit_button.png";
+            editImg.src = "./assets/edit_button.png";
             editImg.alt = "Edit action";
             editBtn.appendChild(editImg);
             editBtn.addEventListener("click", () => {
@@ -580,7 +580,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
         modBtn.title = "Mod actions";
 
         const modIcon = document.createElement("img");
-        modIcon.src = "./rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
+        modIcon.src = "./assets/rotten_potato.png"; // Add your own mod icon here (e.g., hammer, megaphone)
         modIcon.alt = "Mod actions";
 
         modBtn.appendChild(modIcon);
@@ -614,11 +614,11 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     // Create an image element for the icon.
     const icon = document.createElement("img");
     icon.style.marginRight = "5px"; // adjust spacing as needed
-    icon.src = "./Alt1_icon.png";
+    icon.src = "./assets/Alt1_icon.png";
     icon.alt = "Alt1";
 
     if (event.source === "discord") {
-        icon.src = "./Discord_icon.png";
+        icon.src = "./assets/Discord_icon.png";
         icon.alt = "Discord";
     }
     reportedByCell.appendChild(icon);
@@ -775,10 +775,10 @@ function editEvent(event: EventRecord): void {
             if (iconMissing) {
                 let icon = document.createElement("img");
                 icon.style.marginRight = "5px"; // Adjust spacing as needed.
-                icon.src = "./Alt1_icon.png";
+                icon.src = "./assets/Alt1_icon.png";
                 icon.alt = "Alt1";
                 if (event.source === "discord") {
-                    icon.src = "./Discord_icon.png";
+                    icon.src = "./assets/Discord_icon.png";
                     icon.alt = "Discord";
                 }
                 // Insert the icon at the beginning of the cell.
