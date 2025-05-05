@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /alt1/assets/
+Allow: /
+
+Sitemap: https://dsfeventtracker.com/sitemap.xml
