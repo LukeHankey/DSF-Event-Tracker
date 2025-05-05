@@ -3,8 +3,6 @@ layout: default
 title: FAQ
 ---
 
-<link rel="icon" href="/favicon.ico" type="image/x-icon" />
-
 [Home](/) | [FAQ](/faq) | [Alt1 App](/alt1)
 
 # Deep Sea Fishing Alt1 Plugin – FAQ
