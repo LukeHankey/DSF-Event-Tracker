@@ -114,7 +114,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
             wsClient.send(mistyEditEvent);
 
-            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`, {
+            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${newDuration}`, {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
