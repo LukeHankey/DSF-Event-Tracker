@@ -40,6 +40,6 @@ A: Confirm client setup is correct and chatbox is visible.
 
 ---
 
-Need more help? Look in [Discord](https://discord.gg/whirlpooldnd) at our [#alt1](https://discord.com/channels/420803245758480405/1368592418160775249) channel or [create a ticket](https://discord.com/channels/420803245758480405/938566070569144371).
+Need more help? Look in [Discord](https://discord.gg/M5S7B43gx6) at our [#alt1](https://discord.com/channels/420803245758480405/1368592418160775249) channel or [create a ticket](https://discord.com/channels/420803245758480405/938566070569144371).
 
 > Credit to Iron Joseph (Eplex) for creating these FAQs
