@@ -114,7 +114,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
             wsClient.send(mistyEditEvent);
 
-            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`, {
+            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${newDuration}`, {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: ORIGIN,
@@ -128,7 +128,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
         if (axiosErr.response?.status === 404 && status === "active") {
             // Misty says it's active, but no active event is known → create it
-            const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
             await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration, mistyUpdate: true });
             showToast(`Event added from Misty on world ${world}`);
             console.log(`Event added from Misty on world ${world}`);
