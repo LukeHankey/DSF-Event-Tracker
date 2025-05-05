@@ -374,8 +374,17 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     // Every image capture in case a user decides to turn it on/off
     hasTimestamps = detectTimestamps(lines);
 
-    const hasEventEnded = lines.some((line) => matchesEventEnd(line.text));
-    if (hasEventEnded) {
+    let endingEvent: string | null = null;
+
+    for (const line of lines) {
+        const result = matchesEventEnd(line.text);
+        if (result) {
+            endingEvent = result;
+            break;
+        }
+    }
+
+    if (endingEvent) {
         if (hasTimestamps) {
             // Set the lastTimestamp if an event has ended so that chat lines after the last one are read
             lastTimestamp = new Date(`${new Date().toLocaleDateString()} ${lastGameTimestamp}`);
@@ -383,6 +392,24 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
             lastTimestamp = new Date();
         }
         sessionStorage.setItem("lastTimestamp", String(lastTimestamp));
+
+        const eventHistory = JSON.parse(localStorage.getItem("eventHistory") ?? "[]");
+        if (!currentWorld) return;
+
+        const eventRecordEnding = eventHistory
+            .slice(-10)
+            .find((event: EventRecord) => event.world === currentWorld && event.event === endingEvent) as EventRecord;
+        const eventToEnd: EventRecord = { ...eventRecordEnding };
+
+        const token = localStorage.getItem("accessToken");
+        eventToEnd.token = token ?? "";
+        eventToEnd.type = "editEvent";
+        eventToEnd.duration = 0;
+        eventToEnd.timestamp = Date.now();
+        eventToEnd.oldEvent = eventRecordEnding;
+        eventToEnd.source = "alt1";
+        wsClient.send(eventToEnd);
+
         return;
     }
 
@@ -514,7 +541,7 @@ const expiredFuse = new Fuse(expiredEntries, {
     minMatchCharLength: 10,
 });
 
-function matchesEventEnd(lineText: string): boolean {
+function matchesEventEnd(lineText: string): string | null {
     // Strip timestamp from beginning if present
     const timeRegex = /^\[\d{2}:\d{2}:\d{2}\]\s*/;
     lineText = lineText.replace(timeRegex, "");
@@ -522,10 +549,10 @@ function matchesEventEnd(lineText: string): boolean {
     const results = expiredFuse.search(lineText);
 
     if (results.length > 0 && results[0].score! <= 0.3) {
-        return true;
+        return results[0].item.event;
     }
 
-    return false;
+    return null;
 }
 
 /**
