@@ -2,7 +2,7 @@
 
 This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneScape. It was built mainly to help our team of volunteer staff and scouters find event calls quicker and organize scouting efforts. Throughout development, many additional features were added to improve the overall experience of scouting worlds and communicating with everyone who is actively helping.  
 
-📢 Join our official [Deep Sea Fishing Discord Server](https://discord.gg/whirlpooldnd) for more info, coordination, and support.
+📢 Join our official [Deep Sea Fishing Discord Server](https://discord.gg/M5S7B43gx6) for more info, coordination, and support.
 
 ### ✨ Key Features
 - 📋 A fully event-driven **Scouting Tab** to view all active events and your previous history.

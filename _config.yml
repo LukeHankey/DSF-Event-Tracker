@@ -15,3 +15,7 @@ header_pages:
 
 github:
   is_project_page: false
+
+plugins:
+  - jekyll-sitemap
+  
