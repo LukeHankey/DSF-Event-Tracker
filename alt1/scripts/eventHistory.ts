@@ -130,7 +130,6 @@ export function updateTableRowCells(
         newStyle?: Partial<CSSStyleDeclaration>;
     }[],
 ): void {
-    const KNOWN_EVENTS = (Object.keys(events) as EventKeys[]).filter((e) => DEBUG || e !== "Testing");
     updates.forEach((update) => {
         const cell = row.cells[update.cellIndex];
         if (!cell) return;
@@ -208,7 +207,6 @@ function updateTimer(
     mistyChecked: boolean = false,
 ): void {
     const cells = row.getElementsByTagName("td");
-    const timeLeftText = cells[3].textContent?.trim() || "";
     const eventName = (cells[1].textContent?.trim() || "Unknown") as EventKeys;
     const maxDuration = eventTimes[eventName];
 
@@ -261,7 +259,7 @@ export function renderEventHistory(): void {
     let activeEvents: EventRecord[] = [];
     eventsToRender.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
-        let remaining = event.duration - elapsed;
+        const remaining = event.duration - elapsed;
         if (remaining > 0) {
             activeEvents.push(event);
         } else {
@@ -387,7 +385,7 @@ export function updateEventTimers(): void {
     eventHistory.forEach((event) => {
         const elapsed = (now - event.timestamp) / 1000;
         const maxDuration = eventTimes[event.event];
-        let remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
+        const remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
 
         const row = rowMap.get(event.id);
         if (row) {
@@ -707,7 +705,7 @@ export function removeEvent(event: EventRecord): void {
 function checkActive(event: EventRecord): boolean {
     const now = Date.now();
     const elapsed = (now - event.timestamp) / 1000;
-    let remaining = event.duration - elapsed;
+    const remaining = event.duration - elapsed;
     return remaining > 0;
 }
 
@@ -773,7 +771,7 @@ function editEvent(event: EventRecord): void {
         if (unchanged) {
             const iconMissing = !row.cells[4].querySelector("img");
             if (iconMissing) {
-                let icon = document.createElement("img");
+                const icon = document.createElement("img");
                 icon.style.marginRight = "5px"; // Adjust spacing as needed.
                 icon.src = "./assets/Alt1_icon.png";
                 icon.alt = "Alt1";
@@ -871,7 +869,7 @@ function formatTimeLeft(event: EventRecord): string {
     const now = Date.now();
     const elapsed = (now - event.timestamp) / 1000;
     const maxDuration = eventTimes[event.event];
-    let remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
+    const remaining = mistyToggle ? elapsed + (maxDuration - event.duration) : event.duration - elapsed;
     if (remaining < 0 && !mistyToggle) {
         return formatTimeLeftValue(0);
     } else if (remaining < 0 && mistyToggle) {

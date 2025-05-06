@@ -1,7 +1,6 @@
 import DialogReader from "alt1/dialog";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import * as a1lib from "alt1";
-import * as OCR from "alt1/ocr";
 import { currentWorld, reportEvent, findWorldNumber } from "./capture";
 import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
@@ -169,6 +168,11 @@ export async function readTextFromDialogBox(): Promise<void> {
                 return;
             }
 
+            if (!reader.pos) {
+                console.error("reader.pos is undefined");
+                return;
+            }
+
             if (
                 dialogReadable.title.toLowerCase() === "misty" &&
                 dialogReadable.text.length === 1 &&
@@ -178,14 +182,14 @@ export async function readTextFromDialogBox(): Promise<void> {
                 let newLine = "";
                 try {
                     const pos = reader.pos;
-                    const imgref = a1lib.captureHold(pos!.x, pos!.y, pos!.width, pos!.height);
+                    const imgref = a1lib.captureHold(pos.x, pos.y, pos.width, pos.height);
                     const alt1ImageData = imgref.toData().toPngBase64();
 
                     const {
                         data: { text },
                     } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
                     newLine = text.trim();
-                } catch (err) {
+                } catch {
                     showToast("Unable to capture text from dialog", "error");
                     stopCapturingMisty();
                     return;
@@ -207,21 +211,14 @@ export async function readTextFromDialogBox(): Promise<void> {
 
             if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
                 const color = a1lib.mixColor(255, 0, 0);
-                alt1.overLayRect(
-                    color,
-                    reader.pos?.x!,
-                    reader.pos?.y!,
-                    reader.pos?.width!,
-                    reader.pos?.height!,
-                    2000,
-                    1,
-                );
+                alt1.overLayRect(color, reader.pos.x, reader.pos.y, reader.pos.width, reader.pos.height, 2000, 1);
                 console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
                 await updateTimersFromMisty({ seconds, status, eventName });
             }
 
             return;
         } catch (err) {
+            console.error(err);
             return;
         }
     }

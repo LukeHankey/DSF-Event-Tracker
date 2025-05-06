@@ -387,7 +387,7 @@ function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): v
         // If a stored sort column exists, convert it back to a TableColumn enum value and sort.
         if (sortBy) {
             // Convert the stored sort (e.g., "World") to the enum numeric value.
-            const sortColumn = (TableColumn as any)[sortBy] as TableColumn;
+            const sortColumn = TableColumn[sortBy as keyof typeof TableColumn];
             sortTableByColumn(table, sortColumn, sortOrder === "asc");
         }
     });
@@ -638,7 +638,7 @@ async function editMistyTimer(world: number): Promise<void> {
             const minute = parseInt(minuteInputEl.value, 10) || 0;
             const second = parseInt(secondInputEl.value, 10) || 0;
 
-            let parts: string[] = [];
+            const parts: string[] = [];
             // Include hour if it's greater than 0.
             if (hour > 0) {
                 parts.push(`${hour}h`);
@@ -663,10 +663,7 @@ async function editMistyTimer(world: number): Promise<void> {
             newStatus === (row.dataset.originalStatus?.trim() || "") &&
             newTimer === (row.dataset.originalTimer?.trim() || "");
 
-        if (unchanged) {
-            // If nothing has changed, do nothing further.
-            return;
-        }
+        if (unchanged) return;
 
         if (totalSeconds > MAX_SECONDS_ALLOWED) {
             // Revert cells to the original values if the new total exceeds the limit.
