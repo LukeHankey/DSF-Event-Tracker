@@ -1,4 +1,20 @@
 {
+    "name": "dsfeventtracker",
+    "version": "1.0.0",
+    "description": "Front end of the DSF Event Tracker Alt1 plugin.",
+    "homepage": "https://www.dsfeventtracker.com/",
+    "bugs": {
+        "url": "https://github.com/LukeHankey/issues"
+    },
+    "license": "MIT",
+    "author": "Luke Hankey",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LukeHankey/DSF-Event-Tracker.git"
+    },
+    "engines": {
+        "node": ">=23.9.0"
+    },
     "scripts": {
         "build": "webpack && npm run postbuild",
         "postbuild": "cp index.md _config.yml README.md favicon.ico CNAME robots.txt dist/ && cp -r faq _includes dist/",
