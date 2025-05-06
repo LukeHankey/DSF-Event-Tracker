@@ -1,7 +1,12 @@
 /* -------------------------------------
 1) GLOBAL / BASE STYLES
 ------------------------------------- */
-* {
+body.dark-mode {
+    background-color: #101E28;
+    color: #e0e0e0;
+}
+
+body:not(.dark-mode) {
     color: black;
 }
 
@@ -39,6 +44,10 @@ h2 {
     margin-bottom: 5px;
 }
 
+body.dark-mode h2 {
+    color: #4dabf7;
+}
+
 h3 {
     margin: 0
 }
@@ -46,6 +55,11 @@ h3 {
 a {
     text-decoration-color: blue;
     color: blue;
+}
+
+body.dark-mode a {
+    color: #4dabf7;
+    text-decoration-color: #4dabf7;
 }
 
 #mainTab {
@@ -84,6 +98,11 @@ a {
     padding: 4px 8px;
 }
 
+body.dark-mode .event-footer {
+    background: rgba(22, 34, 45, 0.9);
+    border-top-color: #445;
+}
+
 /* -------------------------------------
 2a) TABS
 ------------------------------------- */
@@ -100,11 +119,19 @@ a {
     cursor: pointer;
     color: white;
 }
+body.dark-mode .tabs__tab {
+    color: #e0e0e0;
+}
 
 .tabs__tab--active {
     border-bottom: 3px solid #0077cc; /* Highlights active tab */
     font-weight: bold;
     background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .tabs__tab--active {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom-color: #4dabf7;
 }
 
 .tabs__tab:hover {
@@ -126,6 +153,11 @@ a {
     border-radius: 8px; /* Rounded corners */
 }
 
+body.dark-mode .tabs__content {
+    background-color: #16232d;
+    color: #e0e0e0;
+}
+
 .tabs__content--active {
     display: flex !important;
     overflow: auto;
@@ -141,28 +173,28 @@ a {
     inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
     width: 100%;
     height: 100%;
-  
+
     /* Center the modal horizontally & vertically */
     align-items: center;
     justify-content: center;
-  
+
     background-color: rgba(0, 0, 0, 0.4);
     z-index: 9999;
-  
+
     /* If content is taller than the screen, allow scrolling */
     overflow: auto;
 }
-  
+
 .merchant-modal-content {
     background-color: #1d1b17;
     padding: 0px 20px 20px 20px;
     border: 2px solid #888;
     border-radius: 4px;
     color: #fff;
-    
+
     /* Control the modal's max size so it doesn't overflow the screen */
     overflow-y: auto;
-  
+
     /* For spacing inside the modal */
     display: flex;
     flex-direction: column;
@@ -173,8 +205,8 @@ a {
     align-items: center;
     justify-content: space-between; /* pushes close to the right */
 }
-  
-  
+
+
 .merchant-modal-content .close {
     color: #aaa;
     float: right;
@@ -183,11 +215,11 @@ a {
     cursor: pointer;
     margin-left: auto;
 }
-  
+
 .merchant-modal-content .close:hover {
     color: #fff;
 }
-  
+
 /* Example for the date heading to make it visible and centered */
 #merchantDateHeading {
     color: #fdbf1c; /* bright gold */
@@ -195,7 +227,7 @@ a {
     text-align: center;
     font-size: 18px;
 }
-  
+
 /* Cards container */
 .merchant-cards {
     display: flex;
@@ -204,7 +236,7 @@ a {
     row-gap: 10px;
     column-gap: 10px;
 }
-  
+
 /* Each card */
 .merchant-card {
     background: #2c2c2c;
@@ -218,39 +250,39 @@ a {
     width: 100px;
     box-sizing: border-box;
 }
-  
-  
-  
+
+
+
 /* Item name */
 .merchant-card h4 {
     margin: 5px 0;
     color: silver;
     min-height: 2.4em; /* ~2 lines at 1.2em line-height each */
 }
-  
+
 .merchant-item-info {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px; /* Optional: adds some spacing between the image and cost */
 }
-  
+
 /* You can also ensure the image has a fixed size */
 .merchant-item-info img {
     width: 30px;
     height: 30px;
 }
-  
+
 /* Optional: Style the cost element */
 .merchant-cost {
     font-size: 14px;
     color: #ccc;
-    /* If you want the cost to stick to the right, this is already handled by flex; 
+    /* If you want the cost to stick to the right, this is already handled by flex;
        you can add margin-left: auto; if needed */
     margin-left: auto;
 }
 
-  
+
 /* -------------------------------------
 2b) SUB-TABS
 ------------------------------------- */
@@ -289,6 +321,10 @@ a {
     border-bottom: 2px solid transparent;
 }
 
+body.dark-mode .sub-tab {
+    color: #e0e0e0;
+}
+
 .sub-tab:hover {
     background: rgba(255, 255, 255, 0.1);
 }
@@ -297,6 +333,11 @@ a {
     background: rgba(255, 255, 255, 0.2);
     border-bottom: 3px solid #0077cc;
     font-weight: bold;
+}
+
+body.dark-mode .sub-tab--active {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom-color: #4dabf7;
 }
 
 .sub-tab__content__container {
@@ -310,6 +351,11 @@ a {
     flex-direction: column;
     flex: 1;
     overflow: hidden;
+}
+
+body.dark-mode .sub-tab__content__container {
+    background-color: #192a36;
+    color: #e0e0e0;
 }
 
 /* Make sure the container that holds the Event History content fills available height */
@@ -360,6 +406,11 @@ a {
     text-align: center;
 }
 
+body.dark-mode .event-table th,
+body.dark-mode .event-table td {
+    border-bottom-color: #334;
+}
+
 .event-table tr.editing td {
     border: 1px dashed #ccc;
 }
@@ -407,6 +458,10 @@ a {
     background-color: #ffefc2;
 }
 
+body.dark-mode .favourite-event {
+    background-color: #263d4e;
+}
+
 .event-dropdown {
     width: 100%;
 }
@@ -430,6 +485,11 @@ a {
     overflow: hidden;
 }
 
+body.dark-mode .profile-card {
+    background-color: #192a36;
+    color: #e0e0e0;
+}
+
 /* Header: Profile Info and Total Events */
 .profile-header {
     display: flex;
@@ -438,6 +498,11 @@ a {
     padding: 1% 2%;
     background: #008cff;
     color: #fff;
+}
+
+body.dark-mode .profile-header {
+    background: #101E28;
+    color: #e0e0e0;
 }
 
 .profile-scroll {
@@ -468,15 +533,26 @@ a {
     padding: 5px;
     text-align: center;
 }
+body.dark-mode .stat-box {
+    background: #1c2d38;
+    color: #ddd;
+}
 .stat-label {
     font-size: 0.9rem;
     color: #666;
 }
+body.dark-mode .stat-label {
+    color: #bbb;
+}
+
 .stat-value {
     font-size: 1.3rem;
     font-weight: bold;
     color: #333;
     margin-top: 4px;
+}
+body.dark-mode .stat-value {
+    color: #fff;
 }
 /* Roles Section */
 .roles-section {
@@ -503,6 +579,9 @@ a {
     white-space: nowrap;
     margin: .2rem;
 }
+body.dark-mode .role-badge {
+    background: #2196f3;
+}
 .progress-bar {
     background: #e0e0e0;
     border-radius: 4px;
@@ -510,6 +589,9 @@ a {
     width: 100%;
     overflow: hidden;
     margin-bottom: 8px;
+}
+body.dark-mode .progress-bar {
+    background: #2a3a4a;
 }
 .progress-fill {
     background: #ff9900;
@@ -546,6 +628,12 @@ form .form__group:not(:last-of-type) {
     border-radius: 4px;
 }
 
+body.dark-mode .form__group input {
+    background: #22303c;
+    color: #e0e0e0;
+    border-color: #445;
+}
+
 .form__group button {
     padding: 10px 15px;
     background: linear-gradient(135deg, #0077cc, #005fa3);
@@ -557,8 +645,18 @@ form .form__group:not(:last-of-type) {
     font-weight: bold;
 }
 
+body.dark-mode .form__group button,
+body.dark-mode .validate-btn {
+    background: linear-gradient(135deg, #4dabf7, #237abf);
+}
+
 .form__group button:hover {
     background: linear-gradient(135deg, #0099ff, #0077cc);
+}
+
+body.dark-mode .form__group button:hover,
+body.dark-mode .validate-btn:hover {
+    background: linear-gradient(135deg, #6bbcff, #4dabf7);
 }
 
 .form__saved-message {
@@ -638,6 +736,11 @@ small {
     border-radius: 4px;
 }
 
+body.dark-mode .modal-content {
+    background-color: #192a36;
+    color: #e0e0e0;
+}
+
 /* The close button inside the modal */
 .modal-content .close {
     color: #aaa;
@@ -655,10 +758,10 @@ small {
 
 .modal-content ul {
     /* This reduces the default left padding/indent of the list items */
-    margin-left: 0; 
+    margin-left: 0;
     padding-left: 1.2rem; /* Adjust to your liking */
-  }
-  
+}
+
 .modal-content li {
     margin-bottom: 0.5rem; /* Spacing between items */
 }
@@ -667,10 +770,10 @@ small {
     margin-top: 0;
     margin-bottom: 5px;
 }
-  
-  /* Ensure images line up well with text */
+
+/* Ensure images line up well with text */
 .button-icon {
-    vertical-align: middle; 
+    vertical-align: middle;
     width: 14px; /* Adjust as needed */
     height: 14px; /* Adjust as needed */
 }
@@ -685,14 +788,14 @@ MOD ACTIONS MODAL
     padding: 15px;
     font-size: 14px;
 }
-  
+
 .mod-actions {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 10px;
 }
-  
+
 .mod-actions button {
     display: flex;
     align-items: center;
@@ -704,17 +807,28 @@ MOD ACTIONS MODAL
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-  
+
+body.dark-mode .mod-actions button {
+    background: #1e2c36;
+    border-color: #445;
+    color: #fff;
+}
+
+
 .mod-actions button:hover {
     background-color: #eaeaea;
 }
-  
+
+body.dark-mode .mod-actions button:hover {
+    background-color: #273847;
+}
+
 .mod-icon {
     font-size: 1.2rem;
 }
-  
 
-  
+
+
 /* -------------------------------------
 5) TOAST NOTIFICATION
 ------------------------------------- */
@@ -731,9 +845,9 @@ MOD ACTIONS MODAL
     opacity: 0;
     visibility: hidden;
     transition:
-        opacity 0.5s ease-in-out,
-        visibility 0.5s,
-        transform 0.3s ease-in-out;
+            opacity 0.5s ease-in-out,
+            visibility 0.5s,
+            transform 0.3s ease-in-out;
     transform: translateX(100%); /* Initially hidden offscreen */
 }
 
@@ -762,13 +876,13 @@ MOD ACTIONS MODAL
 
 .misty-timer-hour {
     width: 4ch;    /* Enough room for two digits; adjust as needed */
-    text-align: center; 
+    text-align: center;
     box-sizing: content-box; /* Ensure width is strictly for text, not including padding/border */
 }
 
 .misty-timer-minute, .misty-timer-second {
     width: 4.5ch;
-    text-align: center; 
+    text-align: center;
     box-sizing: content-box;
 }
 
@@ -801,4 +915,47 @@ MOD ACTIONS MODAL
     pointer-events: none; /* So the overlay doesn't block other pointer settings if needed */
     z-index: 2;          /* Ensure the overlay is above other content */
 }
-  
+
+/* Theme toggle switch */
+.theme-switch {
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    position: relative;
+    margin-top: 5px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 20px; width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.theme-switch input:checked + .slider {
+    background: linear-gradient(135deg, #0077cc, #005fa3);
+}
+
+.theme-switch input:checked + .slider::before {
+    transform: translateX(24px);
+}

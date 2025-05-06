@@ -7,3 +7,4 @@ venv
 requirements.txt
 test_server.js
 .vscode/
+.idea/
