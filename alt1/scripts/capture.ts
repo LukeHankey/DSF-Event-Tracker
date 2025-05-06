@@ -432,7 +432,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text));
 
         for (const line of lines) {
-            if (line.basey > maxBasey) maxBasey = line.basey
+            if (line.basey > maxBasey) maxBasey = line.basey;
             if (line.text === lastMessage) continue;
             const { updatedTimestamp, updatedLastMessage } = processLine(line, hasTimestamps);
 
