@@ -232,7 +232,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
     });
 
     sortedRoleIds.forEach((roleId) => {
-        let role = ROLE_DATA.find((r) => r.role_id === roleId);
+        const role = ROLE_DATA.find((r) => r.role_id === roleId);
         if (!role) return;
 
         // ✅ Ensure required roles are already achieved before showing this role
