@@ -91,6 +91,12 @@ if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
 }
 
+const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
+const darkMode = localStorage.getItem("darkMode");
+if (darkModeSwitch && darkMode) {
+    darkModeSwitch.checked = darkMode === "true";
+}
+
 function updateIfChanged(key: string, currentValue: string): void {
     const savedValue = localStorage.getItem(key);
     if (savedValue !== currentValue) {
@@ -98,6 +104,13 @@ function updateIfChanged(key: string, currentValue: string): void {
         if (key === "favoriteEventsMode" || key === "favoriteEvents") renderEventHistory();
     }
 }
+
+function setDarkMode(): void {
+    const isDarkMode = localStorage.getItem("darkMode") === "true";
+    document.body.classList.toggle("dark-mode", isDarkMode);
+}
+
+setDarkMode();
 
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById("settingsForm") as HTMLFormElement | null;
@@ -121,6 +134,12 @@ settingsForm?.addEventListener("submit", (e) => {
     if (favoriteEventsModeSelect) {
         updateIfChanged("favoriteEventsMode", favoriteEventsModeSelect.value);
     }
+
+    if (darkModeSwitch) {
+        updateIfChanged("darkMode", darkModeSwitch.checked.toString());
+    }
+
+    setDarkMode();
 
     // Show success toast notification
     showToast("✅ Settings saved!");
