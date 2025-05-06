@@ -29,6 +29,7 @@ chatbox.readargs.colors.push(
 /**
  * Image references for world number detection
  */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const imgs = webpackImages({
     runescapeWorldPretext: require("../assets/runescape_world_pretext.data.png"),
 });
@@ -268,7 +269,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         };
 
         const buffer = img.toData();
-        let chr = OCR.findChar(buffer, font, [255, 255, 255], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height);
+        const chr = OCR.findChar(buffer, font, [255, 255, 255], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height);
         let data;
         // Lifeguard title
         if (["e", "g", "u"].includes(chr!.chr) && chr!.x === rsnRect.x + 25) {
@@ -324,7 +325,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
     let lines: ChatLine[] = [];
     try {
         lines = (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
-    } catch (err) {
+    } catch {
         // TypeError: Cannot read property 'width' of null
         return;
     }
@@ -431,7 +432,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         lines = lines.filter((line) => !/^\[\d{2}:\d{2}:\d{2}\]\s*\S\W?$/.test(line.text));
 
         for (const line of lines) {
-            line.basey > maxBasey ? (maxBasey = line.basey) : (maxBasey = maxBasey);
+            if (line.basey > maxBasey) maxBasey = line.basey
             if (line.text === lastMessage) continue;
             const { updatedTimestamp, updatedLastMessage } = processLine(line, hasTimestamps);
 
@@ -485,7 +486,7 @@ const fuse = new Fuse(eventEntries, {
     minMatchCharLength: 10,
 });
 
-function isLikelyEventStart(lineText: string): Boolean {
+function isLikelyEventStart(lineText: string): boolean {
     const firstTextFuse = new Fuse(firstEventTexts, {
         includeScore: true,
         threshold: 0.3, // Allow minor OCR errors
@@ -520,7 +521,7 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
         const eventText = firstEventTexts.includes(bestMatch.item.text);
 
         if ("has appeared at the hub!" === lineText) {
-            !eventKey.toLowerCase().includes(lineText) ? (eventKey = "Unknown") : (eventKey = eventKey);
+            if (!eventKey.toLowerCase().includes(lineText)) eventKey = "Unknown";
         }
 
         return [eventKey, eventText];
@@ -565,7 +566,7 @@ export const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | n
 
     let worldNumber = null;
     if (pos.length) {
-        for (let match of pos) {
+        for (const match of pos) {
             const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2);
             worldNumber = textObj.text.match(/\d{1,3}/)![0];
         }
