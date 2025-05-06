@@ -298,11 +298,11 @@ if (toggleMistyTimer) {
 }
 
 function showConfirmationModal({
-                                   title = "Confirm",
-                                   message = "Are you sure you want to proceed?",
-                                   confirmText = "Yes",
-                                   onConfirm,
-                               }: {
+    title = "Confirm",
+    message = "Are you sure you want to proceed?",
+    confirmText = "Yes",
+    onConfirm,
+}: {
     title?: string;
     message?: string;
     confirmText?: string;
