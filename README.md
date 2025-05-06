@@ -4,7 +4,7 @@ This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneSc
 
 📢 Join our official [Deep Sea Fishing Discord Server](https://discord.gg/M5S7B43gx6) for more info, coordination, and support.
 
-### ✨ Key Features
+## ✨ Key Features
 - 📋 A fully event-driven **Scouting Tab** to view all active events and your previous history.
 - 🛒 View the current day (and any other day) of **Merchant Stock** at a glance.
   - 🔮 Next 7 days of stock available immediately.
