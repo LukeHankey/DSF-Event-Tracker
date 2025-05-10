@@ -293,8 +293,9 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                 rsnRect.height,
             );
         }
-        const valkTitle = "of the Valkyrie";
-        if (data.text.includes("of the Valkyrie")) data.text.replace(valkTitle, "");
+        const valkTitle = " of the Valkyrie";
+        if (data.text.includes(valkTitle)) data.text = data.text.replace(valkTitle, "");
+        if (["!", ","].some((char) => data.text.includes(char))) data.text = data.text.replace(/[!,]/g, "");
 
         if (data.text !== "") {
             alt1.overLayRect(
