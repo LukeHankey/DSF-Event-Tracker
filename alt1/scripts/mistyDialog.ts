@@ -5,7 +5,7 @@ import { currentWorld, reportEvent, findWorldNumber } from "./capture";
 import { API_URL, ORIGIN } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
-import { refreshToken, wsClient } from "./ws";
+import { wsClient } from "./ws";
 import { createWorker, Worker } from "tesseract.js";
 
 type TimerData = {
@@ -19,7 +19,6 @@ export interface WorldRecord {
 }
 
 let mistyInterval: NodeJS.Timeout | null;
-let retryCount: number = 0;
 
 // Initialize the DialogReader
 const reader = new DialogReader();
@@ -144,16 +143,6 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             wsClient.send({ world: Number(world) } as WorldRecord);
             showToast(`Misty time updated for world ${world}`);
             console.log(`Misty time updated for world ${world}`);
-        } else if (axiosErr.response?.status === 401 && axiosErr.response?.data.detail === "Token has expired") {
-            retryCount += 1;
-            if (retryCount < 3) {
-                await refreshToken();
-                await updateTimersFromMisty(timerData);
-            } else {
-                retryCount = 0;
-                showToast(`Unable to update world ${world}`, "error");
-                console.error(err);
-            }
         } else {
             console.error("Unhandled error from world event:", axiosErr);
         }
