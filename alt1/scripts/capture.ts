@@ -125,10 +125,10 @@ async function addEventCount(matchingEvent: EventKeys, worldNumber: string, isFi
             headers: {
                 "Content-Type": "application/json",
                 Origin: ORIGIN,
+                Authorization: `Bearer ${token}`,
             },
             key: isFirstEvent ? "alt1First" : "alt1",
             event: matchingEvent,
-            world: worldNumber,
         });
 
         if (addCountResponse.status === 200) {
