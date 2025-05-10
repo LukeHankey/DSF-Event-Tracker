@@ -23,6 +23,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Build stable version into dist/alt1/
+        run: |
+          git fetch --tags
+          git checkout "v${{ steps.package-version.outputs.current-version }}"
+          npm run build
+          git checkout main
+          git pull
+
       - name: Build alt1-dev version
         run: npm run build:dev
 
