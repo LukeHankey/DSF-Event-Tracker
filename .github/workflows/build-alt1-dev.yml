@@ -3,7 +3,7 @@ name: Build alt1-dev on main push
 on:
   push:
     branches:
-      - main
+      - gha_fix
 
 jobs:
   build:
