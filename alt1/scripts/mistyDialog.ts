@@ -126,6 +126,8 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         const axiosErr = err as AxiosError<{ detail?: string }>;
 
         if (axiosErr.response?.status === 404 && status === "active") {
+            // Make sure that if an event is being called, it has some time left
+            if (seconds <= 0) return;
             // Misty says it's active, but no active event is known → create it
             await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration, mistyUpdate: true });
             showToast(`Event added from Misty on world ${world}`);
