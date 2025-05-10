@@ -32,8 +32,7 @@ jobs:
           git fetch --tags
           git checkout "v${{ steps.package-version.outputs.current-version }}"
           npm run build
-          git checkout main
-          git pull
+          git switch -
 
       - name: Build alt1-dev version
         run: npm run build:dev
