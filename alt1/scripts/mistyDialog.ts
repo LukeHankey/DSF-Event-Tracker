@@ -126,6 +126,8 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         const axiosErr = err as AxiosError<{ detail?: string }>;
 
         if (axiosErr.response?.status === 404 && status === "active") {
+            // Make sure that if an event is being called, it has some time left
+            if (seconds <= 0) return;
             // Misty says it's active, but no active event is known → create it
             await reportEvent(eventName ?? "Unknown", false, world, { duration: newDuration, mistyUpdate: true });
             showToast(`Event added from Misty on world ${world}`);
@@ -165,6 +167,7 @@ export async function readTextFromDialogBox(): Promise<void> {
             const dialogReadable = reader.read();
             if (!dialogReadable || !dialogReadable.text) {
                 showToast("Unable to read Misty dialog", "error");
+                stopCapturingMisty();
                 return;
             }
 
@@ -199,7 +202,11 @@ export async function readTextFromDialogBox(): Promise<void> {
 
             const dialogText = dialogReadable.text.join(" ");
             const seconds = parseTimeToSeconds(dialogText);
-            if (!seconds) return;
+            if (!seconds || seconds < 0) {
+                stopCapturingMisty();
+                console.error(`Text=${dialogText}, Seconds=${seconds}`);
+                return showToast("Unable to parse the time", "error");
+            }
 
             // Misty reports Sea Monster as Sea monster. Lower all text
             let eventName = getValidEventNames().find((event) =>
