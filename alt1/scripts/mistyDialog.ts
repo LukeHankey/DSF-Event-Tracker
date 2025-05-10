@@ -165,6 +165,7 @@ export async function readTextFromDialogBox(): Promise<void> {
             const dialogReadable = reader.read();
             if (!dialogReadable || !dialogReadable.text) {
                 showToast("Unable to read Misty dialog", "error");
+                stopCapturingMisty();
                 return;
             }
 
@@ -199,7 +200,11 @@ export async function readTextFromDialogBox(): Promise<void> {
 
             const dialogText = dialogReadable.text.join(" ");
             const seconds = parseTimeToSeconds(dialogText);
-            if (!seconds) return;
+            if (!seconds || seconds < 0) {
+                stopCapturingMisty();
+                console.error(`Text=${dialogText}, Seconds=${seconds}`);
+                return showToast("Unable to parse the time", "error");
+            }
 
             // Misty reports Sea Monster as Sea monster. Lower all text
             let eventName = getValidEventNames().find((event) =>
