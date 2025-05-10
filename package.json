@@ -16,9 +16,9 @@
         "node": ">=23.9.0"
     },
     "scripts": {
-        "build": "webpack && npm run postbuild",
-        "postbuild": "cp index.md _config.yml README.md favicon.ico CNAME robots.txt dist/ && cp -r faq _includes dist/",
+        "build": "webpack --env VERSION=alt1 && npm run postbuild",
         "build:dev": "webpack --env VERSION=alt1-dev && npm run postbuild",
+        "postbuild": "cp index.md _config.yml README.md favicon.ico CNAME robots.txt package.json dist/ && cp -r faq _includes dist/",
         "watch": "webpack --watch",
         "deploy": "gh-pages -d dist",
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",

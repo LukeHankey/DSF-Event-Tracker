@@ -34,7 +34,7 @@ module.exports = (env = {}) => {
                 patterns: [
                     {
                         from: path.resolve(__dirname, "alt1/assets"),
-                        to: path.resolve(__dirname, "dist/alt1/assets"),
+                        to: "assets",
                     },
                 ],
             }),
@@ -46,6 +46,7 @@ module.exports = (env = {}) => {
                 { test: /\.css$/, use: ["style-loader", "css-loader"] },
                 {
                     test: /\.(html|json)$/,
+                    include: path.resolve(__dirname, "alt1"),
                     type: "asset/resource",
                     generator: { filename: "[base]" },
                 },
