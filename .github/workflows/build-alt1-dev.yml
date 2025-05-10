@@ -1,0 +1,47 @@
+name: Build alt1-dev on main push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Alt1 Dev
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Build stable version into dist/alt1/
+        run: |
+          git fetch --tags
+          git checkout "v${{ steps.package-version.outputs.current-version }}"
+          npm run build
+          git switch -
+
+      - name: Build alt1-dev version
+        run: npm run build:dev
+
+      - name: Set Git identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Deploy to GitHub Pages
+        run: |
+          npx gh-pages -d dist --repo https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
