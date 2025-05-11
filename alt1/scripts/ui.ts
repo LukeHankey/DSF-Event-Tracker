@@ -162,7 +162,7 @@ settingsForm?.addEventListener("submit", (e) => {
     if (notificationModesSelect) {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
-        if (selectedValues && selectedValues.length > 0) {
+        if (selectedValues && selectedValues.includes("toolbar")) {
             alt1.setTitleBarText("Listening for DSF events...");
         } else {
             alt1.setTitleBarText("");

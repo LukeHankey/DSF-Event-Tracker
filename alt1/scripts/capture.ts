@@ -91,10 +91,10 @@ export function initCapture(): void {
     renderMistyTimers();
     const notificationModes = JSON.parse(localStorage.getItem("notificationModes"));
     console.log("notificationModes", notificationModes);
-    if (!notificationModes || notificationModes.length === 0) {
-        alt1.setTitleBarText("");
-    } else {
+    if (notificationModes && notificationModes.includes("toolbar")) {
         alt1.setTitleBarText("Listening for DSF events...");
+    } else {
+        alt1.setTitleBarText("");
     }
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
