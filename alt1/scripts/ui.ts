@@ -342,7 +342,7 @@ if (toggleNotificationsToday) {
         toggleNotificationsToday.checked = storedState;
     }
 
-    // 🔁 If enabled, schedule the reset
+    // If enabled, schedule the reset
     if (toggleNotificationsToday.checked) {
         scheduleNotificationResetAtMidnightUTC();
     }
@@ -389,7 +389,7 @@ function scheduleNotificationResetAtMidnightUTC(): void {
             toggleNotificationsToday.checked = false;
         }
 
-        showToast("Daily notification toggle has reset");
+        showToast("Notification suppression has reset");
 
         midnightResetTimeoutId = null;
     }, msUntilMidnight);
