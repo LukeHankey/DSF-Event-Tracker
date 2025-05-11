@@ -7,6 +7,7 @@ import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
 import { WorldEventStatus, updateWorld } from "./mistyTimers";
 import { WorldRecord } from "./mistyDialog";
+import {notifyEvent} from './notifications';
 
 type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
 
@@ -178,6 +179,7 @@ export class WebSocketClient {
         if (eventData.type === "addEvent") addNewEvent(eventData);
         if (eventData.type === "editEvent") updateEvent(eventData);
         if (eventData.type === "deleteEvent") removeEvent(eventData);
+        notifyEvent(eventData);
     }
 
     sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {

@@ -91,6 +91,16 @@ if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
 }
 
+const notificationModesSelect = document.getElementById("notificationModes") as HTMLSelectElement | null;
+const notificationModes = localStorage.getItem("notificationModes");
+if (notificationModes && notificationModesSelect) {
+    const favorites: string[] = JSON.parse(notificationModes);
+    // Mark these options as selected
+    Array.from(notificationModesSelect.options).forEach((option) => {
+        option.selected = favorites.includes(option.value);
+    });
+}
+
 const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
 const darkMode = localStorage.getItem("darkMode");
 if (darkModeSwitch && darkMode) {
@@ -111,6 +121,20 @@ function setDarkMode(): void {
 }
 
 setDarkMode();
+
+// Handle reset notification modes
+const resetNotificationModes = document.getElementById("resetNotificationModes") as HTMLAnchorElement | null;
+resetNotificationModes?.addEventListener("click", (e) => {
+    if (notificationModesSelect) {
+        // Clear all selected options
+        Array.from(notificationModesSelect.options).forEach(option => {
+            option.selected = false;
+        });
+
+        // Update localStorage to reflect empty state
+        localStorage.setItem("notificationModes", JSON.stringify([]));
+    }
+});
 
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById("settingsForm") as HTMLFormElement | null;
@@ -133,6 +157,12 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (favoriteEventsModeSelect) {
         updateIfChanged("favoriteEventsMode", favoriteEventsModeSelect.value);
+    }
+
+    if (notificationModesSelect) {
+        const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
+        console.log('selected modes', selectedValues)
+        updateIfChanged("notificationModes", JSON.stringify(selectedValues));
     }
 
     if (darkModeSwitch) {
@@ -435,6 +465,7 @@ window.addEventListener("DOMContentLoaded", () => {
             populateEventDropdown();
         }
     }
+
     const infoButtonEventHistory = document.getElementById("infoButtonEventHistory") as HTMLElement;
     const modalScouts = document.getElementById("infoModalScouts") as HTMLElement;
     const closeModalScouts = modalScouts.querySelector(".close") as Element;
@@ -474,6 +505,24 @@ window.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("click", function (event) {
         if (event.target === modalMisty) {
             modalMisty.style.display = "none";
+        }
+    });
+
+    const infoButtonNotificationMode = document.getElementById("infoButtonNotificationMode") as HTMLElement;
+    const modalNotificationMode = document.getElementById("infoModalNotificationMode") as HTMLElement;
+    const closeModalNotificationMode = modalNotificationMode.querySelector(".close") as Element;
+
+    infoButtonNotificationMode.addEventListener("click", function () {
+        modalNotificationMode.style.display = "flex";
+    });
+
+    closeModalNotificationMode.addEventListener("click", function () {
+        modalNotificationMode.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+        if (event.target === modalNotificationMode) {
+            modalNotificationMode.style.display = "none";
         }
     });
 
