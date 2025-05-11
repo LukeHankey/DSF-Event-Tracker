@@ -94,10 +94,10 @@ if (favoriteEventsModeSelect && savedFavMode) {
 const notificationModesSelect = document.getElementById("notificationModes") as HTMLSelectElement | null;
 const notificationModes = localStorage.getItem("notificationModes");
 if (notificationModes && notificationModesSelect) {
-    const favorites: string[] = JSON.parse(notificationModes);
+    const modes: string[] = JSON.parse(notificationModes);
     // Mark these options as selected
     Array.from(notificationModesSelect.options).forEach((option) => {
-        option.selected = favorites.includes(option.value);
+        option.selected = modes.includes(option.value);
     });
 }
 
@@ -161,8 +161,12 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (notificationModesSelect) {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
-        console.log("selected modes", selectedValues);
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
+        if (selectedValues && selectedValues.length > 0) {
+            alt1.setTitleBarText("Listening for DSF events...");
+        } else {
+            alt1.setTitleBarText("");
+        }
     }
 
     if (darkModeSwitch) {

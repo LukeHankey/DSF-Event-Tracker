@@ -42,11 +42,8 @@ export function notifyEvent(event: EventRecord): void {
         return;
     }
 
-    const notificationModes = localStorage.getItem("notificationModes") as NotificationModes[] | null;
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes")) as NotificationModes[] | null;
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
-
-    console.log("mode", notificationModes);
-    console.log("favorites", favoriteEventsRaw);
 
     // if favorite events are set, only show the favorites, otherwise, show all
     if (favoriteEventsRaw) {
@@ -85,8 +82,22 @@ export function showTooltip(message: string, time: number = 5000): void {
 
 export function showTitleBarText(event: EventRecord, message: string, duration: number = 120000): void {
     const updateTitle = () => {
-        const remaining = getRemainingTime(event);
+        const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
 
+        if (suppressToday) {
+            alt1.setTitleBarText("");
+            if (titlebarInterval) {
+                clearInterval(titlebarInterval);
+                titlebarInterval = null;
+            }
+            if (titlebarTimeout) {
+                clearTimeout(titlebarTimeout);
+                titlebarTimeout = null;
+            }
+            return;
+        }
+
+        const remaining = getRemainingTime(event);
         if (remaining <= 0) {
             alt1.setTitleBarText("");
             if (titlebarInterval) {
@@ -112,10 +123,10 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
         clearTimeout(titlebarTimeout);
     }
 
-    // Start interval to update every second
+    // Start interval to update every minute
     titlebarInterval = setInterval(updateTitle, 60000);
 
-    // Final clear (in case interval missed the exact end)
+    // Final fallback cleanup in case interval missed the end
     titlebarTimeout = setTimeout(() => {
         alt1.setTitleBarText("");
         if (titlebarInterval) {

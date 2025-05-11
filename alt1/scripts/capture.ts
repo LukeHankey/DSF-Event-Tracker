@@ -89,6 +89,13 @@ export function initCapture(): void {
     previousMainContent = document.querySelector("#mainTab h2")!.innerHTML;
     loadEventHistory();
     renderMistyTimers();
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes"));
+    console.log("notificationModes", notificationModes);
+    if (!notificationModes || notificationModes.length === 0) {
+        alt1.setTitleBarText("");
+    } else {
+        alt1.setTitleBarText("Listening for DSF events...");
+    }
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
     if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
