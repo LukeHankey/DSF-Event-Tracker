@@ -190,6 +190,9 @@ export async function readTextFromDialogBox(): Promise<void> {
             }
 
             const dialogText = dialogReadable.text.join(" ");
+
+            if (dialogReadable.title.toLowerCase() !== "misty") return;
+
             const seconds = parseTimeToSeconds(dialogText);
             if (!seconds || seconds < 0) {
                 stopCapturingMisty();
@@ -205,7 +208,7 @@ export async function readTextFromDialogBox(): Promise<void> {
             const status: "active" | "inactive" = eventName ? "active" : "inactive";
             eventName ??= "Unknown";
 
-            if (dialogReadable.title.toLowerCase() === "misty" && mistyInterval) {
+            if (mistyInterval) {
                 const color = a1lib.mixColor(255, 0, 0);
                 alt1.overLayRect(color, reader.pos.x, reader.pos.y, reader.pos.width, reader.pos.height, 2000, 1);
                 console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
