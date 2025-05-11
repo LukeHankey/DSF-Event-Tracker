@@ -31,7 +31,6 @@ export function showToast(message: string, type: "error" | "success" = "success"
 }
 
 export function notifyEvent(event: EventRecord): void {
-    console.log("notified", event);
     // early return if we aren't in alt1
     if (!window.alt1) {
         return;
