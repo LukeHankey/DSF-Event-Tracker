@@ -127,7 +127,7 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
 
     // Final fallback cleanup in case interval missed the end
     titlebarTimeout = setTimeout(() => {
-        alt1.setTitleBarText("");
+        alt1.setTitleBarText("Listening for DSF events...");
         if (titlebarInterval) {
             clearInterval(titlebarInterval);
         }
