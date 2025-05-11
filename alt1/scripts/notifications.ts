@@ -122,8 +122,8 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
         clearTimeout(titlebarTimeout);
     }
 
-    // Start interval to update every minute
-    titlebarInterval = setInterval(updateTitle, 60000);
+    // Start interval to update every half minute
+    titlebarInterval = setInterval(updateTitle, 30000);
 
     // Final fallback cleanup in case interval missed the end
     titlebarTimeout = setTimeout(() => {
