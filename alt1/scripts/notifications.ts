@@ -92,8 +92,11 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
             return;
         }
 
-        const friendlyRemaining = formatTimeLeftValue(Math.max(remaining, 0), false);
-        alt1.setTitleBarText(`${message} for ~${friendlyRemaining}`);
+        const friendlyRemaining =
+            remaining < 60
+                ? "under a minute"
+                : formatTimeLeftValue(Math.max(remaining, 0), false);
+        alt1.setTitleBarText(`${message} for ${friendlyRemaining}`);
     };
 
     // Immediately update once
