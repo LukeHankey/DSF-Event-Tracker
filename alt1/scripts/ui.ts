@@ -124,10 +124,10 @@ setDarkMode();
 
 // Handle reset notification modes
 const resetNotificationModes = document.getElementById("resetNotificationModes") as HTMLAnchorElement | null;
-resetNotificationModes?.addEventListener("click", (e) => {
+resetNotificationModes?.addEventListener("click", () => {
     if (notificationModesSelect) {
         // Clear all selected options
-        Array.from(notificationModesSelect.options).forEach(option => {
+        Array.from(notificationModesSelect.options).forEach((option) => {
             option.selected = false;
         });
 
@@ -161,7 +161,7 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (notificationModesSelect) {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
-        console.log('selected modes', selectedValues)
+        console.log("selected modes", selectedValues);
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
     }
 
@@ -375,7 +375,7 @@ function scheduleNotificationResetAtMidnightUTC(): void {
         now.getUTCDate(),
         now.getUTCHours(),
         now.getUTCMinutes(),
-        now.getUTCSeconds()
+        now.getUTCSeconds(),
     );
     const utcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0);
 

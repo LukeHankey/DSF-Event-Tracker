@@ -7,7 +7,7 @@ import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
 import { WorldEventStatus, updateWorld } from "./mistyTimers";
 import { WorldRecord } from "./mistyDialog";
-import {notifyEvent} from './notifications';
+import { notifyEvent } from "./notifications";
 
 type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
 

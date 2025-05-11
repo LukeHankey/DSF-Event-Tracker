@@ -1,5 +1,5 @@
 import { EventRecord } from "./events";
-import {formatTimeLeftValue, getRemainingTime} from './eventHistory';
+import { formatTimeLeftValue, getRemainingTime } from "./eventHistory";
 
 export type NotificationModes = "none" | "tooltip" | "toolbar" | "all";
 
@@ -31,7 +31,7 @@ export function showToast(message: string, type: "error" | "success" = "success"
 }
 
 export function notifyEvent(event: EventRecord): void {
-    console.log('notified', event);
+    console.log("notified", event);
     // early return if we aren't in alt1
     if (!window.alt1) {
         return;
@@ -45,8 +45,8 @@ export function notifyEvent(event: EventRecord): void {
     const notificationModes = localStorage.getItem("notificationModes") as NotificationModes[] | null;
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
 
-    console.log('mode', notificationModes);
-    console.log('favorites', favoriteEventsRaw);
+    console.log("mode", notificationModes);
+    console.log("favorites", favoriteEventsRaw);
 
     // if favorite events are set, only show the favorites, otherwise, show all
     if (favoriteEventsRaw) {
@@ -83,13 +83,12 @@ export function showTooltip(message: string, time: number = 5000): void {
     }, time);
 }
 
-
 export function showTitleBarText(event: EventRecord, message: string, duration: number = 120000): void {
     const updateTitle = () => {
         const remaining = getRemainingTime(event);
 
         if (remaining <= 0) {
-            alt1.setTitleBarText('');
+            alt1.setTitleBarText("");
             if (titlebarInterval) {
                 clearInterval(titlebarInterval);
             }
@@ -98,9 +97,7 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
         }
 
         const friendlyRemaining =
-            remaining < 60
-                ? "under a minute"
-                : formatTimeLeftValue(Math.max(remaining, 0), false);
+            remaining < 60 ? "under a minute" : formatTimeLeftValue(Math.max(remaining, 0), false);
         alt1.setTitleBarText(`${message} for ${friendlyRemaining}`);
     };
 
@@ -120,7 +117,7 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
 
     // Final clear (in case interval missed the exact end)
     titlebarTimeout = setTimeout(() => {
-        alt1.setTitleBarText('');
+        alt1.setTitleBarText("");
         if (titlebarInterval) {
             clearInterval(titlebarInterval);
         }
