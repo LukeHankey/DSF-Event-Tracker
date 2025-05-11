@@ -176,10 +176,12 @@ export class WebSocketClient {
 
     processEvent(eventData: EventRecord): void {
         console.log("Parsed data: ", eventData);
-        if (eventData.type === "addEvent") addNewEvent(eventData);
+        if (eventData.type === "addEvent") {
+            addNewEvent(eventData);
+            notifyEvent(eventData);
+        }
         if (eventData.type === "editEvent") updateEvent(eventData);
         if (eventData.type === "deleteEvent") removeEvent(eventData);
-        notifyEvent(eventData);
     }
 
     sendSync(lastEventTimestamp: number, lastEventId: UUIDTypes | undefined): void {
