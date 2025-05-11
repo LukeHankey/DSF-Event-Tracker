@@ -327,6 +327,74 @@ if (toggleMistyTimer) {
     });
 }
 
+const toggleNotificationsToday = document.getElementById("toggleNotificationsToday") as HTMLInputElement | null;
+let midnightResetTimeoutId: number | null = null;
+if (toggleNotificationsToday) {
+    const storedState = localStorage.getItem("toggleNotificationsToday") === "true";
+    const storedDate = localStorage.getItem("toggleNotificationsTodayDate");
+    const todayUTC = new Date().toISOString().slice(0, 10);
+
+    // Reset if stored date is outdated
+    if (storedState && storedDate !== todayUTC) {
+        localStorage.setItem("toggleNotificationsToday", "false");
+        toggleNotificationsToday.checked = false;
+    } else {
+        toggleNotificationsToday.checked = storedState;
+    }
+
+    // 🔁 If enabled, schedule the reset
+    if (toggleNotificationsToday.checked) {
+        scheduleNotificationResetAtMidnightUTC();
+    }
+
+    toggleNotificationsToday.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        const checked = checkbox.checked;
+        localStorage.setItem("toggleNotificationsToday", checked ? "true" : "false");
+
+        if (checked) {
+            localStorage.setItem("toggleNotificationsTodayDate", todayUTC);
+            scheduleNotificationResetAtMidnightUTC();
+        } else {
+            localStorage.removeItem("toggleNotificationsTodayDate");
+
+            // Cancel existing reset timer if any
+            if (midnightResetTimeoutId !== null) {
+                clearTimeout(midnightResetTimeoutId);
+                midnightResetTimeoutId = null;
+            }
+        }
+    });
+}
+
+function scheduleNotificationResetAtMidnightUTC(): void {
+    const now = new Date();
+    const utcNow = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds()
+    );
+    const utcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0);
+
+    const msUntilMidnight = utcMidnight - utcNow;
+
+    midnightResetTimeoutId = window.setTimeout(() => {
+        localStorage.setItem("toggleNotificationsToday", "false");
+        localStorage.removeItem("toggleNotificationsTodayDate");
+
+        if (toggleNotificationsToday) {
+            toggleNotificationsToday.checked = false;
+        }
+
+        showToast("Daily notification toggle has reset");
+
+        midnightResetTimeoutId = null;
+    }, msUntilMidnight);
+}
+
 function showConfirmationModal({
     title = "Confirm",
     message = "Are you sure you want to proceed?",

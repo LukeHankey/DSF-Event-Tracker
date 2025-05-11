@@ -175,6 +175,10 @@
                                 <input type="checkbox" id="toggleMistyTimer" />
                                 Misty Timers
                                 </label>
+                                <label>
+                                    <input type="checkbox" id="toggleNotificationsToday" />
+                                    Toggle notifications today
+                                </label>
                                 <label id="debugContainer">
                                 <select id="testEventSelect"></select>
                                 <button id="testWS">WS Event</button>
@@ -330,15 +334,19 @@
                 <p>This setting controls <strong>how</strong> notifications are delivered for tracked events. You can select one or multiple options below:</p>
                 <ul>
                     <li><strong>Tooltip</strong> – Shows a short message near your cursor for a few seconds.</li>
-                    <li><strong>Toolbar</strong> – Displays a message in your RuneScape title bar for 2 minutes.</li>
+                    <li><strong>Toolbar</strong> – Displays a message in your RuneScape toolbar until the time remaining expires or a new call is made.</li>
                 </ul>
                 <p>
-                    You can select multiple modes using <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> or <kbd>Shift</kbd> when clicking.
+                    You can select multiple modes using <kbd>Ctrl</kbd> or <kbd>Shift</kbd> when clicking.
                     To clear your selections, use the <strong>Reset notification modes</strong> link below the selector.
                 </p>
                 <p>
                     If no favorite events are set, <strong>all events</strong> will trigger notifications.
                     Otherwise, only <strong>favorited events</strong> will.
+                </p>
+                <p>
+                    Additionally, you can use the <strong>“Toggle notifications today”</strong> checkbox located in the <em>Event History</em> sub-tab of the <em>Scouts</em> tab.
+                    When enabled, it will <strong>suppress notifications</strong> until 00:00 GMT, after which it resets automatically.
                 </p>
                 <p><em>Note: Notifications will only be sent if the application is running inside Alt1.</em></p>
         </div>

@@ -37,6 +37,11 @@ export function notifyEvent(event: EventRecord): void {
         return;
     }
 
+    const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+    if (suppressToday) {
+        return;
+    }
+
     const notificationModes = localStorage.getItem("notificationModes") as NotificationModes[] | null;
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
 
