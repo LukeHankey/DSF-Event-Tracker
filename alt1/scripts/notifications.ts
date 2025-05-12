@@ -41,7 +41,7 @@ export function notifyEvent(event: EventRecord): void {
         return;
     }
 
-    const notificationModes = JSON.parse(localStorage.getItem("notificationModes")) as NotificationModes[] | null;
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
 
     // if favorite events are set, only show the favorites, otherwise, show all

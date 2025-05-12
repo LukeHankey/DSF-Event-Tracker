@@ -90,7 +90,7 @@ export function initCapture(): void {
     loadEventHistory();
     renderMistyTimers();
 
-    const notificationModes = JSON.parse(localStorage.getItem("notificationModes"));
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     if (notificationModes && notificationModes.includes("toolbar")) {
         alt1.setTitleBarText("Listening for DSF events...");
     } else {
