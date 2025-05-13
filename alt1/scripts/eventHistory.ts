@@ -707,8 +707,7 @@ export function getRemainingTime(event: EventRecord): number {
 }
 
 function checkActive(event: EventRecord): boolean {
-    const remaining = getRemainingTime(event);
-    return remaining > 0;
+    return getRemainingTime(event) > 0;
 }
 
 function editEvent(event: EventRecord): void {

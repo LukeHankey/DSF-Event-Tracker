@@ -180,7 +180,10 @@ export class WebSocketClient {
             addNewEvent(eventData);
             notifyEvent(eventData);
         }
-        if (eventData.type === "editEvent") updateEvent(eventData);
+        if (eventData.type === "editEvent") {
+            updateEvent(eventData);
+            notifyEvent(eventData);
+        }
         if (eventData.type === "deleteEvent") removeEvent(eventData);
     }
 

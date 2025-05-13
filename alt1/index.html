@@ -119,7 +119,7 @@
                         Notifications (Multi-Select)
                         <button id="infoButtonNotificationMode" class="info-button" title="Click for info" type="button">ℹ️</button>
                     </label>
-                    <select id="notificationModes" multiple size="5">
+                    <select id="notificationModes" multiple size="2">
                         <option value="tooltip">Tooltip</option>
                         <option value="toolbar">Toolbar</option>
                     </select>
@@ -278,6 +278,9 @@
                 <h2>Event History Information</h2>
                 <p>The <strong>Hide Expired</strong> checkbox hides any Expired events.</p>
                 <p>The <strong>Misty Timers</strong> checkbox will change the Time Left column to Misty Timer. If editing the event with this checked, you should input the time that Misty provides.</p>
+                <p>
+                    The <strong>Toggle notifications today</strong> checkbox will <strong>suppress notifications</strong> until 00:00 GMT, after which it resets automatically.
+                </p>
                 <p>The <strong>Clear All</strong> button will remove all events.</p>
                 <h3>Button Icons:</h3>
                 <ul>
@@ -331,22 +334,16 @@
             <div class="modal-content">
                 <span class="close" title="Close">&times;</span>
                 <h2>Notification Modes</h2>
-                <p>This setting controls <strong>how</strong> notifications are delivered for tracked events. You can select one or multiple options below:</p>
+                <p>Select one or more of the following:</p>
                 <ul>
                     <li><strong>Tooltip</strong> – Shows a short message near your cursor for a few seconds.</li>
                     <li><strong>Toolbar</strong> – Displays a message in your RuneScape toolbar until the time remaining expires or a new call is made.</li>
                 </ul>
                 <p>
-                    You can select multiple modes using <kbd>Ctrl</kbd> or <kbd>Shift</kbd> when clicking.
-                    To clear your selections, use the <strong>Reset notification modes</strong> link below the selector.
+                    Select multiple modes with <kbd>Ctrl</kbd> or <kbd>Shift</kbd>. To clear selections, click the <strong>Reset notification modes</strong> link.
                 </p>
                 <p>
-                    If no favorite events are set, <strong>all events</strong> will trigger notifications.
-                    Otherwise, only <strong>favorited events</strong> will.
-                </p>
-                <p>
-                    Additionally, you can use the <strong>“Toggle notifications today”</strong> checkbox located in the <em>Event History</em> sub-tab of the <em>Scouts</em> tab.
-                    When enabled, it will <strong>suppress notifications</strong> until 00:00 GMT, after which it resets automatically.
+                    <strong>All events</strong> will trigger notifications unless <strong>favorited events</strong> are set.
                 </p>
                 <p><em>Note: Notifications will only be sent if the application is running inside Alt1.</em></p>
             </div>

@@ -709,11 +709,13 @@ small {
 ------------------------------------- */
 /* Info button style */
 .info-button {
-    background: none;
-    border: none;
+    background: linear-gradient(135deg, #0077cc, #005fa3);
+    border-radius: 5px;
     cursor: pointer;
+    color: white;
     font-size: 1.2em;
     padding: 1px 3px !important;
+    border: none;
 }
 
 body.dark-mode .info-button, body.dark-mode .reset-button {

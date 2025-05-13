@@ -1,9 +1,6 @@
 import { EventRecord } from "./events";
 import { formatTimeLeftValue, getRemainingTime } from "./eventHistory";
 
-export type NotificationModes = "none" | "tooltip" | "toolbar" | "all";
-
-let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarInterval: ReturnType<typeof setTimeout> | null = null;
 
@@ -38,6 +35,7 @@ export function notifyEvent(event: EventRecord): void {
 
     const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
     if (suppressToday) {
+        alt1.setTitleBarText("");
         return;
     }
 
@@ -63,23 +61,17 @@ export function notifyEvent(event: EventRecord): void {
     }
 
     if (notificationModes.includes("toolbar")) {
-        showTitleBarText(event, `${message}`, event.duration * 1000);
+        showTitleBarText(event, message, event.duration * 1000);
     }
 }
 
-export function showTooltip(message: string, time: number = 5000): void {
+function showTooltip(message: string, durationMs: number = 5_000): void {
     alt1.setTooltip(message);
 
-    if (tooltipTimeout) {
-        clearTimeout(tooltipTimeout);
-    }
-
-    tooltipTimeout = setTimeout(() => {
-        alt1.clearTooltip();
-    }, time);
+    setTimeout(alt1.clearTooltip, durationMs);
 }
 
-export function showTitleBarText(event: EventRecord, message: string, duration: number = 120000): void {
+function showTitleBarText(event: EventRecord, message: string, durationMs: number = 120_000): void {
     const updateTitle = () => {
         const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
 
@@ -106,8 +98,7 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
             return;
         }
 
-        const friendlyRemaining =
-            remaining < 60 ? "under a minute" : formatTimeLeftValue(Math.max(remaining, 0), false);
+        const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
         alt1.setTitleBarText(`${message} for ${friendlyRemaining}`);
     };
 
@@ -123,7 +114,7 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
     }
 
     // Start interval to update every half minute
-    titlebarInterval = setInterval(updateTitle, 30000);
+    titlebarInterval = setInterval(updateTitle, 30_000);
 
     // Final fallback cleanup in case interval missed the end
     titlebarTimeout = setTimeout(() => {
@@ -133,5 +124,5 @@ export function showTitleBarText(event: EventRecord, message: string, duration: 
         }
         titlebarInterval = null;
         titlebarTimeout = null;
-    }, duration);
+    }, durationMs);
 }
