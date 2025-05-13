@@ -553,6 +553,7 @@ modGlobalDeleteBtn.addEventListener("click", () => {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${eventToSend.token}`,
+                    debug: DEBUG,
                 },
             });
         } catch (error: unknown) {
