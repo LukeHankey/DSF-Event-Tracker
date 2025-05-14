@@ -13,6 +13,7 @@ import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
 import { renderMistyTimers, startMistyimerRefresh } from "./mistyTimers";
 import { startCapturingMisty } from "./mistyDialog";
+import { setDefaultTitleBar } from "./notifications";
 
 /**
  * ChatBoxReader & color definitions
@@ -92,7 +93,7 @@ export function initCapture(): void {
 
     const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     if (notificationModes && notificationModes.includes("toolbar")) {
-        alt1.setTitleBarText("Listening for DSF events...");
+        setDefaultTitleBar();
     } else {
         alt1.setTitleBarText("");
     }

@@ -3,6 +3,7 @@ import { formatTimeLeftValue, getRemainingTime } from "./eventHistory";
 
 let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarInterval: ReturnType<typeof setTimeout> | null = null;
+let recentEvent: EventRecord | null = null;
 
 // Function to show toast notification using new BEM modifier for "show"
 export function showToast(message: string, type: "error" | "success" = "success"): void {
@@ -43,8 +44,9 @@ export function notifyEvent(event: EventRecord): void {
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
 
     // if favorite events are set, only show the favorites, otherwise, show all
+    let favoriteEvents: string[];
     if (favoriteEventsRaw) {
-        const favoriteEvents: string[] = JSON.parse(favoriteEventsRaw);
+        favoriteEvents = JSON.parse(favoriteEventsRaw);
         if (favoriteEvents.length > 0 && !favoriteEvents.includes(event.event)) {
             return;
         }
@@ -53,6 +55,35 @@ export function notifyEvent(event: EventRecord): void {
     if (!notificationModes || notificationModes.length === 0) {
         return;
     }
+
+    if (event.type === "deleteEvent" && event.id === recentEvent?.id) {
+        const historyRaw = localStorage.getItem("eventHistory");
+
+        if (historyRaw) {
+            const history: EventRecord[] = JSON.parse(historyRaw);
+            const now = Date.now();
+
+            // find an active event they care about as fallback that isn't the same id
+            const fallbackEvent = history.find(
+                (e) =>
+                    e.id !== event.id &&
+                    now < e.timestamp + e.duration * 1000 &&
+                    (favoriteEvents.length === 0 || favoriteEvents.includes(e.event)),
+            );
+            if (fallbackEvent) {
+                event = fallbackEvent;
+            } else {
+                setDefaultTitleBar();
+                return;
+            }
+        } else {
+            setDefaultTitleBar();
+            return;
+        }
+    }
+
+    // notification will be sent for this event, set it as the local recentEvent for tracking
+    recentEvent = event;
 
     const message = `${event.event} on w${event.world}`;
 
@@ -63,6 +94,10 @@ export function notifyEvent(event: EventRecord): void {
     if (notificationModes.includes("toolbar")) {
         showTitleBarText(event, message, event.duration * 1000);
     }
+}
+
+export function setDefaultTitleBar() {
+    alt1.setTitleBarText("Listening for DSF events...");
 }
 
 function showTooltip(message: string, durationMs: number = 5_000): void {
@@ -118,7 +153,7 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
 
     // Final fallback cleanup in case interval missed the end
     titlebarTimeout = setTimeout(() => {
-        alt1.setTitleBarText("Listening for DSF events...");
+        setDefaultTitleBar();
         if (titlebarInterval) {
             clearInterval(titlebarInterval);
         }
