@@ -92,7 +92,7 @@ export function notifyEvent(event: EventRecord): void {
     }
 
     if (notificationModes.includes("toolbar")) {
-        showTitleBarText(event, message, event.duration * 1000);
+        showTitleBarText(event, message, getRemainingTime(event) * 1000);
     }
 }
 
