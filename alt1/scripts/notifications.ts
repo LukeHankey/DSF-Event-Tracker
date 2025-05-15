@@ -56,7 +56,7 @@ export function notifyEvent(event: EventRecord): void {
         return;
     }
 
-        if (
+    if (
         (event.type === "deleteEvent" || (event.type === "editEvent" && event.duration === 0)) &&
         event.id === recentEvent?.id
     ) {
