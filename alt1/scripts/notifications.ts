@@ -56,7 +56,10 @@ export function notifyEvent(event: EventRecord): void {
         return;
     }
 
-    if (event.type === "deleteEvent" && event.id === recentEvent?.id) {
+        if (
+        (event.type === "deleteEvent" || (event.type === "editEvent" && event.duration === 0)) &&
+        event.id === recentEvent?.id
+    ) {
         const historyRaw = localStorage.getItem("eventHistory");
 
         if (historyRaw) {
