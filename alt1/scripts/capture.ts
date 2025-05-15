@@ -14,6 +14,7 @@ import { decodeJWT } from "./permissions";
 import { showToast } from "./notifications";
 import { renderMistyTimers, startMistyimerRefresh } from "./mistyTimers";
 import { startCapturingMisty } from "./mistyDialog";
+import { setDefaultTitleBar } from "./notifications";
 
 /**
  * ChatBoxReader & color definitions
@@ -90,6 +91,13 @@ export function initCapture(): void {
     previousMainContent = document.querySelector("#mainTab h2")!.innerHTML;
     loadEventHistory();
     renderMistyTimers();
+
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    if (notificationModes && notificationModes.includes("toolbar")) {
+        setDefaultTitleBar();
+    } else {
+        alt1.setTitleBarText("");
+    }
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
     if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
