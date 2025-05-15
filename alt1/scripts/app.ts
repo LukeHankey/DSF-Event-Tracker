@@ -37,3 +37,7 @@ a1lib.on("rsfocus", () => {
     startCapturing();
     // Optionally restore main content if needed
 });
+
+window.addEventListener("unload", () => {
+    alt1.setTitleBarText("");
+});
