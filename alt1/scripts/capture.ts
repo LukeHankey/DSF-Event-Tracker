@@ -530,11 +530,14 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
     lineText = lineText.replace(timeRegex, "");
 
     // Remove certain prefixes if present
-    const prefixes = ["Misty: ", "Fisherman: ", "Guys: ", "5Ftx: "];
-    const matchingPrefix = prefixes.find((prefix) => lineText.startsWith(prefix));
-    if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
+    const names = ["Misty", "Fisherman", "Guys", "5Ftx"];
+    // OCR can read ":" as ";"
+    const prefixRegex = new RegExp(`^(${names.join("|")})[:;]\\s*`);
 
-    if (!matchingPrefix && !isLikelyEventStart(lineText)) {
+    const prefixMatch = lineText.match(prefixRegex);
+    if (prefixMatch) lineText = lineText.slice(prefixMatch[0].length);
+
+    if (!prefixMatch && !isLikelyEventStart(lineText)) {
         return [null, false]; // Ignore non-valid starting lines
     }
 
