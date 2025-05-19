@@ -702,7 +702,8 @@ export function removeEvent(event: EventRecord): void {
 
 export function getRemainingTime(event: EventRecord): number {
     const now = Date.now();
-    const elapsed = (now - event.timestamp) / 1000;
+    // Avoids clock drift from server when event.duration = 0
+    const elapsed = Math.max((now - event.timestamp) / 1000, 0);
     return event.duration - elapsed;
 }
 
