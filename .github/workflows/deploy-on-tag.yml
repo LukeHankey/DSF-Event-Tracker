@@ -1,0 +1,51 @@
+name: Deploy on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Release
+
+    steps:
+      - name: Checkout repo at tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure all tags are fetched
+
+      - name: Ensure tag is from main
+        run: |
+          git fetch origin main
+          if git merge-base --is-ancestor HEAD origin/main; then
+            echo "✅ Tag commit is part of main."
+          else
+            echo "❌ Tag commit is NOT on main. Failing build."
+            exit 1
+          fi
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for release
+        run: npm run build
+
+      - name: Build dev version
+        run: npm run build:dev
+
+      - name: Set Git identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Deploy to GitHub Pages
+        run: |
+          npx gh-pages -d dist --repo https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
