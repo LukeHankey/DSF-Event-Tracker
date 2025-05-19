@@ -528,9 +528,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
         row.classList.add("favourite-event");
     }
 
-    const now = Date.now();
-    const elapsed = (now - event.timestamp) / 1000;
-    const remaining = event.duration - elapsed;
+    const remaining = getRemainingTime(event);
 
     const buttonsTd = document.createElement("td");
     const buttonContainer = document.createElement("div");
@@ -702,11 +700,15 @@ export function removeEvent(event: EventRecord): void {
     rowMap.delete(event.id);
 }
 
-function checkActive(event: EventRecord): boolean {
+export function getRemainingTime(event: EventRecord): number {
     const now = Date.now();
-    const elapsed = (now - event.timestamp) / 1000;
-    const remaining = event.duration - elapsed;
-    return remaining > 0;
+    // Avoids clock drift from server when event.duration = 0
+    const elapsed = Math.max((now - event.timestamp) / 1000, 0);
+    return event.duration - elapsed;
+}
+
+function checkActive(event: EventRecord): boolean {
+    return getRemainingTime(event) > 0;
 }
 
 function editEvent(event: EventRecord): void {
@@ -881,12 +883,12 @@ function formatTimeLeft(event: EventRecord): string {
     }
 }
 
-function formatTimeLeftValue(seconds: number): string {
+export function formatTimeLeftValue(seconds: number, showSeconds: boolean = true): string {
     const mistyToggle = localStorage.getItem("toggleMistyTimer") === "true";
     if (seconds <= 0 && !mistyToggle) return "Expired";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}m ${secs}s`;
+    return showSeconds ? `${mins}m ${secs}s` : `${mins}m`;
 }
 
 function parseDuration(durationStr: string): number {

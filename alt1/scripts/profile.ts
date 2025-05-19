@@ -123,7 +123,7 @@ interface BaseRoleData {
 
 interface AchievableRole extends BaseRoleData {
     achievable: true; // Forces this type to include these fields
-    type_of_event: keyof UpdateFields;
+    type_of_event: (keyof UpdateFields)[];
     num_of_event: number;
 }
 
@@ -171,7 +171,7 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775940649802793000",
         role_name: "Scouter",
         achievable: true, // Has a progress bar
-        type_of_event: "count",
+        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
         num_of_event: 40, // Total required for next milestone
         next_role: "Verified Scouter",
     },
@@ -179,7 +179,7 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775941183716851764",
         role_name: "Verified Scouter",
         achievable: true,
-        type_of_event: "count",
+        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
         num_of_event: 100,
         require: ["Scouter"],
         next_role: null,
@@ -244,7 +244,11 @@ export function populateRoles(userEventCounts: UpdateFields) {
 
         // If role has a progress bar, add it
         if (role.achievable) {
-            const userEventCount = userEventCounts[role.type_of_event] || 0; // Get user's progress
+            const userEventCount =
+                role.type_of_event
+                    .map((key) => userEventCounts[key])
+                    .filter((value): value is number => value !== undefined)
+                    .reduce((sum: number, value: number) => sum + value, 0) || 0;
             const progressPercentage = Math.min((userEventCount / role.num_of_event) * 100, 100); // Cap at 100%
 
             // Create progress bar
