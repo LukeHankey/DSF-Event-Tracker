@@ -58,10 +58,11 @@ module.exports = (env = {}) => {
                 { test: /\.tsx?$/, loader: "ts-loader" },
                 { test: /\.css$/, use: ["style-loader", "css-loader"] },
                 {
-                    test: /\.(html|json)$/,
-                    include: path.resolve(__dirname, "alt1"),
+                    test: /\.(png|jpe?g|gif)$/i,
                     type: "asset/resource",
-                    generator: { filename: "[base]" },
+                    generator: {
+                        filename: "assets/stock_icons/[name][ext]",
+                    },
                 },
                 // file types useful for writing alt1 apps, make sure these two loader come after any other json or png loaders, otherwise they will be ignored
                 {
