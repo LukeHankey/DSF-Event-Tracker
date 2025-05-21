@@ -1,5 +1,6 @@
 const path = require("path");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 /**
  * @type {(env: { VERSION?: string }) => import("webpack").Configuration}
@@ -37,6 +38,10 @@ module.exports = (env = {}) => {
                         to: "assets",
                     },
                 ],
+            }),
+            new HtmlWebpackPlugin({
+                template: path.resolve(__dirname, "alt1/index.html"),
+                filename: "index.html",
             }),
         ],
         module: {
