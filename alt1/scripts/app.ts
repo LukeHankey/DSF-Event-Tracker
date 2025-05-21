@@ -7,7 +7,6 @@
 import * as a1lib from "alt1";
 import "../appconfig.json";
 import "../styles/style.css";
-import "../index.html";
 
 // UI and events
 import "./ui";

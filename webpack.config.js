@@ -1,4 +1,7 @@
 const path = require("path");
+const childProcess = require("child_process");
+const packageJson = require("./package.json");
+
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
@@ -7,6 +10,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
  */
 module.exports = (env = {}) => {
     const version = env.VERSION || "alt1";
+    const gitCommit = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
+    const packageVersion = packageJson.version;
     console.log("🔧 Webpack build version:", version);
 
     return {
@@ -19,8 +24,11 @@ module.exports = (env = {}) => {
         },
         output: {
             path: path.resolve(__dirname, `dist/${version}`),
+            publicPath: `/${version}/`,
+            filename: version === "alt1" ? `main.v${packageVersion}.${gitCommit}.js` : `main.[contenthash].js`,
             // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.DSFEventTracker
             library: { type: "umd", name: "DSFEventTracker" },
+            clean: true,
         },
         devtool: "eval",
         // devtool: "source-map",
