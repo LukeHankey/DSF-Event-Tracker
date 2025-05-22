@@ -1,11 +1,17 @@
 const path = require("path");
+const childProcess = require("child_process");
+const packageJson = require("./package.json");
+
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 /**
  * @type {(env: { VERSION?: string }) => import("webpack").Configuration}
  */
 module.exports = (env = {}) => {
     const version = env.VERSION || "alt1";
+    const gitCommit = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
+    const packageVersion = packageJson.version;
     console.log("🔧 Webpack build version:", version);
 
     return {
@@ -18,8 +24,11 @@ module.exports = (env = {}) => {
         },
         output: {
             path: path.resolve(__dirname, `dist/${version}`),
+            publicPath: `/${version}/`,
+            filename: version === "alt1" ? `main.v${packageVersion}.${gitCommit}.js` : `main.[contenthash].js`,
             // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.DSFEventTracker
             library: { type: "umd", name: "DSFEventTracker" },
+            clean: true,
         },
         devtool: "eval",
         // devtool: "source-map",
@@ -38,6 +47,10 @@ module.exports = (env = {}) => {
                     },
                 ],
             }),
+            new HtmlWebpackPlugin({
+                template: path.resolve(__dirname, "alt1/index.html"),
+                filename: "index.html",
+            }),
         ],
         module: {
             // The rules section tells webpack what to do with different file types when you import them from js/ts
@@ -45,10 +58,11 @@ module.exports = (env = {}) => {
                 { test: /\.tsx?$/, loader: "ts-loader" },
                 { test: /\.css$/, use: ["style-loader", "css-loader"] },
                 {
-                    test: /\.(html|json)$/,
-                    include: path.resolve(__dirname, "alt1"),
+                    test: /\.(png|jpe?g|gif)$/i,
                     type: "asset/resource",
-                    generator: { filename: "[base]" },
+                    generator: {
+                        filename: "assets/stock_icons/[name][ext]",
+                    },
                 },
                 // file types useful for writing alt1 apps, make sure these two loader come after any other json or png loaders, otherwise they will be ignored
                 {

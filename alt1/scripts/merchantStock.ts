@@ -87,6 +87,16 @@ const slotConstants: Record<Exclude<Slot, "A">, [number, number]> = {
     D: [5, 13],
 };
 
+const req = require.context("../assets/stock_icons", false, /\.png$/);
+const icons = req.keys().reduce(
+    (acc, path) => {
+        const key = path.replace("./", "").replace(".png", "");
+        acc[key] = req(path);
+        return acc;
+    },
+    {} as Record<string, string>,
+);
+
 const getRuneDate = () => {
     const initialRuneDate = Date.UTC(2002, 1, 27); // Base date
     const now = new Date();
@@ -135,17 +145,8 @@ function formatDateWithOrdinal(date: Date): string {
 }
 
 function getImagePath(item: string): string {
-    // Convert to lowercase.
-    let fileName = item.toLowerCase();
-    // Replace ampersand with "and".
-    fileName = fileName.replace(/&/g, "and");
-    // Replace one or more whitespace characters with an underscore.
-    fileName = fileName.replace(/\s+/g, "_");
-    // Remove parentheses.
-    fileName = fileName.replace(/[()]/g, "");
-    // Remove any accidental duplicate underscores.
-    fileName = fileName.replace(/_+/g, "_");
-    return `assets/stock_icons/${fileName}.png`;
+    const key = item.toLowerCase().replace(/&/g, "and").replace(/\s+/g, "_").replace(/[()]/g, "").replace(/_+/g, "_");
+    return icons[key] || ""; // fallback if not found
 }
 
 export function renderStockTable(): void {
