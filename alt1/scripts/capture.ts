@@ -367,8 +367,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
         await delay(6000);
         console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
-        startCapturingMisty();
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
+        startCapturingMisty();
 
         if (currentWorld && Number(currentWorld) > 0) {
             console.log("World hop message detected and found world number: ", currentWorld);
