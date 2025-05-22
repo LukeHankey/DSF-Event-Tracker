@@ -1029,10 +1029,10 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /*!************************!*\
   !*** ./appconfig.json ***!
   \************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"appconfig.json\";\n\n//# sourceURL=webpack://DSFEventTracker/./appconfig.json?");
+eval("module.exports = /*#__PURE__*/JSON.parse('{\"appName\":\"DSF Event Tracker\",\"description\":\"Detects DSF events via the chat\",\"appUrl\":\"./index.html\",\"configUrl\":\"./appconfig.json\",\"iconUrl\":\"./assets/icon.png\",\"defaultWidth\":375,\"defaultHeight\":215,\"minWidth\":250,\"minHeight\":180,\"maxWidth\":1000,\"maxHeight\":1000,\"requestHandlers\":[],\"activators\":[],\"permissions\":\"pixel,overlay,gamestate\"}');\n\n//# sourceURL=webpack://DSFEventTracker/./appconfig.json?");
 
 /***/ }),
 
@@ -1043,6 +1043,379 @@ eval("module.exports = __webpack_require__.p + \"appconfig.json\";\n\n//# source
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 eval("module.exports=(__webpack_require__(/*! alt1/base */ \"../node_modules/alt1/dist/base/index.js\").ImageDetect).imageDataFromBase64(\"iVBORw0KGgoAAAANSUhEUgAAADoAAAAJCAYAAABjVT8rAAAAAW5vUEUAYtdMlAAAAQBJREFUSA29lL0NAjEMhV3TUbAAHT0DUFCwADPQIyQaanpqRmEFVmAFVjBydL57PvKi8KNEOvnyHH+2L8mJXkX9kQajZa5cOyoi+ryI2RZD14tmuX7vx3YnR/lm10oxzMd0q6nkS85c4SVtu8w3a7mOG+pjSJ3PaEw4cdZIB0kx5DQONXjnGMiqqNGRB8wQyvSwaDRx7lj2OTJ9rVtfY1Zve/nnvUl33rjdg7nS++Pc78ibjwn3k9Adt6amk8D03G4ZNur4xaKn3QxrwHeowJqqG7uVHHAlAgv3B0OKPwLjIdMDa3Wswe5ljmVMxvN8zNZ/qYFQOjLM96nu2Vh9Pe8F0d3AFtANtLEAAAAObm9QRQAAAAAAAAAAAAAAAAAAHb983QAAAABJRU5ErkJggg==\")\n\n//# sourceURL=webpack://DSFEventTracker/./assets/runescape_world_pretext.data.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons sync \\.png$":
+/*!******************************************************!*\
+  !*** ./assets/stock_icons/ sync nonrecursive \.png$ ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("var map = {\n\t\"./advanced_pulse_core.png\": \"./assets/stock_icons/advanced_pulse_core.png\",\n\t\"./anima_crystal.png\": \"./assets/stock_icons/anima_crystal.png\",\n\t\"./barrel_of_bait.png\": \"./assets/stock_icons/barrel_of_bait.png\",\n\t\"./broken_fishing_rod.png\": \"./assets/stock_icons/broken_fishing_rod.png\",\n\t\"./crystal_triskelion.png\": \"./assets/stock_icons/crystal_triskelion.png\",\n\t\"./dandd_token_daily.png\": \"./assets/stock_icons/dandd_token_daily.png\",\n\t\"./dandd_token_monthly.png\": \"./assets/stock_icons/dandd_token_monthly.png\",\n\t\"./dandd_token_weekly.png\": \"./assets/stock_icons/dandd_token_weekly.png\",\n\t\"./deathtouched_dart.png\": \"./assets/stock_icons/deathtouched_dart.png\",\n\t\"./dragonkin_lamp.png\": \"./assets/stock_icons/dragonkin_lamp.png\",\n\t\"./dungeoneering_wildcard.png\": \"./assets/stock_icons/dungeoneering_wildcard.png\",\n\t\"./gift_for_the_reaper.png\": \"./assets/stock_icons/gift_for_the_reaper.png\",\n\t\"./harmonic_dust.png\": \"./assets/stock_icons/harmonic_dust.png\",\n\t\"./horn_of_honour.png\": \"./assets/stock_icons/horn_of_honour.png\",\n\t\"./large_goebie_burial_charm.png\": \"./assets/stock_icons/large_goebie_burial_charm.png\",\n\t\"./livid_plant.png\": \"./assets/stock_icons/livid_plant.png\",\n\t\"./medium_goebie_burial_charm.png\": \"./assets/stock_icons/medium_goebie_burial_charm.png\",\n\t\"./menaphite_gift_offering_large.png\": \"./assets/stock_icons/menaphite_gift_offering_large.png\",\n\t\"./menaphite_gift_offering_medium.png\": \"./assets/stock_icons/menaphite_gift_offering_medium.png\",\n\t\"./menaphite_gift_offering_small.png\": \"./assets/stock_icons/menaphite_gift_offering_small.png\",\n\t\"./message_in_a_bottle.png\": \"./assets/stock_icons/message_in_a_bottle.png\",\n\t\"./sacred_clay.png\": \"./assets/stock_icons/sacred_clay.png\",\n\t\"./shattered_anima.png\": \"./assets/stock_icons/shattered_anima.png\",\n\t\"./silverhawk_down.png\": \"./assets/stock_icons/silverhawk_down.png\",\n\t\"./slayer_vip_coupon.png\": \"./assets/stock_icons/slayer_vip_coupon.png\",\n\t\"./small_goebie_burial_charm.png\": \"./assets/stock_icons/small_goebie_burial_charm.png\",\n\t\"./starved_ancient_effigy.png\": \"./assets/stock_icons/starved_ancient_effigy.png\",\n\t\"./taijitu.png\": \"./assets/stock_icons/taijitu.png\",\n\t\"./tangled_fishbowl.png\": \"./assets/stock_icons/tangled_fishbowl.png\",\n\t\"./uncharted_island_map.png\": \"./assets/stock_icons/uncharted_island_map.png\",\n\t\"./unfocused_damage_enhancer.png\": \"./assets/stock_icons/unfocused_damage_enhancer.png\",\n\t\"./unfocused_reward_enhancer.png\": \"./assets/stock_icons/unfocused_reward_enhancer.png\",\n\t\"./unstable_air_rune.png\": \"./assets/stock_icons/unstable_air_rune.png\"\n};\n\n\nfunction webpackContext(req) {\n\tvar id = webpackContextResolve(req);\n\treturn __webpack_require__(id);\n}\nfunction webpackContextResolve(req) {\n\tif(!__webpack_require__.o(map, req)) {\n\t\tvar e = new Error(\"Cannot find module '\" + req + \"'\");\n\t\te.code = 'MODULE_NOT_FOUND';\n\t\tthrow e;\n\t}\n\treturn map[req];\n}\nwebpackContext.keys = function webpackContextKeys() {\n\treturn Object.keys(map);\n};\nwebpackContext.resolve = webpackContextResolve;\nmodule.exports = webpackContext;\nwebpackContext.id = \"./assets/stock_icons sync \\\\.png$\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/_sync_nonrecursive_\\.png$?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/advanced_pulse_core.png":
+/*!****************************************************!*\
+  !*** ./assets/stock_icons/advanced_pulse_core.png ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/advanced_pulse_core.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/advanced_pulse_core.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/anima_crystal.png":
+/*!**********************************************!*\
+  !*** ./assets/stock_icons/anima_crystal.png ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/anima_crystal.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/anima_crystal.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/barrel_of_bait.png":
+/*!***********************************************!*\
+  !*** ./assets/stock_icons/barrel_of_bait.png ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/barrel_of_bait.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/barrel_of_bait.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/broken_fishing_rod.png":
+/*!***************************************************!*\
+  !*** ./assets/stock_icons/broken_fishing_rod.png ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/broken_fishing_rod.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/broken_fishing_rod.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/crystal_triskelion.png":
+/*!***************************************************!*\
+  !*** ./assets/stock_icons/crystal_triskelion.png ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/crystal_triskelion.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/crystal_triskelion.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/dandd_token_daily.png":
+/*!**************************************************!*\
+  !*** ./assets/stock_icons/dandd_token_daily.png ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/dandd_token_daily.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/dandd_token_daily.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/dandd_token_monthly.png":
+/*!****************************************************!*\
+  !*** ./assets/stock_icons/dandd_token_monthly.png ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/dandd_token_monthly.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/dandd_token_monthly.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/dandd_token_weekly.png":
+/*!***************************************************!*\
+  !*** ./assets/stock_icons/dandd_token_weekly.png ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/dandd_token_weekly.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/dandd_token_weekly.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/deathtouched_dart.png":
+/*!**************************************************!*\
+  !*** ./assets/stock_icons/deathtouched_dart.png ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/deathtouched_dart.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/deathtouched_dart.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/dragonkin_lamp.png":
+/*!***********************************************!*\
+  !*** ./assets/stock_icons/dragonkin_lamp.png ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/dragonkin_lamp.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/dragonkin_lamp.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/dungeoneering_wildcard.png":
+/*!*******************************************************!*\
+  !*** ./assets/stock_icons/dungeoneering_wildcard.png ***!
+  \*******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/dungeoneering_wildcard.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/dungeoneering_wildcard.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/gift_for_the_reaper.png":
+/*!****************************************************!*\
+  !*** ./assets/stock_icons/gift_for_the_reaper.png ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/gift_for_the_reaper.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/gift_for_the_reaper.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/harmonic_dust.png":
+/*!**********************************************!*\
+  !*** ./assets/stock_icons/harmonic_dust.png ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/harmonic_dust.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/harmonic_dust.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/horn_of_honour.png":
+/*!***********************************************!*\
+  !*** ./assets/stock_icons/horn_of_honour.png ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/horn_of_honour.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/horn_of_honour.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/large_goebie_burial_charm.png":
+/*!**********************************************************!*\
+  !*** ./assets/stock_icons/large_goebie_burial_charm.png ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/large_goebie_burial_charm.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/large_goebie_burial_charm.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/livid_plant.png":
+/*!********************************************!*\
+  !*** ./assets/stock_icons/livid_plant.png ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/livid_plant.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/livid_plant.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/medium_goebie_burial_charm.png":
+/*!***********************************************************!*\
+  !*** ./assets/stock_icons/medium_goebie_burial_charm.png ***!
+  \***********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/medium_goebie_burial_charm.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/medium_goebie_burial_charm.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/menaphite_gift_offering_large.png":
+/*!**************************************************************!*\
+  !*** ./assets/stock_icons/menaphite_gift_offering_large.png ***!
+  \**************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/menaphite_gift_offering_large.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/menaphite_gift_offering_large.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/menaphite_gift_offering_medium.png":
+/*!***************************************************************!*\
+  !*** ./assets/stock_icons/menaphite_gift_offering_medium.png ***!
+  \***************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/menaphite_gift_offering_medium.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/menaphite_gift_offering_medium.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/menaphite_gift_offering_small.png":
+/*!**************************************************************!*\
+  !*** ./assets/stock_icons/menaphite_gift_offering_small.png ***!
+  \**************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/menaphite_gift_offering_small.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/menaphite_gift_offering_small.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/message_in_a_bottle.png":
+/*!****************************************************!*\
+  !*** ./assets/stock_icons/message_in_a_bottle.png ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/message_in_a_bottle.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/message_in_a_bottle.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/sacred_clay.png":
+/*!********************************************!*\
+  !*** ./assets/stock_icons/sacred_clay.png ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/sacred_clay.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/sacred_clay.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/shattered_anima.png":
+/*!************************************************!*\
+  !*** ./assets/stock_icons/shattered_anima.png ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/shattered_anima.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/shattered_anima.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/silverhawk_down.png":
+/*!************************************************!*\
+  !*** ./assets/stock_icons/silverhawk_down.png ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/silverhawk_down.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/silverhawk_down.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/slayer_vip_coupon.png":
+/*!**************************************************!*\
+  !*** ./assets/stock_icons/slayer_vip_coupon.png ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/slayer_vip_coupon.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/slayer_vip_coupon.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/small_goebie_burial_charm.png":
+/*!**********************************************************!*\
+  !*** ./assets/stock_icons/small_goebie_burial_charm.png ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/small_goebie_burial_charm.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/small_goebie_burial_charm.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/starved_ancient_effigy.png":
+/*!*******************************************************!*\
+  !*** ./assets/stock_icons/starved_ancient_effigy.png ***!
+  \*******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/starved_ancient_effigy.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/starved_ancient_effigy.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/taijitu.png":
+/*!****************************************!*\
+  !*** ./assets/stock_icons/taijitu.png ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/taijitu.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/taijitu.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/tangled_fishbowl.png":
+/*!*************************************************!*\
+  !*** ./assets/stock_icons/tangled_fishbowl.png ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/tangled_fishbowl.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/tangled_fishbowl.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/uncharted_island_map.png":
+/*!*****************************************************!*\
+  !*** ./assets/stock_icons/uncharted_island_map.png ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/uncharted_island_map.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/uncharted_island_map.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/unfocused_damage_enhancer.png":
+/*!**********************************************************!*\
+  !*** ./assets/stock_icons/unfocused_damage_enhancer.png ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/unfocused_damage_enhancer.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/unfocused_damage_enhancer.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/unfocused_reward_enhancer.png":
+/*!**********************************************************!*\
+  !*** ./assets/stock_icons/unfocused_reward_enhancer.png ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/unfocused_reward_enhancer.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/unfocused_reward_enhancer.png?");
+
+/***/ }),
+
+/***/ "./assets/stock_icons/unstable_air_rune.png":
+/*!**************************************************!*\
+  !*** ./assets/stock_icons/unstable_air_rune.png ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"assets/stock_icons/unstable_air_rune.png\";\n\n//# sourceURL=webpack://DSFEventTracker/./assets/stock_icons/unstable_air_rune.png?");
 
 /***/ }),
 
@@ -1057,17 +1430,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
-/***/ "./index.html":
-/*!********************!*\
-  !*** ./index.html ***!
-  \********************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-eval("module.exports = __webpack_require__.p + \"index.html\";\n\n//# sourceURL=webpack://DSFEventTracker/./index.html?");
-
-/***/ }),
-
 /***/ "./scripts/app.ts":
 /*!************************!*\
   !*** ./scripts/app.ts ***!
@@ -1075,7 +1437,7 @@ eval("module.exports = __webpack_require__.p + \"index.html\";\n\n//# sourceURL=
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var alt1__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! alt1 */ \"../node_modules/alt1/dist/base/index.js\");\n/* harmony import */ var alt1__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(alt1__WEBPACK_IMPORTED_MODULE_7__);\n/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../appconfig.json */ \"./appconfig.json\");\n/* harmony import */ var _styles_style_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/style.css */ \"./styles/style.css\");\n/* harmony import */ var _index_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../index.html */ \"./index.html\");\n/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ui */ \"./scripts/ui.ts\");\n/* harmony import */ var _capture__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./capture */ \"./scripts/capture.ts\");\n/* harmony import */ var _merchantStock__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./merchantStock */ \"./scripts/merchantStock.ts\");\n/* harmony import */ var _mistyDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./mistyDialog */ \"./scripts/mistyDialog.ts\");\n/**\n * Main entry point for the DSF Event Tracker\n * - Minimal code: sets up Alt1 integration and starts capture\n */\n// Import the essential references and assets\n\n\n\n\n// UI and events\n\n// Our new capture logic\n\n\n\n// If running in Alt1, identify and start capturing\nif (window.alt1) {\n    alt1.identifyAppUrl(\"./appconfig.json\");\n    (0,_capture__WEBPACK_IMPORTED_MODULE_4__.initCapture)(); // Set up any needed initial states\n    (0,_capture__WEBPACK_IMPORTED_MODULE_4__.startCapturing)(); // Begin capturing every 1s\n    // Call scheduleMidnightUpdate once when your app starts.\n    (0,_merchantStock__WEBPACK_IMPORTED_MODULE_5__.scheduleMidnightUpdate)();\n    (0,_mistyDialog__WEBPACK_IMPORTED_MODULE_6__.startCapturingMisty)();\n}\nelse {\n    // Not in Alt1, show instructions\n    const addappurl = `alt1://addapp/${new URL(\"./appconfig.json\", document.location.href).href}`;\n    document.querySelector(\"#mainTab h2\").innerHTML =\n        `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;\n}\n// When the RuneScape client gains focus, start capturing\nalt1__WEBPACK_IMPORTED_MODULE_7__.on(\"rsfocus\", () => {\n    (0,_capture__WEBPACK_IMPORTED_MODULE_4__.startCapturing)();\n    // Optionally restore main content if needed\n});\nwindow.addEventListener(\"unload\", () => {\n    alt1.setTitleBarText(\"\");\n});\n\n\n//# sourceURL=webpack://DSFEventTracker/./scripts/app.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var alt1__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! alt1 */ \"../node_modules/alt1/dist/base/index.js\");\n/* harmony import */ var alt1__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(alt1__WEBPACK_IMPORTED_MODULE_6__);\n/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../appconfig.json */ \"./appconfig.json\");\n/* harmony import */ var _styles_style_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/style.css */ \"./styles/style.css\");\n/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ui */ \"./scripts/ui.ts\");\n/* harmony import */ var _capture__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./capture */ \"./scripts/capture.ts\");\n/* harmony import */ var _merchantStock__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./merchantStock */ \"./scripts/merchantStock.ts\");\n/* harmony import */ var _mistyDialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./mistyDialog */ \"./scripts/mistyDialog.ts\");\n/**\n * Main entry point for the DSF Event Tracker\n * - Minimal code: sets up Alt1 integration and starts capture\n */\n// Import the essential references and assets\n\n\n\n// UI and events\n\n// Our new capture logic\n\n\n\n// If running in Alt1, identify and start capturing\nif (window.alt1) {\n    alt1.identifyAppUrl(\"./appconfig.json\");\n    (0,_capture__WEBPACK_IMPORTED_MODULE_3__.initCapture)(); // Set up any needed initial states\n    (0,_capture__WEBPACK_IMPORTED_MODULE_3__.startCapturing)(); // Begin capturing every 1s\n    // Call scheduleMidnightUpdate once when your app starts.\n    (0,_merchantStock__WEBPACK_IMPORTED_MODULE_4__.scheduleMidnightUpdate)();\n    (0,_mistyDialog__WEBPACK_IMPORTED_MODULE_5__.startCapturingMisty)();\n}\nelse {\n    // Not in Alt1, show instructions\n    const addappurl = `alt1://addapp/${new URL(\"./appconfig.json\", document.location.href).href}`;\n    document.querySelector(\"#mainTab h2\").innerHTML =\n        `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;\n}\n// When the RuneScape client gains focus, start capturing\nalt1__WEBPACK_IMPORTED_MODULE_6__.on(\"rsfocus\", () => {\n    (0,_capture__WEBPACK_IMPORTED_MODULE_3__.startCapturing)();\n    // Optionally restore main content if needed\n});\nwindow.addEventListener(\"unload\", () => {\n    alt1.setTitleBarText(\"\");\n});\n\n\n//# sourceURL=webpack://DSFEventTracker/./scripts/app.ts?");
 
 /***/ }),
 
@@ -1119,7 +1481,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   renderStockTable: () => (/* binding */ renderStockTable),\n/* harmony export */   scheduleMidnightUpdate: () => (/* binding */ scheduleMidnightUpdate)\n/* harmony export */ });\nconst slotMap = {\n    A: [\"Uncharted island map\"],\n    B: [\n        \"Gift for the Reaper\",\n        \"Broken fishing rod\",\n        \"Barrel of bait\",\n        \"Anima crystal\",\n        \"Small goebie burial charm\",\n        \"Medium goebie burial charm\",\n        \"Menaphite gift offering (small)\",\n        \"Menaphite gift offering (medium)\",\n        \"Shattered anima\",\n        \"D&D token (daily)\",\n        \"Sacred clay\",\n        \"Livid plant\",\n        \"Slayer VIP Coupon\",\n        \"Silverhawk Down\",\n        \"Unstable air rune\",\n        \"Advanced pulse core\",\n        \"Tangled fishbowl\",\n        \"Unfocused damage enhancer\",\n        \"Horn of honour\",\n    ],\n    C: [], // Will be set to slotMap.B below\n    D: [\n        \"Taijitu\",\n        \"Large goebie burial charm\",\n        \"Menaphite gift offering (large)\",\n        \"D&D token (weekly)\",\n        \"D&D token (monthly)\",\n        \"Dungeoneering Wildcard\",\n        \"Message in a bottle\",\n        \"Crystal triskelion\",\n        \"Starved ancient effigy\",\n        \"Deathtouched dart\",\n        \"Dragonkin lamp\",\n        \"Harmonic dust\",\n        \"Unfocused reward enhancer\",\n    ],\n};\n// A dummy mapping from item name to cost string\nconst itemCosts = {\n    \"Uncharted island map\": \"800K coins\",\n    \"Gift for the Reaper\": \"1,25M coins\",\n    \"Broken fishing rod\": \"50K coins\",\n    \"Barrel of bait\": \"50K coins\",\n    \"Anima crystal\": \"150K coins\",\n    \"Small goebie burial charm\": \"50K coins\",\n    \"Medium goebie burial charm\": \"100K coins\",\n    \"Menaphite gift offering (small)\": \"100K coins\",\n    \"Menaphite gift offering (medium)\": \"300K coins\",\n    \"Shattered anima\": \"150K coins\",\n    \"D&D token (daily)\": \"250K coins\",\n    \"Sacred clay\": \"600K coins\",\n    \"Livid plant\": \"1M coins\",\n    \"Slayer VIP Coupon\": \"200K coins\",\n    \"Silverhawk Down\": \"1.5M coins\",\n    \"Unstable air rune\": \"250K coins\",\n    \"Advanced pulse core\": \"800K coins\",\n    \"Tangled fishbowl\": \"50K coins\",\n    \"Unfocused reward enhancer\": \"10M coins\",\n    \"Horn of honour\": \"1M coins\",\n    Taijitu: \"800K coins\",\n    \"Large goebie burial charm\": \"150K coins\",\n    \"Menaphite gift offering (large)\": \"500K coins\",\n    \"D&D token (weekly)\": \"400K coins\",\n    \"D&D token (monthly)\": \"1M coins\",\n    \"Dungeoneering Wildcard\": \"400K coins\",\n    \"Message in a bottle\": \"200K coins\",\n    \"Crystal triskelion\": \"2M coins\",\n    \"Starved ancient effigy\": \"1M coins\",\n    \"Deathtouched dart\": \"5M coins\",\n    \"Dragonkin lamp\": \"250K coins\",\n    \"Harmonic dust\": \"1M coins\",\n};\n// Set slot C to be identical to slot B.\nslotMap.C = slotMap.B;\n// Define slot constants for slots B, C, and D.\nconst slotConstants = {\n    B: [3, 19],\n    C: [8, 19],\n    D: [5, 13],\n};\nconst getRuneDate = () => {\n    const initialRuneDate = Date.UTC(2002, 1, 27); // Base date\n    const now = new Date();\n    return Math.floor((now.getTime() - initialRuneDate) / (1000 * 3600 * 24));\n};\nconst getSlot = (slot, runedate) => {\n    const [constant, numUnique] = slotConstants[slot];\n    const runedateBigInt = BigInt(runedate);\n    let seed = (runedateBigInt << BigInt(32)) + (runedateBigInt % BigInt(constant));\n    const multiplier = BigInt(\"0x5DEECE66D\");\n    const mask = BigInt(2 ** 48 - 1);\n    const addend = BigInt(11);\n    seed = (seed ^ multiplier) & mask;\n    seed = (seed * multiplier + addend) & mask;\n    const slotIndex = Number((seed >> BigInt(17)) % BigInt(numUnique));\n    return slotMap[slot][slotIndex];\n};\nconst getAllSlots = (runedate) => {\n    const stock = {};\n    stock.A = slotMap.A[0];\n    stock.B = getSlot(\"B\", runedate);\n    stock.C = getSlot(\"C\", runedate);\n    stock.D = getSlot(\"D\", runedate);\n    return stock;\n};\nfunction getOrdinal(n) {\n    const s = [\"th\", \"st\", \"nd\", \"rd\"];\n    const v = n % 100;\n    return s[(v - 20) % 10] || s[v] || s[0];\n}\nfunction formatDateWithOrdinal(date) {\n    const day = date.getDate();\n    const ordinal = getOrdinal(day);\n    const month = date.toLocaleString(\"default\", { month: \"long\" });\n    const year = date.getFullYear();\n    return `${day}${ordinal} ${month} ${year}`;\n}\nfunction getImagePath(item) {\n    // Convert to lowercase.\n    let fileName = item.toLowerCase();\n    // Replace ampersand with \"and\".\n    fileName = fileName.replace(/&/g, \"and\");\n    // Replace one or more whitespace characters with an underscore.\n    fileName = fileName.replace(/\\s+/g, \"_\");\n    // Remove parentheses.\n    fileName = fileName.replace(/[()]/g, \"\");\n    // Remove any accidental duplicate underscores.\n    fileName = fileName.replace(/_+/g, \"_\");\n    return `assets/stock_icons/${fileName}.png`;\n}\nfunction renderStockTable() {\n    // Get the table body element from the mainTab stock table\n    const tableBody = document.querySelector(\"#stock-table table.event-table tbody\");\n    if (!tableBody)\n        return;\n    // Clear any existing rows\n    tableBody.innerHTML = \"\";\n    // Get today's rune date (number of days since 27 Feb 2002)\n    const todayRuneDate = getRuneDate();\n    Number(Math.random() * 10);\n    // Loop through today and the next 6 days\n    for (let i = 0; i < 7; i++) {\n        // Calculate the rune date for this day\n        const currentRuneDate = todayRuneDate + i;\n        // Get stock for the day; include slot A (map) if you want that column\n        const stock = getAllSlots(currentRuneDate);\n        // Create a new table row\n        const row = document.createElement(\"tr\");\n        // Create the Date cell. For today, display \"Today\", otherwise format the date.\n        const dateCell = document.createElement(\"td\");\n        const now = new Date();\n        // Create a UTC date with today's UTC year, month, and UTC date plus i days.\n        const currentDateUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));\n        dateCell.textContent = i === 0 ? \"Today\" : formatDateWithOrdinal(currentDateUTC);\n        row.appendChild(dateCell);\n        // For each slot (A, B, C, D), create a cell with the image.\n        // Slot A (map) is an array, so we use the first element.\n        const slots = [\"A\", \"B\", \"C\", \"D\"];\n        for (const slot of slots) {\n            const cell = document.createElement(\"td\");\n            const item = stock[slot];\n            if (item) {\n                const img = document.createElement(\"img\");\n                img.src = getImagePath(item);\n                img.alt = item;\n                img.title = item;\n                // Optionally, set dimensions or styles\n                img.style.width = slot === \"A\" ? \"25px\" : \"20px\";\n                img.style.height = \"25px\";\n                cell.appendChild(img);\n            }\n            row.appendChild(cell);\n        }\n        // Append the row to the table body\n        tableBody.appendChild(row);\n    }\n}\nfunction showDetailedStockForDate(selectedDate) {\n    // Update the modal header with the formatted date\n    const merchantDateHeading = document.getElementById(\"merchantDateHeading\");\n    if (merchantDateHeading) {\n        merchantDateHeading.textContent = formatDateWithOrdinal(selectedDate);\n    }\n    // Calculate the runedate for the selected date.\n    const initialRuneDate = Date.parse(\"27 Feb 2002\");\n    const selectedRunedate = Math.floor((selectedDate.getTime() - initialRuneDate) / (1000 * 3600 * 24));\n    // Get the stock for that day.\n    const stock = getAllSlots(selectedRunedate);\n    // Get the modal container for the detailed stock.\n    const merchantCardsContainer = document.getElementById(\"merchantCardsContainer\");\n    if (!merchantCardsContainer)\n        return;\n    // Clear any previous content.\n    merchantCardsContainer.innerHTML = \"\";\n    // We'll show a card for each slot: A, B, C, and D.\n    const slots = [\"A\", \"B\", \"C\", \"D\"];\n    slots.forEach((slot) => {\n        const item = stock[slot];\n        if (!item)\n            return;\n        // Create a card container.\n        const card = document.createElement(\"div\");\n        card.classList.add(\"merchant-card\");\n        // Item full name above the image.\n        const title = document.createElement(\"h4\");\n        title.textContent = item;\n        card.appendChild(title);\n        // Create a container for the image and cost side by side.\n        const infoRow = document.createElement(\"div\");\n        infoRow.classList.add(\"merchant-item-info\");\n        // Create the item image.\n        const img = document.createElement(\"img\");\n        img.src = getImagePath(item);\n        img.alt = item;\n        infoRow.appendChild(img);\n        // Create the cost element.\n        const costDiv = document.createElement(\"div\");\n        costDiv.classList.add(\"merchant-cost\");\n        costDiv.textContent = itemCosts[item] || \"Cost unknown\";\n        infoRow.appendChild(costDiv);\n        // Append the infoRow to the card.\n        card.appendChild(infoRow);\n        merchantCardsContainer.appendChild(card);\n    });\n    // Finally, show the modal.\n    const merchantModal = document.getElementById(\"merchantModal\");\n    if (merchantModal) {\n        merchantModal.style.display = \"flex\";\n    }\n}\nconst datePicker = document.getElementById(\"datePicker\");\ndatePicker.addEventListener(\"change\", () => {\n    if (!datePicker.value)\n        return;\n    const selectedDate = new Date(datePicker.value);\n    showDetailedStockForDate(selectedDate);\n});\nconst merchantModal = document.getElementById(\"merchantModal\");\nconst merchantModalClose = document.getElementById(\"merchantModalClose\");\nmerchantModalClose.addEventListener(\"click\", () => {\n    merchantModal.style.display = \"none\";\n});\n// Optionally, close when clicking outside the modal content.\nwindow.addEventListener(\"click\", (event) => {\n    if (event.target === merchantModal) {\n        merchantModal.style.display = \"none\";\n    }\n});\nfunction scheduleMidnightUpdate() {\n    const now = new Date();\n    // Calculate next midnight in UTC.\n    const nextMidnightUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));\n    const msUntilMidnight = nextMidnightUTC.getTime() - now.getTime();\n    setTimeout(() => {\n        // Call your update function. For example, re-render the 7-day stock table.\n        renderStockTable();\n        // Reschedule the update for the next midnight UTC.\n        scheduleMidnightUpdate();\n    }, msUntilMidnight);\n}\n\n\n//# sourceURL=webpack://DSFEventTracker/./scripts/merchantStock.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   renderStockTable: () => (/* binding */ renderStockTable),\n/* harmony export */   scheduleMidnightUpdate: () => (/* binding */ scheduleMidnightUpdate)\n/* harmony export */ });\nconst slotMap = {\n    A: [\"Uncharted island map\"],\n    B: [\n        \"Gift for the Reaper\",\n        \"Broken fishing rod\",\n        \"Barrel of bait\",\n        \"Anima crystal\",\n        \"Small goebie burial charm\",\n        \"Medium goebie burial charm\",\n        \"Menaphite gift offering (small)\",\n        \"Menaphite gift offering (medium)\",\n        \"Shattered anima\",\n        \"D&D token (daily)\",\n        \"Sacred clay\",\n        \"Livid plant\",\n        \"Slayer VIP Coupon\",\n        \"Silverhawk Down\",\n        \"Unstable air rune\",\n        \"Advanced pulse core\",\n        \"Tangled fishbowl\",\n        \"Unfocused damage enhancer\",\n        \"Horn of honour\",\n    ],\n    C: [], // Will be set to slotMap.B below\n    D: [\n        \"Taijitu\",\n        \"Large goebie burial charm\",\n        \"Menaphite gift offering (large)\",\n        \"D&D token (weekly)\",\n        \"D&D token (monthly)\",\n        \"Dungeoneering Wildcard\",\n        \"Message in a bottle\",\n        \"Crystal triskelion\",\n        \"Starved ancient effigy\",\n        \"Deathtouched dart\",\n        \"Dragonkin lamp\",\n        \"Harmonic dust\",\n        \"Unfocused reward enhancer\",\n    ],\n};\n// A dummy mapping from item name to cost string\nconst itemCosts = {\n    \"Uncharted island map\": \"800K coins\",\n    \"Gift for the Reaper\": \"1,25M coins\",\n    \"Broken fishing rod\": \"50K coins\",\n    \"Barrel of bait\": \"50K coins\",\n    \"Anima crystal\": \"150K coins\",\n    \"Small goebie burial charm\": \"50K coins\",\n    \"Medium goebie burial charm\": \"100K coins\",\n    \"Menaphite gift offering (small)\": \"100K coins\",\n    \"Menaphite gift offering (medium)\": \"300K coins\",\n    \"Shattered anima\": \"150K coins\",\n    \"D&D token (daily)\": \"250K coins\",\n    \"Sacred clay\": \"600K coins\",\n    \"Livid plant\": \"1M coins\",\n    \"Slayer VIP Coupon\": \"200K coins\",\n    \"Silverhawk Down\": \"1.5M coins\",\n    \"Unstable air rune\": \"250K coins\",\n    \"Advanced pulse core\": \"800K coins\",\n    \"Tangled fishbowl\": \"50K coins\",\n    \"Unfocused reward enhancer\": \"10M coins\",\n    \"Horn of honour\": \"1M coins\",\n    Taijitu: \"800K coins\",\n    \"Large goebie burial charm\": \"150K coins\",\n    \"Menaphite gift offering (large)\": \"500K coins\",\n    \"D&D token (weekly)\": \"400K coins\",\n    \"D&D token (monthly)\": \"1M coins\",\n    \"Dungeoneering Wildcard\": \"400K coins\",\n    \"Message in a bottle\": \"200K coins\",\n    \"Crystal triskelion\": \"2M coins\",\n    \"Starved ancient effigy\": \"1M coins\",\n    \"Deathtouched dart\": \"5M coins\",\n    \"Dragonkin lamp\": \"250K coins\",\n    \"Harmonic dust\": \"1M coins\",\n};\n// Set slot C to be identical to slot B.\nslotMap.C = slotMap.B;\n// Define slot constants for slots B, C, and D.\nconst slotConstants = {\n    B: [3, 19],\n    C: [8, 19],\n    D: [5, 13],\n};\nconst req = __webpack_require__(\"./assets/stock_icons sync \\\\.png$\");\nconst icons = req.keys().reduce((acc, path) => {\n    const key = path.replace(\"./\", \"\").replace(\".png\", \"\");\n    acc[key] = req(path);\n    return acc;\n}, {});\nconst getRuneDate = () => {\n    const initialRuneDate = Date.UTC(2002, 1, 27); // Base date\n    const now = new Date();\n    return Math.floor((now.getTime() - initialRuneDate) / (1000 * 3600 * 24));\n};\nconst getSlot = (slot, runedate) => {\n    const [constant, numUnique] = slotConstants[slot];\n    const runedateBigInt = BigInt(runedate);\n    let seed = (runedateBigInt << BigInt(32)) + (runedateBigInt % BigInt(constant));\n    const multiplier = BigInt(\"0x5DEECE66D\");\n    const mask = BigInt(2 ** 48 - 1);\n    const addend = BigInt(11);\n    seed = (seed ^ multiplier) & mask;\n    seed = (seed * multiplier + addend) & mask;\n    const slotIndex = Number((seed >> BigInt(17)) % BigInt(numUnique));\n    return slotMap[slot][slotIndex];\n};\nconst getAllSlots = (runedate) => {\n    const stock = {};\n    stock.A = slotMap.A[0];\n    stock.B = getSlot(\"B\", runedate);\n    stock.C = getSlot(\"C\", runedate);\n    stock.D = getSlot(\"D\", runedate);\n    return stock;\n};\nfunction getOrdinal(n) {\n    const s = [\"th\", \"st\", \"nd\", \"rd\"];\n    const v = n % 100;\n    return s[(v - 20) % 10] || s[v] || s[0];\n}\nfunction formatDateWithOrdinal(date) {\n    const day = date.getDate();\n    const ordinal = getOrdinal(day);\n    const month = date.toLocaleString(\"default\", { month: \"long\" });\n    const year = date.getFullYear();\n    return `${day}${ordinal} ${month} ${year}`;\n}\nfunction getImagePath(item) {\n    const key = item.toLowerCase().replace(/&/g, \"and\").replace(/\\s+/g, \"_\").replace(/[()]/g, \"\").replace(/_+/g, \"_\");\n    return icons[key] || \"\"; // fallback if not found\n}\nfunction renderStockTable() {\n    // Get the table body element from the mainTab stock table\n    const tableBody = document.querySelector(\"#stock-table table.event-table tbody\");\n    if (!tableBody)\n        return;\n    // Clear any existing rows\n    tableBody.innerHTML = \"\";\n    // Get today's rune date (number of days since 27 Feb 2002)\n    const todayRuneDate = getRuneDate();\n    Number(Math.random() * 10);\n    // Loop through today and the next 6 days\n    for (let i = 0; i < 7; i++) {\n        // Calculate the rune date for this day\n        const currentRuneDate = todayRuneDate + i;\n        // Get stock for the day; include slot A (map) if you want that column\n        const stock = getAllSlots(currentRuneDate);\n        // Create a new table row\n        const row = document.createElement(\"tr\");\n        // Create the Date cell. For today, display \"Today\", otherwise format the date.\n        const dateCell = document.createElement(\"td\");\n        const now = new Date();\n        // Create a UTC date with today's UTC year, month, and UTC date plus i days.\n        const currentDateUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));\n        dateCell.textContent = i === 0 ? \"Today\" : formatDateWithOrdinal(currentDateUTC);\n        row.appendChild(dateCell);\n        // For each slot (A, B, C, D), create a cell with the image.\n        // Slot A (map) is an array, so we use the first element.\n        const slots = [\"A\", \"B\", \"C\", \"D\"];\n        for (const slot of slots) {\n            const cell = document.createElement(\"td\");\n            const item = stock[slot];\n            if (item) {\n                const img = document.createElement(\"img\");\n                img.src = getImagePath(item);\n                img.alt = item;\n                img.title = item;\n                // Optionally, set dimensions or styles\n                img.style.width = slot === \"A\" ? \"25px\" : \"20px\";\n                img.style.height = \"25px\";\n                cell.appendChild(img);\n            }\n            row.appendChild(cell);\n        }\n        // Append the row to the table body\n        tableBody.appendChild(row);\n    }\n}\nfunction showDetailedStockForDate(selectedDate) {\n    // Update the modal header with the formatted date\n    const merchantDateHeading = document.getElementById(\"merchantDateHeading\");\n    if (merchantDateHeading) {\n        merchantDateHeading.textContent = formatDateWithOrdinal(selectedDate);\n    }\n    // Calculate the runedate for the selected date.\n    const initialRuneDate = Date.parse(\"27 Feb 2002\");\n    const selectedRunedate = Math.floor((selectedDate.getTime() - initialRuneDate) / (1000 * 3600 * 24));\n    // Get the stock for that day.\n    const stock = getAllSlots(selectedRunedate);\n    // Get the modal container for the detailed stock.\n    const merchantCardsContainer = document.getElementById(\"merchantCardsContainer\");\n    if (!merchantCardsContainer)\n        return;\n    // Clear any previous content.\n    merchantCardsContainer.innerHTML = \"\";\n    // We'll show a card for each slot: A, B, C, and D.\n    const slots = [\"A\", \"B\", \"C\", \"D\"];\n    slots.forEach((slot) => {\n        const item = stock[slot];\n        if (!item)\n            return;\n        // Create a card container.\n        const card = document.createElement(\"div\");\n        card.classList.add(\"merchant-card\");\n        // Item full name above the image.\n        const title = document.createElement(\"h4\");\n        title.textContent = item;\n        card.appendChild(title);\n        // Create a container for the image and cost side by side.\n        const infoRow = document.createElement(\"div\");\n        infoRow.classList.add(\"merchant-item-info\");\n        // Create the item image.\n        const img = document.createElement(\"img\");\n        img.src = getImagePath(item);\n        img.alt = item;\n        infoRow.appendChild(img);\n        // Create the cost element.\n        const costDiv = document.createElement(\"div\");\n        costDiv.classList.add(\"merchant-cost\");\n        costDiv.textContent = itemCosts[item] || \"Cost unknown\";\n        infoRow.appendChild(costDiv);\n        // Append the infoRow to the card.\n        card.appendChild(infoRow);\n        merchantCardsContainer.appendChild(card);\n    });\n    // Finally, show the modal.\n    const merchantModal = document.getElementById(\"merchantModal\");\n    if (merchantModal) {\n        merchantModal.style.display = \"flex\";\n    }\n}\nconst datePicker = document.getElementById(\"datePicker\");\ndatePicker.addEventListener(\"change\", () => {\n    if (!datePicker.value)\n        return;\n    const selectedDate = new Date(datePicker.value);\n    showDetailedStockForDate(selectedDate);\n});\nconst merchantModal = document.getElementById(\"merchantModal\");\nconst merchantModalClose = document.getElementById(\"merchantModalClose\");\nmerchantModalClose.addEventListener(\"click\", () => {\n    merchantModal.style.display = \"none\";\n});\n// Optionally, close when clicking outside the modal content.\nwindow.addEventListener(\"click\", (event) => {\n    if (event.target === merchantModal) {\n        merchantModal.style.display = \"none\";\n    }\n});\nfunction scheduleMidnightUpdate() {\n    const now = new Date();\n    // Calculate next midnight in UTC.\n    const nextMidnightUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));\n    const msUntilMidnight = nextMidnightUTC.getTime() - now.getTime();\n    setTimeout(() => {\n        // Call your update function. For example, re-render the 7-day stock table.\n        renderStockTable();\n        // Reschedule the update for the next midnight UTC.\n        scheduleMidnightUpdate();\n    }, msUntilMidnight);\n}\n\n\n//# sourceURL=webpack://DSFEventTracker/./scripts/merchantStock.ts?");
 
 /***/ }),
 
@@ -1301,18 +1663,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_sharp__;
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -1331,25 +1681,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_sharp__;
 /******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
-/******/ 		var scriptUrl;
-/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
-/******/ 		var document = __webpack_require__.g.document;
-/******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
-/******/ 				scriptUrl = document.currentScript.src;
-/******/ 			if (!scriptUrl) {
-/******/ 				var scripts = document.getElementsByTagName("script");
-/******/ 				if(scripts.length) {
-/******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
-/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
-/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
-/******/ 		__webpack_require__.p = scriptUrl;
+/******/ 		__webpack_require__.p = "/alt1-dev/";
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
