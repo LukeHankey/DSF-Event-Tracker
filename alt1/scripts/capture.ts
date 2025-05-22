@@ -435,6 +435,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         eventToEnd.timestamp = Date.now();
         eventToEnd.oldEvent = eventRecordEnding;
         eventToEnd.source = "alt1";
+        eventToEnd.mistyUpdate = true; // Makes sure the discord call is edited
         wsClient.send(eventToEnd);
 
         return;
