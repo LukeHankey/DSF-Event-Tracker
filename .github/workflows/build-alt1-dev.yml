@@ -29,26 +29,10 @@ jobs:
 
       - name: Build stable version into dist/alt1/
         run: |
-          set -e
           git fetch --tags
-          TAG="v${{ steps.package-version.outputs.current-version }}"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Found tag $TAG, checking out and building."
-            git checkout "$TAG"
-            npm run build
-            git switch -
-          else
-            echo "Tag $TAG not found, falling back to previous tag."
-            PREV_TAG=$(git tag --sort=-v:refname | grep -v "^$TAG$" | head -n1)
-            if [ -z "$PREV_TAG" ]; then
-              echo "No previous tag found. Exiting with error."
-              exit 1
-            fi
-            echo "Building previous tag: $PREV_TAG"
-            git checkout "$PREV_TAG"
-            npm run build
-            git switch -
-          fi
+          git checkout "v${{ steps.package-version.outputs.current-version }}"
+          npm run build
+          git switch -
 
       - name: Build alt1-dev version
         run: npm run build:dev
