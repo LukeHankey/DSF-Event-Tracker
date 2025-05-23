@@ -4,6 +4,7 @@ const packageJson = require("./package.json");
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { DefinePlugin } = require("webpack");
 
 /**
  * @type {(env: { VERSION?: string }) => import("webpack").Configuration}
@@ -50,6 +51,9 @@ module.exports = (env = {}) => {
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, "alt1/index.html"),
                 filename: "index.html",
+            }),
+            new DefinePlugin({
+                __APP_VERSION__: JSON.stringify(packageVersion),
             }),
         ],
         module: {
