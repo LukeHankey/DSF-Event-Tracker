@@ -127,19 +127,24 @@ function detectTimestamps(lines: ChatLine[]): boolean {
 }
 
 async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
-    const token = localStorage.getItem("refreshToken");
+    const token = localStorage.getItem("accessToken");
     if (token) {
         const discordID = decodeJWT(token)?.discord_id;
         try {
-            const addCountResponse = await axios.patch(`${API_URL}/profiles/${discordID}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Origin: ORIGIN,
-                    Authorization: `Bearer ${token}`,
+            const addCountResponse = await axios.patch(
+                `${API_URL}/profiles/${discordID}`,
+                {
+                    key: isFirstEvent ? "alt1First" : "alt1",
+                    event: matchingEvent,
                 },
-                key: isFirstEvent ? "alt1First" : "alt1",
-                event: matchingEvent,
-            });
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: ORIGIN,
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
 
             if (addCountResponse.status === 200) {
                 console.log(`${matchingEvent} has been added to call count.`);
