@@ -43,6 +43,10 @@ module.exports = (env = {}) => {
             new CopyWebpackPlugin({
                 patterns: [
                     {
+                        from: path.resolve(__dirname, "alt1/appconfig.json"),
+                        to: ".",
+                    },
+                    {
                         from: path.resolve(__dirname, "alt1/assets"),
                         to: "assets",
                     },
