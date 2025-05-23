@@ -9,7 +9,10 @@ import { WorldEventStatus, updateWorld } from "./mistyTimers";
 import { WorldRecord } from "./mistyDialog";
 import { notifyEvent } from "./notifications";
 
-type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
+interface Version {
+    version: string;
+}
+type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | Version;
 declare const __APP_VERSION__: string;
 
 const originalConsoleLog = console.log;
