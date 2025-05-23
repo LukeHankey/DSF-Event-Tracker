@@ -9,7 +9,11 @@ import { WorldEventStatus, updateWorld } from "./mistyTimers";
 import { WorldRecord } from "./mistyDialog";
 import { notifyEvent } from "./notifications";
 
-type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus;
+interface Version {
+    version: string;
+}
+type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | Version;
+declare const __APP_VERSION__: string;
 
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
@@ -162,6 +166,8 @@ export class WebSocketClient {
                 this.processProfileUpdate(parsedData);
             } else if ("type" in parsedData) {
                 this.processEvent(parsedData);
+            } else if ("version" in parsedData) {
+                if (__APP_VERSION__ !== parsedData.version) window.location.reload();
             } else {
                 await updateWorld(parsedData);
             }
