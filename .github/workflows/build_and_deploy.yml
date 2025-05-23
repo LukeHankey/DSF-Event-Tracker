@@ -1,4 +1,4 @@
-name: Build alt1-dev on main push
+name: Build and deploy on push to main
 
 on:
   push:
@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -28,27 +31,29 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Build stable version into dist/alt1/
+        id: build_stable
+        env:
+          VERSION: ${{ steps.package-version.outputs.current-version }}
         run: |
           set -e
+
           git fetch --tags
-          TAG="v${{ steps.package-version.outputs.current-version }}"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Found tag $TAG, checking out and building."
-            git checkout "$TAG"
-            npm run build
-            git switch -
+
+          TAG="v$VERSION"
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n1)
+
+          if [ "$TAG" != "$LATEST_TAG" ]; then
+            echo "${TAG} not found (latest is ${LATEST_TAG}), creating it…"
+            git tag -a "$TAG" -m "chore(release): $TAG"
+            git push origin "$TAG"
           else
-            echo "Tag $TAG not found, falling back to previous tag."
-            PREV_TAG=$(git tag --sort=-v:refname | grep -v "^$TAG$" | head -n1)
-            if [ -z "$PREV_TAG" ]; then
-              echo "No previous tag found. Exiting with error."
-              exit 1
-            fi
-            echo "Building previous tag: $PREV_TAG"
-            git checkout "$PREV_TAG"
-            npm run build
-            git switch -
+            echo "Found existing tag ${TAG}"
           fi
+
+          echo "Checking out ${TAG} and building stable…"
+          git checkout "$TAG"
+          npm run build
+          git switch -
 
       - name: Build alt1-dev version
         run: npm run build:dev
