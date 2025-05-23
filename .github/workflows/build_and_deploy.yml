@@ -1,4 +1,4 @@
-name: Build alt1-dev on main push
+name: Build and deploy on push to main
 
 on:
   push:
@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -28,9 +31,34 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Build stable version into dist/alt1/
+        id: build_stable
+        env:
+          VERSION: ${{ steps.package-version.outputs.current-version }}
         run: |
+<<<<<<< HEAD:.github/workflows/build-alt1-dev.yml
           git fetch --tags
           git checkout "v${{ steps.package-version.outputs.current-version }}"
+          npm run build
+          git switch -
+=======
+          set -e
+
+          git fetch --tags
+
+          TAG="v$VERSION"
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n1)
+
+          if [ "$TAG" != "$LATEST_TAG" ]; then
+            echo "${TAG} not found (latest is ${LATEST_TAG}), creating it…"
+            git tag -a "$TAG" -m "chore(release): $TAG"
+            git push origin "$TAG"
+          else
+            echo "Found existing tag ${TAG}"
+          fi
+>>>>>>> a7faf6f (Build combine workflows (#87)):.github/workflows/build_and_deploy.yml
+
+          echo "Checking out ${TAG} and building stable…"
+          git checkout "$TAG"
           npm run build
           git switch -
 
