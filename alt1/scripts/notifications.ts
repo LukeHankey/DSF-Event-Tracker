@@ -1,8 +1,11 @@
 import { EventRecord } from "./events";
 import { formatTimeLeftValue, getRemainingTime } from "./eventHistory";
+import { getAllSlots, getRuneDate } from "./merchantStock";
 
+let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarInterval: ReturnType<typeof setTimeout> | null = null;
+let activeCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let recentEvent: EventRecord | null = null;
 
 // Function to show toast notification using new BEM modifier for "show"
@@ -91,22 +94,80 @@ export function notifyEvent(event: EventRecord): void {
     const message = `${event.event} on w${event.world}`;
 
     if (notificationModes.includes("tooltip")) {
-        showTooltip(message);
+        const tooltipNotificationSetting = localStorage.getItem("tooltipNotificationSetting");
+        let duration = 5_000;
+        switch (tooltipNotificationSetting) {
+            case "30s":
+                duration = 30_000;
+                break;
+            case "1m":
+                duration = 60_000;
+                break;
+            case "expire": {
+                duration = getRemainingTime(event) * 1000;
+                let lastKnownInactiveMs = alt1.rsLastActive;
+                const minVisibleTime = 2_500;
+                const tooltipShownAt = Date.now();
+                console.log("Initial rsLastActive (ms since last RS input):", lastKnownInactiveMs);
+                if (activeCheckTimeout) {
+                    clearInterval(activeCheckTimeout);
+                }
+                activeCheckTimeout = setInterval(() => {
+                    const currentInactiveMs = alt1.rsLastActive;
+                    const userReturned = currentInactiveMs < lastKnownInactiveMs;
+                    const elapsed = Date.now() - tooltipShownAt;
+                    console.log("alt1.rsActive", alt1.rsActive);
+                    console.log("alt1.rsLastActive", currentInactiveMs);
+
+                    const shouldClearNow = alt1.rsActive && userReturned && elapsed >= minVisibleTime;
+
+                    if (shouldClearNow) {
+                        console.log("User re-activated RuneScape window. Clearing tooltip.");
+                        alt1.clearTooltip();
+
+                        if (activeCheckTimeout) {
+                            clearInterval(activeCheckTimeout);
+                            activeCheckTimeout = null;
+                        }
+
+                        if (tooltipTimeout) {
+                            clearTimeout(tooltipTimeout);
+                            tooltipTimeout = null;
+                        }
+                    }
+                    lastKnownInactiveMs = currentInactiveMs;
+                }, 600);
+                break;
+            }
+            default:
+                duration = 5_000;
+        }
+        showTooltip(message, duration);
     }
 
     if (notificationModes.includes("toolbar")) {
         showTitleBarText(event, message, getRemainingTime(event) * 1000);
     }
+
+    if (notificationModes.includes("system")) {
+        alt1.showNotification("DSF Event Tracker", message, "");
+    }
 }
 
 export function setDefaultTitleBar() {
-    alt1.setTitleBarText("Listening for DSF events...");
+    alt1.setTitleBarText(`<span title='${getStockTitle()}'>Listening for DSF events...</span>`);
+}
+
+function getStockTitle(): string {
+    const runedate = getRuneDate();
+    const stock = getAllSlots(runedate);
+    return `${stock.A}\n${stock.B}\n${stock.C}\n${stock.D}`;
 }
 
 function showTooltip(message: string, durationMs: number = 5_000): void {
     alt1.setTooltip(message);
 
-    setTimeout(alt1.clearTooltip, durationMs);
+    tooltipTimeout = setTimeout(alt1.clearTooltip, durationMs);
 }
 
 function showTitleBarText(event: EventRecord, message: string, durationMs: number = 120_000): void {
@@ -137,7 +198,7 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
         }
 
         const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
-        alt1.setTitleBarText(`${message} for ${friendlyRemaining}`);
+        alt1.setTitleBarText(`<span title='${getStockTitle()}'>${message} for ${friendlyRemaining}</span>`);
     };
 
     // Immediately update once
