@@ -108,7 +108,6 @@ export function notifyEvent(event: EventRecord): void {
                 let lastKnownInactiveMs = alt1.rsLastActive;
                 const minVisibleTime = 2_500;
                 const tooltipShownAt = Date.now();
-                console.log("Initial rsLastActive (ms since last RS input):", lastKnownInactiveMs);
                 if (activeCheckTimeout) {
                     clearInterval(activeCheckTimeout);
                 }
@@ -116,13 +115,10 @@ export function notifyEvent(event: EventRecord): void {
                     const currentInactiveMs = alt1.rsLastActive;
                     const userReturned = currentInactiveMs < lastKnownInactiveMs;
                     const elapsed = Date.now() - tooltipShownAt;
-                    console.log("alt1.rsActive", alt1.rsActive);
-                    console.log("alt1.rsLastActive", currentInactiveMs);
 
                     const shouldClearNow = alt1.rsActive && userReturned && elapsed >= minVisibleTime;
 
                     if (shouldClearNow) {
-                        console.log("User re-activated RuneScape window. Clearing tooltip.");
                         alt1.clearTooltip();
 
                         if (activeCheckTimeout) {
