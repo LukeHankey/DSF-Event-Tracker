@@ -11,7 +11,7 @@ import { wsClient, refreshToken } from "./ws";
 import { DEBUG, ORIGIN, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
-import { showToast } from "./notifications";
+import { setDefaultTitleBar, showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
 import { renderMistyTimers } from "./mistyTimers";
 
@@ -101,6 +101,14 @@ if (notificationModes && notificationModesSelect) {
     });
 }
 
+const tooltipNotificationSettingSelect = document.getElementById(
+    "tooltipNotificationSetting",
+) as HTMLSelectElement | null;
+const tooltipNotificationSetting = localStorage.getItem("tooltipNotificationSetting");
+if (tooltipNotificationSetting && tooltipNotificationSettingSelect) {
+    tooltipNotificationSettingSelect.value = tooltipNotificationSetting;
+}
+
 const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
 const darkMode = localStorage.getItem("darkMode");
 if (darkModeSwitch && darkMode) {
@@ -134,6 +142,10 @@ resetNotificationModes?.addEventListener("click", () => {
         // Update localStorage to reflect empty state
         localStorage.setItem("notificationModes", JSON.stringify([]));
     }
+    if (tooltipNotificationSettingSelect) {
+        localStorage.setItem("tooltipNotificationSetting", "default");
+        tooltipNotificationSettingSelect.value = "default";
+    }
 });
 
 // Handle settings form submission and save to localStorage
@@ -163,10 +175,14 @@ settingsForm?.addEventListener("submit", (e) => {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
         if (selectedValues && selectedValues.includes("toolbar")) {
-            alt1.setTitleBarText("Listening for DSF events...");
+            setDefaultTitleBar();
         } else {
             alt1.setTitleBarText("");
         }
+    }
+
+    if (tooltipNotificationSettingSelect) {
+        updateIfChanged("tooltipNotificationSetting", tooltipNotificationSettingSelect.value);
     }
 
     if (darkModeSwitch) {
