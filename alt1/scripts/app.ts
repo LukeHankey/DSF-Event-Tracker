@@ -7,7 +7,6 @@
 import * as a1lib from "alt1";
 import "../appconfig.json";
 import "../styles/style.css";
-import "../index.html";
 
 // UI and events
 import "./ui";
@@ -36,4 +35,8 @@ if (window.alt1) {
 a1lib.on("rsfocus", () => {
     startCapturing();
     // Optionally restore main content if needed
+});
+
+window.addEventListener("unload", () => {
+    alt1.setTitleBarText("");
 });

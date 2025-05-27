@@ -6,13 +6,15 @@ import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { EventKeys, events, eventTimes, firstEventTexts, eventExpiredText, EventRecord } from "./events";
 import { DEBUG, ORIGIN, API_URL } from "../config";
-import { wsClient } from "./ws";
+import { wsClient, refreshToken } from "./ws";
 import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
 import Fuse from "fuse.js";
 import { decodeJWT } from "./permissions";
+import { showToast } from "./notifications";
 import { renderMistyTimers, startMistyimerRefresh } from "./mistyTimers";
 import { startCapturingMisty } from "./mistyDialog";
+import { setDefaultTitleBar } from "./notifications";
 
 /**
  * ChatBoxReader & color definitions
@@ -90,6 +92,13 @@ export function initCapture(): void {
     loadEventHistory();
     renderMistyTimers();
 
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    if (notificationModes && notificationModes.includes("toolbar")) {
+        setDefaultTitleBar();
+    } else {
+        alt1.setTitleBarText("");
+    }
+
     const eventHistoryTab = document.getElementById("eventHistoryTab");
     if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
         startEventTimerRefresh();
@@ -117,24 +126,45 @@ function detectTimestamps(lines: ChatLine[]): boolean {
     return lines.some((line) => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text));
 }
 
-async function addEventCount(matchingEvent: EventKeys, worldNumber: string, isFirstEvent: boolean) {
-    const token = localStorage.getItem("refreshToken");
+async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
+    const token = localStorage.getItem("accessToken");
     if (token) {
         const discordID = decodeJWT(token)?.discord_id;
-        const addCountResponse = await axios.patch(`${API_URL}/profiles/${discordID}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
-                Authorization: `Bearer ${token}`,
-            },
-            key: isFirstEvent ? "alt1First" : "alt1",
-            event: matchingEvent,
-        });
+        try {
+            const addCountResponse = await axios.patch(
+                `${API_URL}/profiles/${discordID}`,
+                {
+                    key: isFirstEvent ? "alt1First" : "alt1",
+                    event: matchingEvent,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: ORIGIN,
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
 
-        if (addCountResponse.status === 200) {
-            console.log(`${matchingEvent} has been added to call count.`);
-        } else {
-            console.error(`Status not 200 for adding event count: ${addCountResponse}`);
+            if (addCountResponse.status === 200) {
+                console.log(`${matchingEvent} has been added to call count.`);
+            } else {
+                console.error(`Status not 200 for adding event count: ${addCountResponse}`);
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error(error);
+                const status = error.response?.status;
+                const message = error.response?.data?.detail;
+                if (status === 401 && message === "Token has expired") {
+                    await refreshToken();
+                    await addEventCount(matchingEvent, isFirstEvent);
+                } else {
+                    return showToast(message, "error");
+                }
+            } else {
+                console.error("Unexpected error", error);
+            }
         }
     }
 }
@@ -199,7 +229,7 @@ export async function reportEvent(
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
         // I will track all that have been verified
-        await addEventCount(matchingEvent, currentWorld, isFirstEvent);
+        await addEventCount(matchingEvent, isFirstEvent);
 
         if (sendWebhookResponse.status !== 200) {
             console.log("Did not receive the correct response");
@@ -234,7 +264,7 @@ export async function reportEvent(
             // Happens if there are multiple people on same world. Only one will send the webhook
             // Others will get a 409.
             if (error.response?.data.is_first_event) {
-                await addEventCount(matchingEvent, currentWorld, error.response?.data.is_first_event);
+                await addEventCount(matchingEvent, error.response?.data.is_first_event);
             }
             return;
         }
@@ -342,8 +372,8 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         console.log("alt1.currentWorld after world hop and before delay: ", alt1.currentWorld);
         await delay(6000);
         console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
-        startCapturingMisty();
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
+        startCapturingMisty();
 
         if (currentWorld && Number(currentWorld) > 0) {
             console.log("World hop message detected and found world number: ", currentWorld);
@@ -410,6 +440,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         eventToEnd.timestamp = Date.now();
         eventToEnd.oldEvent = eventRecordEnding;
         eventToEnd.source = "alt1";
+        eventToEnd.mistyUpdate = true; // Makes sure the discord call is edited
         wsClient.send(eventToEnd);
 
         return;
@@ -505,11 +536,14 @@ function getMatchingEvent(lineText: string): [EventKeys | null, boolean] {
     lineText = lineText.replace(timeRegex, "");
 
     // Remove certain prefixes if present
-    const prefixes = ["Misty: ", "Fisherman: ", "Guys: ", "5Ftx: "];
-    const matchingPrefix = prefixes.find((prefix) => lineText.startsWith(prefix));
-    if (matchingPrefix) lineText = lineText.slice(matchingPrefix.length);
+    const names = ["Misty", "Fisherman", "Guys", "5Ftx"];
+    // OCR can read ":" as ";"
+    const prefixRegex = new RegExp(`^(${names.join("|")})[:;]\\s*`);
 
-    if (!matchingPrefix && !isLikelyEventStart(lineText)) {
+    const prefixMatch = lineText.match(prefixRegex);
+    if (prefixMatch) lineText = lineText.slice(prefixMatch[0].length);
+
+    if (!prefixMatch && !isLikelyEventStart(lineText)) {
         return [null, false]; // Ignore non-valid starting lines
     }
 

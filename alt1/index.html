@@ -115,8 +115,19 @@
                     </select>
                 </div>
                 <div class="form__group">
+                    <label for="notificationModes" title="Select multiple options">
+                        Notifications (Multi-Select)
+                        <button id="infoButtonNotificationMode" class="info-button" title="Click for info" type="button">ℹ️</button>
+                    </label>
+                    <select id="notificationModes" multiple size="2">
+                        <option value="tooltip">Tooltip</option>
+                        <option value="toolbar">Toolbar</option>
+                    </select>
+                    <a id="resetNotificationModes" style="display: block; cursor: pointer; margin-top: .5rem;">Reset notification modes</a>
+                </div>
+                <div class="form__group">
                     <label for="darkMode">Enable Dark Mode</label>
-                    <label class="theme-switch">
+                    <label class="switch">
                         <input type="checkbox" id="darkMode" />
                         <span class="slider"></span>
                     </label>
@@ -163,6 +174,10 @@
                                 <label>
                                 <input type="checkbox" id="toggleMistyTimer" />
                                 Misty Timers
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="toggleNotificationsToday" />
+                                    Toggle notifications today
                                 </label>
                                 <label id="debugContainer">
                                 <select id="testEventSelect"></select>
@@ -263,6 +278,9 @@
                 <h2>Event History Information</h2>
                 <p>The <strong>Hide Expired</strong> checkbox hides any Expired events.</p>
                 <p>The <strong>Misty Timers</strong> checkbox will change the Time Left column to Misty Timer. If editing the event with this checked, you should input the time that Misty provides.</p>
+                <p>
+                    The <strong>Toggle notifications today</strong> checkbox will <strong>suppress notifications</strong> until 00:00 UTC, after which it resets automatically.
+                </p>
                 <p>The <strong>Clear All</strong> button will remove all events.</p>
                 <h3>Button Icons:</h3>
                 <ul>
@@ -312,6 +330,24 @@
                 </ul>
             </div>
         </div>
+        <div id="infoModalNotificationMode" class="modal">
+            <div class="modal-content">
+                <span class="close" title="Close">&times;</span>
+                <h2>Notification Modes</h2>
+                <p>Select one or more of the following:</p>
+                <ul>
+                    <li><strong>Tooltip</strong> – Shows a short message near your cursor for a few seconds.</li>
+                    <li><strong>Toolbar</strong> – Displays a message in your RuneScape toolbar until the time remaining expires or a new call is made.</li>
+                </ul>
+                <p>
+                    Select multiple modes with <kbd>Ctrl</kbd> or <kbd>Shift</kbd>. To clear selections, click the <strong>Reset notification modes</strong> link.
+                </p>
+                <p>
+                    <strong>All events</strong> will trigger notifications unless <strong>favorited events</strong> are set.
+                </p>
+                <p><em>Note: Notifications will only be sent if the application is running inside Alt1.</em></p>
+            </div>
+        </div>
         <!--  Modal for a confirmation -->
         <div id="confirmModal" class="modal">
             <div class="modal-content">
@@ -336,7 +372,5 @@
                 </div>
             </div>
         </div>
-        <!-- External JavaScript -->
-        <script src="./main.js"></script>
     </body>
 </html>

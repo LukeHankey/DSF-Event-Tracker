@@ -82,7 +82,7 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
               ? String(alt1.currentWorld)
               : await findWorldNumber(a1lib.captureHoldFullRs());
 
-    if (!world) {
+    if (!world || world === "-1") {
         showToast("Misty time not updated - world not found.", "error");
         console.log("Misty time not updated - world not found.");
         return stopCapturingMisty();

@@ -709,10 +709,18 @@ small {
 ------------------------------------- */
 /* Info button style */
 .info-button {
-    background: none;
-    border: none;
+    background: linear-gradient(135deg, #0077cc, #005fa3);
+    border-radius: 5px;
     cursor: pointer;
+    color: white;
     font-size: 1.2em;
+    padding: 1px 3px !important;
+    border: none;
+}
+
+body.dark-mode .info-button, body.dark-mode .reset-button {
+    background: linear-gradient(135deg, #4dabf7, #237abf);
+    color: white;
 }
 
 /* The Modal (hidden by default) */
@@ -919,7 +927,7 @@ body.dark-mode .mod-actions button:hover {
 }
 
 /* Theme toggle switch */
-.theme-switch {
+.switch {
     display: inline-block;
     width: 50px;
     height: 26px;
@@ -927,7 +935,7 @@ body.dark-mode .mod-actions button:hover {
     margin-top: 5px;
 }
 
-.theme-switch input {
+.switch input {
     opacity: 0;
     width: 0;
     height: 0;
@@ -954,10 +962,10 @@ body.dark-mode .mod-actions button:hover {
     border-radius: 50%;
 }
 
-.theme-switch input:checked + .slider {
+.switch input:checked + .slider {
     background: linear-gradient(135deg, #0077cc, #005fa3);
 }
 
-.theme-switch input:checked + .slider::before {
+.switch input:checked + .slider::before {
     transform: translateX(24px);
 }

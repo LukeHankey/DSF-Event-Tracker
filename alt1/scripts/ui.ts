@@ -91,6 +91,16 @@ if (favoriteEventsModeSelect && savedFavMode) {
     favoriteEventsModeSelect.value = savedFavMode;
 }
 
+const notificationModesSelect = document.getElementById("notificationModes") as HTMLSelectElement | null;
+const notificationModes = localStorage.getItem("notificationModes");
+if (notificationModes && notificationModesSelect) {
+    const modes: string[] = JSON.parse(notificationModes);
+    // Mark these options as selected
+    Array.from(notificationModesSelect.options).forEach((option) => {
+        option.selected = modes.includes(option.value);
+    });
+}
+
 const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
 const darkMode = localStorage.getItem("darkMode");
 if (darkModeSwitch && darkMode) {
@@ -111,6 +121,20 @@ function setDarkMode(): void {
 }
 
 setDarkMode();
+
+// Handle reset notification modes
+const resetNotificationModes = document.getElementById("resetNotificationModes") as HTMLAnchorElement | null;
+resetNotificationModes?.addEventListener("click", () => {
+    if (notificationModesSelect) {
+        // Clear all selected options
+        Array.from(notificationModesSelect.options).forEach((option) => {
+            option.selected = false;
+        });
+
+        // Update localStorage to reflect empty state
+        localStorage.setItem("notificationModes", JSON.stringify([]));
+    }
+});
 
 // Handle settings form submission and save to localStorage
 const settingsForm = document.getElementById("settingsForm") as HTMLFormElement | null;
@@ -133,6 +157,16 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (favoriteEventsModeSelect) {
         updateIfChanged("favoriteEventsMode", favoriteEventsModeSelect.value);
+    }
+
+    if (notificationModesSelect) {
+        const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
+        updateIfChanged("notificationModes", JSON.stringify(selectedValues));
+        if (selectedValues && selectedValues.includes("toolbar")) {
+            alt1.setTitleBarText("Listening for DSF events...");
+        } else {
+            alt1.setTitleBarText("");
+        }
     }
 
     if (darkModeSwitch) {
@@ -304,6 +338,74 @@ if (toggleMistyTimer) {
     });
 }
 
+const toggleNotificationsToday = document.getElementById("toggleNotificationsToday") as HTMLInputElement | null;
+let midnightResetTimeoutId: number | null = null;
+if (toggleNotificationsToday) {
+    const storedState = localStorage.getItem("toggleNotificationsToday") === "true";
+    const storedDate = localStorage.getItem("toggleNotificationsTodayDate");
+    const todayUTC = new Date().toISOString().slice(0, 10);
+
+    // Reset if stored date is outdated
+    if (storedState && storedDate !== todayUTC) {
+        localStorage.setItem("toggleNotificationsToday", "false");
+        toggleNotificationsToday.checked = false;
+    } else {
+        toggleNotificationsToday.checked = storedState;
+    }
+
+    // If enabled, schedule the reset
+    if (toggleNotificationsToday.checked) {
+        scheduleNotificationResetAtMidnightUTC();
+    }
+
+    toggleNotificationsToday.addEventListener("change", (e) => {
+        const checkbox = e.target as HTMLInputElement;
+        const checked = checkbox.checked;
+        localStorage.setItem("toggleNotificationsToday", checked ? "true" : "false");
+
+        if (checked) {
+            localStorage.setItem("toggleNotificationsTodayDate", todayUTC);
+            scheduleNotificationResetAtMidnightUTC();
+        } else {
+            localStorage.removeItem("toggleNotificationsTodayDate");
+
+            // Cancel existing reset timer if any
+            if (midnightResetTimeoutId !== null) {
+                clearTimeout(midnightResetTimeoutId);
+                midnightResetTimeoutId = null;
+            }
+        }
+    });
+}
+
+function scheduleNotificationResetAtMidnightUTC(): void {
+    const now = new Date();
+    const utcNow = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds(),
+    );
+    const utcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0);
+
+    const msUntilMidnight = utcMidnight - utcNow;
+
+    midnightResetTimeoutId = window.setTimeout(() => {
+        localStorage.setItem("toggleNotificationsToday", "false");
+        localStorage.removeItem("toggleNotificationsTodayDate");
+
+        if (toggleNotificationsToday) {
+            toggleNotificationsToday.checked = false;
+        }
+
+        showToast("Notification suppression has reset");
+
+        midnightResetTimeoutId = null;
+    }, msUntilMidnight);
+}
+
 function showConfirmationModal({
     title = "Confirm",
     message = "Are you sure you want to proceed?",
@@ -442,6 +544,7 @@ window.addEventListener("DOMContentLoaded", () => {
             populateEventDropdown();
         }
     }
+
     const infoButtonEventHistory = document.getElementById("infoButtonEventHistory") as HTMLElement;
     const modalScouts = document.getElementById("infoModalScouts") as HTMLElement;
     const closeModalScouts = modalScouts.querySelector(".close") as Element;
@@ -481,6 +584,24 @@ window.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("click", function (event) {
         if (event.target === modalMisty) {
             modalMisty.style.display = "none";
+        }
+    });
+
+    const infoButtonNotificationMode = document.getElementById("infoButtonNotificationMode") as HTMLElement;
+    const modalNotificationMode = document.getElementById("infoModalNotificationMode") as HTMLElement;
+    const closeModalNotificationMode = modalNotificationMode.querySelector(".close") as Element;
+
+    infoButtonNotificationMode.addEventListener("click", function () {
+        modalNotificationMode.style.display = "flex";
+    });
+
+    closeModalNotificationMode.addEventListener("click", function () {
+        modalNotificationMode.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+        if (event.target === modalNotificationMode) {
+            modalNotificationMode.style.display = "none";
         }
     });
 
