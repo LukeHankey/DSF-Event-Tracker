@@ -84,30 +84,13 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         console.log("Misty time not updated - failed reading dialog");
         return;
     }
-    const { seconds, status, eventName } = timerData;
-
-    const world =
-        Number(currentWorld) === alt1.currentWorld
-            ? currentWorld
-            : alt1.currentWorld > 0
-              ? String(alt1.currentWorld)
-              : await findWorldNumber(a1lib.captureHoldFullRs());
-
-    if (!world || world === "-1") {
-        showToast("Misty time not updated - world not found.", "error");
-        console.log("Misty time not updated - world not found.");
-        return stopCapturingMisty();
-    }
+    const { seconds, status, eventName, world } = timerData;
     stopCapturingMisty();
 
     const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
     try {
         const token = localStorage.getItem("accessToken");
-        const event = await axios.get(`${API_URL}/worlds/${world}/event`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const event = await axios.get(`${API_URL}/worlds/${world}/event`);
 
         // Active check
         if (event.data && event.data.message) {
