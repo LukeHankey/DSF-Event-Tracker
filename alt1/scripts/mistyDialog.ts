@@ -12,10 +12,15 @@ type TimerData = {
     seconds: number;
     status: "active" | "inactive";
     eventName: EventKeys | null;
+    world: string;
 };
 
 export interface WorldRecord {
     world: number;
+}
+
+interface WorkerOptions {
+    startWorker?: boolean;
 }
 
 let mistyInterval: NodeJS.Timeout | null;
@@ -23,19 +28,25 @@ let mistyInterval: NodeJS.Timeout | null;
 // Initialize the DialogReader
 const reader = new DialogReader();
 let worker: Worker | null = null;
+let OCRInProgress = false;
+
+const color = a1lib.mixColor(255, 0, 0);
 
 async function setupWorker() {
     if (!worker) {
         worker = await createWorker("eng", 1, {
             workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js",
-            corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@6.0.0/tesseract-core.wasm.js",
         });
     }
 }
 
-export function startCapturingMisty(): void {
+export async function startCapturingMisty({ startWorker = false }: WorkerOptions = {}): Promise<void> {
     if (mistyInterval) return; // already running
     mistyInterval = setInterval(readTextFromDialogBox, 1000);
+    if (startWorker) {
+        console.log("Starting OCR worker...");
+        await setupWorker();
+    }
 }
 
 function stopCapturingMisty(): void {
@@ -73,30 +84,13 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
         console.log("Misty time not updated - failed reading dialog");
         return;
     }
-    const { seconds, status, eventName } = timerData;
-
-    const world =
-        Number(currentWorld) === alt1.currentWorld
-            ? currentWorld
-            : alt1.currentWorld > 0
-              ? String(alt1.currentWorld)
-              : await findWorldNumber(a1lib.captureHoldFullRs());
-
-    if (!world || world === "-1") {
-        showToast("Misty time not updated - world not found.", "error");
-        console.log("Misty time not updated - world not found.");
-        return stopCapturingMisty();
-    }
+    const { seconds, status, eventName, world } = timerData;
     stopCapturingMisty();
 
     const newDuration = eventTimes[eventName ?? "Unknown"] - seconds;
     try {
         const token = localStorage.getItem("accessToken");
-        const event = await axios.get(`${API_URL}/worlds/${world}/event`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const event = await axios.get(`${API_URL}/worlds/${world}/event`);
 
         // Active check
         if (event.data && event.data.message) {
@@ -149,76 +143,74 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-export async function readTextFromDialogBox(): Promise<void> {
-    await setupWorker();
-    if (reader.find()) {
-        try {
-            const dialogReadable = reader.read();
-            if (!dialogReadable || !dialogReadable.text) {
-                showToast("Unable to read Misty dialog", "error");
-                stopCapturingMisty();
-                return;
-            }
+async function readTextFromDialogBox(): Promise<void> {
+    if (!mistyInterval || OCRInProgress) return;
 
-            if (!reader.pos) {
-                console.error("reader.pos is undefined");
-                return;
-            }
+    try {
+        reader.find();
+        const dialogReadable = reader.read();
+        if (!dialogReadable) return;
 
-            if (
-                dialogReadable.title.toLowerCase() === "misty" &&
-                dialogReadable.text.length === 1 &&
-                !dialogReadable.text[0].endsWith(".")
-            ) {
-                // Incomplete read
-                let newLine = "";
-                try {
-                    const pos = reader.pos;
-                    const imgref = a1lib.captureHold(pos.x, pos.y, pos.width, pos.height);
-                    const alt1ImageData = imgref.toData().toPngBase64();
-
-                    const {
-                        data: { text },
-                    } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
-                    newLine = text.trim();
-                } catch {
-                    showToast("Unable to capture text from dialog", "error");
-                    stopCapturingMisty();
-                    return;
-                }
-                dialogReadable.text.push(newLine);
-            }
-
-            const dialogText = dialogReadable.text.join(" ");
-
-            if (dialogReadable.title.toLowerCase() !== "misty") return;
-
-            const seconds = parseTimeToSeconds(dialogText);
-            if (!seconds || seconds < 0) {
-                stopCapturingMisty();
-                console.error(`Text=${dialogText}, Seconds=${seconds}`);
-                return showToast("Unable to parse the time", "error");
-            }
-
-            // Misty reports Sea Monster as Sea monster. Lower all text
-            let eventName = getValidEventNames().find((event) =>
-                dialogText.toLowerCase().includes(event.toLowerCase()),
-            );
-
-            const status: "active" | "inactive" = eventName ? "active" : "inactive";
-            eventName ??= "Unknown";
-
-            if (mistyInterval) {
-                const color = a1lib.mixColor(255, 0, 0);
-                alt1.overLayRect(color, reader.pos.x, reader.pos.y, reader.pos.width, reader.pos.height, 2000, 1);
-                console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
-                await updateTimersFromMisty({ seconds, status, eventName });
-            }
-
-            return;
-        } catch (err) {
-            console.error(err);
+        if (!reader.pos) {
+            console.error("reader.pos is undefined");
             return;
         }
+
+        if (dialogReadable.title.toLowerCase() !== "misty") return;
+
+        const world =
+            Number(currentWorld) === alt1.currentWorld
+                ? currentWorld
+                : alt1.currentWorld > 0
+                  ? String(alt1.currentWorld)
+                  : await findWorldNumber(a1lib.captureHoldFullRs());
+
+        if (!world || world === "-1") {
+            showToast("Misty time not updated - world not found.", "error");
+            console.log("Misty time not updated - world not found.");
+            stopCapturingMisty();
+            return;
+        }
+
+        let ocrText = "";
+        try {
+            const { x, y, width, height } = reader.pos;
+            const imgref = a1lib.captureHold(x, y, width, height);
+            alt1.overLayRect(color, x, y, width, height, 2000, 1);
+
+            const alt1ImageData = imgref.toData().toPngBase64();
+
+            OCRInProgress = true;
+            const {
+                data: { text },
+            } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
+            ocrText = text.trim();
+        } catch {
+            showToast("Unable to capture text from dialog", "error");
+            stopCapturingMisty();
+            return;
+        } finally {
+            OCRInProgress = false;
+        }
+
+        const seconds = parseTimeToSeconds(ocrText);
+        if (!seconds || seconds < 0) {
+            stopCapturingMisty();
+            console.error(`Text=${ocrText}, Seconds=${seconds}`);
+            showToast("Unable to parse the time", "error");
+            return;
+        }
+
+        // Misty reports Sea Monster as Sea monster. Lower all text
+        let eventName = getValidEventNames().find((event) => ocrText.toLowerCase().includes(event.toLowerCase()));
+
+        const status: "active" | "inactive" = eventName ? "active" : "inactive";
+        eventName ??= "Unknown";
+
+        console.log(`Misty: ${ocrText} | ${status} | ${eventName} | ${world}`);
+        // Account 2 seconds for OCR reading
+        await updateTimersFromMisty({ seconds: seconds + 2, status, eventName, world });
+    } catch (err) {
+        console.error(err);
     }
 }

@@ -14,7 +14,6 @@ import "./ui";
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
 import { scheduleMidnightUpdate } from "./merchantStock";
-import { startCapturingMisty } from "./mistyDialog";
 
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
@@ -23,7 +22,6 @@ if (window.alt1) {
     startCapturing(); // Begin capturing every 1s
     // Call scheduleMidnightUpdate once when your app starts.
     scheduleMidnightUpdate();
-    startCapturingMisty();
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
