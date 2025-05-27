@@ -55,6 +55,7 @@ export async function refreshToken(): Promise<string | null> {
                 "Content-Type": "application/json",
                 Origin: ORIGIN,
             },
+            debug: DEBUG,
         });
 
         if (response.data.access_token) {

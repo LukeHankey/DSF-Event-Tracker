@@ -11,6 +11,7 @@ const { DefinePlugin } = require("webpack");
  */
 module.exports = (env = {}) => {
     const version = env.VERSION || "alt1";
+    const isLocal = version === "alt1-local";
     const gitCommit = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
     const packageVersion = packageJson.version;
     console.log("🔧 Webpack build version:", version);
@@ -25,7 +26,7 @@ module.exports = (env = {}) => {
         },
         output: {
             path: path.resolve(__dirname, `dist/${version}`),
-            publicPath: `/${version}/`,
+            publicPath: isLocal ? "./" : `/${version}/`,
             filename: version === "alt1" ? `main.v${packageVersion}.${gitCommit}.js` : `main.[contenthash].js`,
             // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.DSFEventTracker
             library: { type: "umd", name: "DSFEventTracker" },
@@ -33,7 +34,7 @@ module.exports = (env = {}) => {
         },
         devtool: "eval",
         // devtool: "source-map",
-        mode: "development",
+        mode: isLocal ? "development" : "production",
         // prevent webpack from bundling these imports (alt1 libs can use them when running in nodejs)
         externals: ["sharp", "canvas", "electron/common"],
         resolve: {
@@ -55,6 +56,7 @@ module.exports = (env = {}) => {
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, "alt1/index.html"),
                 filename: "index.html",
+                publicPath: isLocal ? "./" : `/${version}/`,
             }),
             new DefinePlugin({
                 __APP_VERSION__: JSON.stringify(packageVersion),
