@@ -12,10 +12,15 @@ type TimerData = {
     seconds: number;
     status: "active" | "inactive";
     eventName: EventKeys | null;
+    world: string;
 };
 
 export interface WorldRecord {
     world: number;
+}
+
+interface WorkerOptions {
+    startWorker?: boolean;
 }
 
 let mistyInterval: NodeJS.Timeout | null;
@@ -23,19 +28,25 @@ let mistyInterval: NodeJS.Timeout | null;
 // Initialize the DialogReader
 const reader = new DialogReader();
 let worker: Worker | null = null;
+let OCRInProgress = false;
+
+const color = a1lib.mixColor(255, 0, 0);
 
 async function setupWorker() {
     if (!worker) {
         worker = await createWorker("eng", 1, {
             workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js",
-            corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@6.0.0/tesseract-core.wasm.js",
         });
     }
 }
 
-export function startCapturingMisty(): void {
+export async function startCapturingMisty({ startWorker = false }: WorkerOptions = {}): Promise<void> {
     if (mistyInterval) return; // already running
     mistyInterval = setInterval(readTextFromDialogBox, 1000);
+    if (startWorker) {
+        console.log("Starting OCR worker...");
+        await setupWorker();
+    }
 }
 
 function stopCapturingMisty(): void {
