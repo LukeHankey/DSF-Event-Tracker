@@ -172,27 +172,44 @@ async function readTextFromDialogBox(): Promise<void> {
             return;
         }
 
-        const seconds = parseTimeToSeconds(dialogText);
+        let ocrText = "";
+        try {
+            const { x, y, width, height } = reader.pos;
+            const imgref = a1lib.captureHold(x, y, width, height);
+            alt1.overLayRect(color, x, y, width, height, 2000, 1);
+
+            const alt1ImageData = imgref.toData().toPngBase64();
+
+            OCRInProgress = true;
+            const {
+                data: { text },
+            } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
+            ocrText = text.trim();
+        } catch {
+            showToast("Unable to capture text from dialog", "error");
+            stopCapturingMisty();
+            return;
+        } finally {
+            OCRInProgress = false;
+        }
+
+        const seconds = parseTimeToSeconds(ocrText);
         if (!seconds || seconds < 0) {
             stopCapturingMisty();
-            console.error(`Text=${dialogText}, Seconds=${seconds}`);
-            return showToast("Unable to parse the time", "error");
+            console.error(`Text=${ocrText}, Seconds=${seconds}`);
+            showToast("Unable to parse the time", "error");
+            return;
         }
 
         // Misty reports Sea Monster as Sea monster. Lower all text
-        let eventName = getValidEventNames().find((event) => dialogText.toLowerCase().includes(event.toLowerCase()));
+        let eventName = getValidEventNames().find((event) => ocrText.toLowerCase().includes(event.toLowerCase()));
 
         const status: "active" | "inactive" = eventName ? "active" : "inactive";
         eventName ??= "Unknown";
 
-        if (mistyInterval) {
-            const color = a1lib.mixColor(255, 0, 0);
-            alt1.overLayRect(color, reader.pos.x, reader.pos.y, reader.pos.width, reader.pos.height, 2000, 1);
-            console.log(`Misty: ${dialogText} | ${status} | ${eventName}`);
-            await updateTimersFromMisty({ seconds, status, eventName });
-        }
-
-        return;
+        console.log(`Misty: ${ocrText} | ${status} | ${eventName} | ${world}`);
+        // Account 2 seconds for OCR reading
+        await updateTimersFromMisty({ seconds: seconds + 2, status, eventName, world });
     } catch (err) {
         console.error(err);
     }
