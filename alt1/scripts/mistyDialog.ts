@@ -143,51 +143,34 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-export async function readTextFromDialogBox(): Promise<void> {
-    if (!mistyInterval || !reader.find()) return;
+async function readTextFromDialogBox(): Promise<void> {
+    if (!mistyInterval || OCRInProgress) return;
 
-    await setupWorker();
     try {
+        reader.find();
         const dialogReadable = reader.read();
-        if (!dialogReadable || !dialogReadable.text) {
-            showToast("Unable to read Misty dialog", "error");
-            stopCapturingMisty();
-            return;
-        }
+        if (!dialogReadable) return;
 
         if (!reader.pos) {
             console.error("reader.pos is undefined");
             return;
         }
 
-        if (
-            dialogReadable.title.toLowerCase() === "misty" &&
-            (dialogReadable.text.length === 1 || dialogReadable.text.some((text) => text.includes("_"))) &&
-            !dialogReadable.text[0].endsWith(".")
-        ) {
-            // Incomplete read
-            let newLine = "";
-            try {
-                const pos = reader.pos;
-                const imgref = a1lib.captureHold(pos.x, pos.y, pos.width, pos.height);
-                const alt1ImageData = imgref.toData().toPngBase64();
-
-                const {
-                    data: { text },
-                } = await worker!.recognize(`data:image/png;base64,${alt1ImageData}`);
-                newLine = text.trim();
-            } catch {
-                showToast("Unable to capture text from dialog", "error");
-                stopCapturingMisty();
-                return;
-            }
-            dialogReadable.text = [newLine];
-            console.log("OCR read", dialogReadable);
-        }
-
-        const dialogText = dialogReadable.text.join(" ");
-
         if (dialogReadable.title.toLowerCase() !== "misty") return;
+
+        const world =
+            Number(currentWorld) === alt1.currentWorld
+                ? currentWorld
+                : alt1.currentWorld > 0
+                  ? String(alt1.currentWorld)
+                  : await findWorldNumber(a1lib.captureHoldFullRs());
+
+        if (!world || world === "-1") {
+            showToast("Misty time not updated - world not found.", "error");
+            console.log("Misty time not updated - world not found.");
+            stopCapturingMisty();
+            return;
+        }
 
         const seconds = parseTimeToSeconds(dialogText);
         if (!seconds || seconds < 0) {
