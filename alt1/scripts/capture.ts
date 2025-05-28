@@ -305,7 +305,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         const chr = OCR.findChar(buffer, font, [255, 255, 255], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height);
         let data;
         // Lifeguard title
-        if (["e", "g", "u"].includes(chr!.chr) && chr!.x === rsnRect.x + 25) {
+        if (chr && ["e", "g", "u"].includes(chr.chr) && chr.x === rsnRect.x + 25) {
             data = OCR.findReadLine(
                 buffer,
                 font,
