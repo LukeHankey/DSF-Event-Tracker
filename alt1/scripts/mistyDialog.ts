@@ -2,7 +2,7 @@ import DialogReader from "alt1/dialog";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import * as a1lib from "alt1";
 import { currentWorld, reportEvent, findWorldNumber } from "./capture";
-import { API_URL, ORIGIN } from "../config";
+import { API_URL } from "../config";
 import axios, { AxiosError } from "axios";
 import { showToast } from "./notifications";
 import { wsClient } from "./ws";
@@ -106,12 +106,15 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
 
             wsClient.send(mistyEditEvent);
 
-            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${newDuration}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Origin: ORIGIN,
+            await axios.patch(
+                `${API_URL}/worlds/${world}/event?type=${status}&seconds=${newDuration}`,
+                {},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 },
-            });
+            );
         }
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
@@ -127,12 +130,15 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
             console.log(`Event added from Misty on world ${world}`);
         } else if (axiosErr.response?.status === 404 && status === "inactive") {
             // Misty says it's inactive, and no event exists → just update the timer
-            await axios.patch(`${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Origin: ORIGIN,
+            await axios.patch(
+                `${API_URL}/worlds/${world}/event?type=${status}&seconds=${seconds}`,
+                {},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 },
-            });
+            );
 
             wsClient.send({ world: Number(world) } as WorldRecord);
             showToast(`Misty time updated for world ${world}`);

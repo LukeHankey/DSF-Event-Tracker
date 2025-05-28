@@ -5,7 +5,7 @@ import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { EventKeys, events, eventTimes, firstEventTexts, eventExpiredText, EventRecord } from "./events";
-import { DEBUG, ORIGIN, API_URL } from "../config";
+import { DEBUG, API_URL } from "../config";
 import { wsClient, refreshToken } from "./ws";
 import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
@@ -140,7 +140,6 @@ async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Origin: ORIGIN,
                         Authorization: `Bearer ${token}`,
                     },
                 },
@@ -215,16 +214,20 @@ export async function reportEvent(
     };
 
     try {
-        const sendWebhookResponse = await axios.post(`${API_URL}/events/webhook`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        const sendWebhookResponse = await axios.post(
+            `${API_URL}/events/webhook`,
+            {
+                eventRecord,
+                isFirstEvent,
+                debug: DEBUG,
+                reportedBy: rsn,
             },
-            eventRecord,
-            isFirstEvent,
-            debug: DEBUG,
-            reportedBy: rsn,
-        });
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
 
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
@@ -241,10 +244,10 @@ export async function reportEvent(
         const eventWorld = `${matchingEvent}_${currentWorld}`;
         const clearEventTimerResponse = await axios.post(
             `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventRecord.duration}`,
+            {},
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Origin: ORIGIN,
                 },
             },
         );
