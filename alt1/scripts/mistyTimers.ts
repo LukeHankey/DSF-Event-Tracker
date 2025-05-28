@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL, ORIGIN } from "../config";
+import { API_URL } from "../config";
 import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
 import { wsClient } from "./ws";
@@ -673,12 +673,15 @@ async function editMistyTimer(world: number): Promise<void> {
             return;
         }
 
-        await axios.patch(`${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        await axios.patch(
+            `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
             },
-        });
+        );
         wsClient.send({ world: Number(world) } as WorldRecord);
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);

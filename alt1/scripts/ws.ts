@@ -1,6 +1,6 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent, removeEvent } from "./eventHistory";
-import { DEBUG, ORIGIN, API_URL } from "../config";
+import { DEBUG, API_URL } from "../config";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
@@ -50,12 +50,15 @@ export async function refreshToken(): Promise<string | null> {
     }
 
     try {
-        const response = await axios.post(`${API_URL}/auth/refresh?token=${refreshToken}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        const response = await axios.post(
+            `${API_URL}/auth/refresh?token=${refreshToken}`,
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
             },
-        });
+        );
 
         if (response.data.access_token) {
             console.log("🔄 Token refreshed successfully");
