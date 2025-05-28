@@ -25,7 +25,7 @@ module.exports = (env = {}) => {
         },
         output: {
             path: path.resolve(__dirname, `dist/${version}`),
-            publicPath: `/${version}/`,
+            publicPath: `./`,
             filename: version === "alt1" ? `main.v${packageVersion}.${gitCommit}.js` : `main.[contenthash].js`,
             // library means that the exports from the entry file can be accessed from outside, in this case from the global scope as window.DSFEventTracker
             library: { type: "umd", name: "DSFEventTracker" },
