@@ -14,6 +14,7 @@ import "./ui";
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
 import { scheduleMidnightUpdate } from "./merchantStock";
+import { readTextFromDialogBox } from "./mistyDialog";
 
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
@@ -33,6 +34,10 @@ if (window.alt1) {
 a1lib.on("rsfocus", () => {
     startCapturing();
     // Optionally restore main content if needed
+});
+
+a1lib.on("alt1pressed", async () => {
+    await readTextFromDialogBox({ alt1Pressed: true });
 });
 
 window.addEventListener("unload", () => {

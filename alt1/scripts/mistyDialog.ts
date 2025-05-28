@@ -23,6 +23,10 @@ interface WorkerOptions {
     startWorker?: boolean;
 }
 
+interface ReadDialogOptions {
+    alt1Pressed?: boolean;
+}
+
 let mistyInterval: NodeJS.Timeout | null;
 
 // Initialize the DialogReader
@@ -143,8 +147,8 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
-async function readTextFromDialogBox(): Promise<void> {
-    if (!mistyInterval || OCRInProgress) return;
+export async function readTextFromDialogBox({ alt1Pressed = false }: ReadDialogOptions = {}): Promise<void> {
+    if (OCRInProgress || (!mistyInterval && !alt1Pressed)) return;
 
     try {
         reader.find();
