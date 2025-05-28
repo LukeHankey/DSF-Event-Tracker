@@ -140,7 +140,6 @@ async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Origin: ORIGIN,
                         Authorization: `Bearer ${token}`,
                     },
                 },
