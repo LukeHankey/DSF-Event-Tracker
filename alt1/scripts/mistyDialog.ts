@@ -63,7 +63,7 @@ function stopCapturingMisty(): void {
 
 // Function to parse time strings into total seconds
 function parseTimeToSeconds(input: string): number {
-    const regex = /(\d+)\s*(hour|minute|second)s?/gi;
+    const regex = /(\d+)[^\w\s]*\s*(hour|minute|second)s?/gi;
     let totalSeconds = 0;
 
     for (const match of input.matchAll(regex)) {
