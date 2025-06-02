@@ -62,6 +62,7 @@ const itemCosts: Record<string, string> = {
     "Advanced pulse core": "800K coins",
     "Tangled fishbowl": "50K coins",
     "Unfocused reward enhancer": "10M coins",
+    "Unfocused damage enhancer": "500k coins",
     "Horn of honour": "1M coins",
     Taijitu: "800K coins",
     "Large goebie burial charm": "150K coins",
