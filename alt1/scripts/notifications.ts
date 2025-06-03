@@ -2,16 +2,15 @@ import { EventRecord } from "./events";
 import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
 import { STATUS_API_URL } from "../config";
 
-
 type StatusState = {
     forDay: string;
-    stock: Record<"A" | "B" | "C" | "D", { slot: string, title: string, icon: string }>;
-}
+    stock: Record<"A" | "B" | "C" | "D", { slot: string; title: string; icon: string }>;
+};
 
 type EventInProgress = {
     message: string;
     endTime: number;
-}
+};
 
 let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -167,23 +166,23 @@ export function registerStatusUpdates() {
             favoriteEvents: localStorage.getItem("favoriteEvents") ?? null,
             notificationModes: localStorage.getItem("notificationModes") ?? null,
         };
-        alt1.registerStatusDaemon(`${STATUS_API_URL}/status`, JSON.stringify({settings}));
+        alt1.registerStatusDaemon(`${STATUS_API_URL}/status`, JSON.stringify({ settings }));
     }
 }
 
 export function updateTitlebar() {
-    const eventInProgress = JSON.parse(localStorage.getItem("eventInProgress") ?? '') as EventInProgress;
+    const eventInProgress = JSON.parse(localStorage.getItem("eventInProgress") ?? "") as EventInProgress;
     if (eventInProgress && eventInProgress.endTime > Date.now()) {
-        alt1.setTitleBarText( `${buildStockFromState()}<vr/>${eventInProgress.message}`);
+        alt1.setTitleBarText(`${buildStockFromState()}<vr/>${eventInProgress.message}`);
     } else {
         setDefaultTitleBar();
     }
 }
 
-function buildStockFromState(): string { 
-    const state = JSON.parse(alt1.getStatusDaemonState() ?? '') as StatusState;
+function buildStockFromState(): string {
+    const state = JSON.parse(alt1.getStatusDaemonState() ?? "") as StatusState;
     const stock = state?.stock;
-    let builder = '';
+    let builder = "";
 
     (["A", "B", "C", "D"] as const).forEach((slot) => {
         const slotValue = stock[slot];
@@ -192,7 +191,6 @@ function buildStockFromState(): string {
 
     return builder;
 }
-
 
 export function setDefaultTitleBar() {
     localStorage.setItem("eventInProgress", JSON.stringify(null));
@@ -236,7 +234,7 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
         const titlebarText = `${message} for ${friendlyRemaining}`;
         const eventInProgress = {
             message: titlebarText,
-            endTime: getEndTime(event)
+            endTime: getEndTime(event),
         };
         localStorage.setItem("eventInProgress", JSON.stringify(eventInProgress));
         updateTitlebar();

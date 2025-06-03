@@ -47,5 +47,5 @@ window.addEventListener("unload", () => {
     // cleanup to remove any calls and only show stock
     // this is so the status update can have long intervals between runs
     // and still be in sync
-    setDefaultTitleBar()
+    setDefaultTitleBar();
 });
