@@ -11,7 +11,7 @@ import { wsClient, refreshToken } from "./ws";
 import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
-import { setDefaultTitleBar, showToast } from "./notifications";
+import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
 import { renderMistyTimers } from "./mistyTimers";
 
@@ -189,6 +189,8 @@ settingsForm?.addEventListener("submit", (e) => {
         updateIfChanged("darkMode", darkModeSwitch.checked.toString());
     }
 
+    // when settings change, reset the status daemon as it relies on user settings
+    registerStatusUpdates();
     setDarkMode();
 
     // Show success toast notification

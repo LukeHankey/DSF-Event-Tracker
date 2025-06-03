@@ -1,6 +1,17 @@
 import { EventRecord } from "./events";
-import { formatTimeLeftValue, getRemainingTime } from "./eventHistory";
-import { getAllSlots, getRuneDate } from "./merchantStock";
+import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
+import { STATUS_API_URL } from "../config";
+
+
+type StatusState = {
+    forDay: string;
+    stock: Record<"A" | "B" | "C" | "D", { slot: string, title: string, icon: string }>;
+}
+
+type EventInProgress = {
+    message: string;
+    endTime: number;
+}
 
 let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -39,7 +50,7 @@ export function notifyEvent(event: EventRecord): void {
 
     const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
     if (suppressToday) {
-        alt1.setTitleBarText("");
+        setDefaultTitleBar();
         return;
     }
 
@@ -150,14 +161,42 @@ export function notifyEvent(event: EventRecord): void {
     }
 }
 
-export function setDefaultTitleBar() {
-    alt1.setTitleBarText(`<span title='${getStockTitle()}'>Listening for DSF events...</span>`);
+export function registerStatusUpdates() {
+    if (STATUS_API_URL) {
+        const settings = {
+            favoriteEvents: localStorage.getItem("favoriteEvents") ?? null,
+            notificationModes: localStorage.getItem("notificationModes") ?? null,
+        };
+        alt1.registerStatusDaemon(`${STATUS_API_URL}/status`, JSON.stringify({settings}));
+    }
 }
 
-function getStockTitle(): string {
-    const runedate = getRuneDate();
-    const stock = getAllSlots(runedate);
-    return `${stock.A}\n${stock.B}\n${stock.C}\n${stock.D}`;
+export function updateTitlebar() {
+    const eventInProgress = JSON.parse(localStorage.getItem("eventInProgress") ?? '') as EventInProgress;
+    if (eventInProgress && eventInProgress.endTime > Date.now()) {
+        alt1.setTitleBarText( `${buildStockFromState()}<vr/>${eventInProgress.message}`);
+    } else {
+        setDefaultTitleBar();
+    }
+}
+
+function buildStockFromState(): string { 
+    const state = JSON.parse(alt1.getStatusDaemonState() ?? '') as StatusState;
+    const stock = state?.stock;
+    let builder = '';
+
+    (["A", "B", "C", "D"] as const).forEach((slot) => {
+        const slotValue = stock[slot];
+        builder += `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
+    });
+
+    return builder;
+}
+
+
+export function setDefaultTitleBar() {
+    localStorage.setItem("eventInProgress", JSON.stringify(null));
+    alt1.setTitleBarText(buildStockFromState());
 }
 
 function showTooltip(message: string, durationMs: number = 5_000): void {
@@ -171,7 +210,7 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
         const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
 
         if (suppressToday) {
-            alt1.setTitleBarText("");
+            setDefaultTitleBar();
             if (titlebarInterval) {
                 clearInterval(titlebarInterval);
                 titlebarInterval = null;
@@ -185,7 +224,7 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
 
         const remaining = getRemainingTime(event);
         if (remaining <= 0) {
-            alt1.setTitleBarText("");
+            setDefaultTitleBar();
             if (titlebarInterval) {
                 clearInterval(titlebarInterval);
             }
@@ -194,7 +233,13 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
         }
 
         const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
-        alt1.setTitleBarText(`<span title='${getStockTitle()}'>${message} for ${friendlyRemaining}</span>`);
+        const titlebarText = `${message} for ${friendlyRemaining}`;
+        const eventInProgress = {
+            message: titlebarText,
+            endTime: getEndTime(event)
+        };
+        localStorage.setItem("eventInProgress", JSON.stringify(eventInProgress));
+        updateTitlebar();
     };
 
     // Immediately update once

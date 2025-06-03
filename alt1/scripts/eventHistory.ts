@@ -707,6 +707,10 @@ export function getRemainingTime(event: EventRecord): number {
     return event.duration - elapsed;
 }
 
+export function getEndTime(event: EventRecord): number {
+    return event.timestamp + (event.duration * 1000);
+}
+
 function checkActive(event: EventRecord): boolean {
     return getRemainingTime(event) > 0;
 }
