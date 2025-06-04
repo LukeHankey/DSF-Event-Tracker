@@ -173,7 +173,7 @@ export function registerStatusUpdates() {
             useAbbreviatedCall: localStorage.getItem("useAbbreviatedCall") === "true",
             favoriteStock: null,
         };
-        alt1.registerStatusDaemon(`${API_URL}/status`, JSON.stringify({ settings }));
+        alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
     }
 }
 
