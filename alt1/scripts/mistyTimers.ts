@@ -1,8 +1,8 @@
 import axios from "axios";
-import { API_URL, ORIGIN } from "../config";
+import { API_URL } from "../config";
 import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
-import { wsClient } from "./ws";
+import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
 import { MEMBER_WORLDS } from "./eventHistory";
 
@@ -119,8 +119,20 @@ export async function renderMistyTimers(): Promise<void> {
             }
         }
         initTableSorting(tableSort, tableSortOrder);
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error(error);
+            const status = error.response?.status;
+            const message = error.response?.data?.detail;
+            if (status === 401 && message === "Token has expired") {
+                await refreshToken();
+                await renderMistyTimers();
+            } else {
+                return showToast(message, "error");
+            }
+        } else {
+            console.error("Unexpected error", error);
+        }
     }
 }
 
@@ -673,12 +685,15 @@ async function editMistyTimer(world: number): Promise<void> {
             return;
         }
 
-        await axios.patch(`${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        await axios.patch(
+            `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
             },
-        });
+        );
         wsClient.send({ world: Number(world) } as WorldRecord);
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);

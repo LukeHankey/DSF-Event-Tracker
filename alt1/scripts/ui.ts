@@ -8,7 +8,7 @@ import {
 } from "./eventHistory";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient, refreshToken } from "./ws";
-import { DEBUG, ORIGIN, API_URL } from "../config";
+import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
@@ -189,12 +189,15 @@ document.getElementById("validateDiscordID")?.addEventListener("click", async ()
     }
 
     try {
-        const response = await axios.post(`${API_URL}/auth/validate/${discordID}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        const response = await axios.post(
+            `${API_URL}/auth/validate/${discordID}`,
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
             },
-        });
+        );
 
         if (response.status === 200 && response.data.exists) {
             validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
@@ -226,12 +229,15 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
         return;
     }
 
-    const response = await axios.post(`${API_URL}/auth/verify/${discordID}?code=${verificationCode}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Origin: ORIGIN,
+    const response = await axios.post(
+        `${API_URL}/auth/verify/${discordID}?code=${verificationCode}`,
+        {},
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
         },
-    });
+    );
 
     if (response.data.verified && response.data.refresh_token) {
         // Hide verification section

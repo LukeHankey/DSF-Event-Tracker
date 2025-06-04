@@ -5,7 +5,7 @@ import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
 import font from "alt1/fonts/aa_8px_mono.js";
 import { EventKeys, events, eventTimes, firstEventTexts, eventExpiredText, EventRecord } from "./events";
-import { DEBUG, ORIGIN, API_URL } from "../config";
+import { DEBUG, API_URL } from "../config";
 import { wsClient, refreshToken } from "./ws";
 import { loadEventHistory, startEventTimerRefresh } from "./eventHistory";
 import { v4 as uuid } from "uuid";
@@ -140,7 +140,6 @@ async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Origin: ORIGIN,
                         Authorization: `Bearer ${token}`,
                     },
                 },
@@ -215,16 +214,20 @@ export async function reportEvent(
     };
 
     try {
-        const sendWebhookResponse = await axios.post(`${API_URL}/events/webhook`, {
-            headers: {
-                "Content-Type": "application/json",
-                Origin: ORIGIN,
+        const sendWebhookResponse = await axios.post(
+            `${API_URL}/events/webhook`,
+            {
+                eventRecord,
+                isFirstEvent,
+                debug: DEBUG,
+                reportedBy: rsn,
             },
-            eventRecord,
-            isFirstEvent,
-            debug: DEBUG,
-            reportedBy: rsn,
-        });
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
 
         // Check that the event is seen spawning and they have verified discord ID
         // May change in future to add another setting to track count but for now
@@ -241,10 +244,10 @@ export async function reportEvent(
         const eventWorld = `${matchingEvent}_${currentWorld}`;
         const clearEventTimerResponse = await axios.post(
             `${API_URL}/events/clear_timer?event_world=${eventWorld}&timeout=${eventRecord.duration}`,
+            {},
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Origin: ORIGIN,
                 },
             },
         );
@@ -302,7 +305,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         const chr = OCR.findChar(buffer, font, [255, 255, 255], rsnRect.x, rsnRect.y, rsnRect.width, rsnRect.height);
         let data;
         // Lifeguard title
-        if (["e", "g", "u"].includes(chr!.chr) && chr!.x === rsnRect.x + 25) {
+        if (chr && ["e", "g", "u"].includes(chr.chr) && chr.x === rsnRect.x + 25) {
             data = OCR.findReadLine(
                 buffer,
                 font,
@@ -345,6 +348,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
 
         // Get current world when alt1 app first loads
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
+        await startCapturingMisty({ startWorker: true });
 
         console.log("Looking up world number for the first time: ", currentWorld);
     }
@@ -373,7 +377,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         await delay(6000);
         console.log("alt1.currentWorld after world hop and after delay: ", alt1.currentWorld);
         currentWorld = alt1.currentWorld > 0 ? String(alt1.currentWorld) : await findWorldNumber(img);
-        startCapturingMisty();
+        await startCapturingMisty();
 
         if (currentWorld && Number(currentWorld) > 0) {
             console.log("World hop message detected and found world number: ", currentWorld);
