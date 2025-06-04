@@ -109,6 +109,12 @@ if (tooltipNotificationSetting && tooltipNotificationSettingSelect) {
     tooltipNotificationSettingSelect.value = tooltipNotificationSetting;
 }
 
+const useAbbreviatedCallSwitch = document.getElementById("useAbbreviatedCall") as HTMLInputElement | null;
+const useAbbreviatedCall = localStorage.getItem("useAbbreviatedCall");
+if (useAbbreviatedCall && useAbbreviatedCallSwitch) {
+    useAbbreviatedCallSwitch.checked = useAbbreviatedCall === "true";
+}
+
 const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
 const darkMode = localStorage.getItem("darkMode");
 if (darkModeSwitch && darkMode) {
@@ -131,8 +137,8 @@ function setDarkMode(): void {
 setDarkMode();
 
 // Handle reset notification modes
-const resetNotificationModes = document.getElementById("resetNotificationModes") as HTMLAnchorElement | null;
-resetNotificationModes?.addEventListener("click", () => {
+const resetNotificationSettings = document.getElementById("resetNotificationSettings") as HTMLAnchorElement | null;
+resetNotificationSettings?.addEventListener("click", () => {
     if (notificationModesSelect) {
         // Clear all selected options
         Array.from(notificationModesSelect.options).forEach((option) => {
@@ -145,6 +151,10 @@ resetNotificationModes?.addEventListener("click", () => {
     if (tooltipNotificationSettingSelect) {
         localStorage.setItem("tooltipNotificationSetting", "default");
         tooltipNotificationSettingSelect.value = "default";
+    }
+    if (useAbbreviatedCallSwitch) {
+        localStorage.setItem("useAbbreviatedCall", "false");
+        useAbbreviatedCallSwitch.checked = false;
     }
 });
 
@@ -183,6 +193,10 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (tooltipNotificationSettingSelect) {
         updateIfChanged("tooltipNotificationSetting", tooltipNotificationSettingSelect.value);
+    }
+
+    if (useAbbreviatedCallSwitch) {
+        updateIfChanged("useAbbreviatedCall", useAbbreviatedCallSwitch.checked.toString());
     }
 
     if (darkModeSwitch) {

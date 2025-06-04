@@ -43,6 +43,10 @@ a1lib.on("alt1pressed", async () => {
     await readTextFromDialogBox({ alt1Pressed: true });
 });
 
+a1lib.on("daemonrun", (e) => {
+    updateTitlebar();
+});
+
 window.addEventListener("unload", () => {
     // cleanup to remove any calls and only show stock
     // this is so the status update can have long intervals between runs

@@ -1,6 +1,6 @@
-import { EventRecord } from "./events";
+import { eventAbbreviations, EventRecord } from "./events";
 import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
-import { STATUS_API_URL } from "../config";
+import { API_URL } from "../config";
 
 type StatusState = {
     forDay: string;
@@ -54,6 +54,7 @@ export function notifyEvent(event: EventRecord): void {
     }
 
     const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    const useAbbreviatedCall = localStorage.getItem("useAbbreviatedCall") === "true";
     const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
 
     // if favorite events are set, only show the favorites, otherwise, show all
@@ -101,7 +102,10 @@ export function notifyEvent(event: EventRecord): void {
     // notification will be sent for this event, set it as the local recentEvent for tracking
     recentEvent = event;
 
-    const message = `${event.event} on w${event.world}`;
+    let message = `${event.event} on w${event.world}`;
+    if (useAbbreviatedCall) {
+        message = `${eventAbbreviations[event.event]}${event.world}`;
+    }
 
     if (notificationModes.includes("tooltip")) {
         const tooltipNotificationSetting = localStorage.getItem("tooltipNotificationSetting");
@@ -161,17 +165,21 @@ export function notifyEvent(event: EventRecord): void {
 }
 
 export function registerStatusUpdates() {
-    if (STATUS_API_URL) {
+    const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    if (API_URL && notificationModes?.includes("toolbar")) {
         const settings = {
-            favoriteEvents: localStorage.getItem("favoriteEvents") ?? null,
-            notificationModes: localStorage.getItem("notificationModes") ?? null,
+            favoriteEvents: JSON.parse(localStorage.getItem("favoriteEvents") ?? "[]"),
+            notificationModes: notificationModes ?? null,
+            useAbbreviatedCall: localStorage.getItem("useAbbreviatedCall") === "true",
+            favoriteStock: null,
         };
-        alt1.registerStatusDaemon(`${STATUS_API_URL}/status`, JSON.stringify({ settings }));
+        alt1.registerStatusDaemon(`${API_URL}/status`, JSON.stringify({ settings }));
     }
 }
 
 export function updateTitlebar() {
-    const eventInProgress = JSON.parse(localStorage.getItem("eventInProgress") ?? "") as EventInProgress;
+    const ipRaw = localStorage.getItem("eventInProgress");
+    const eventInProgress: EventInProgress | null = ipRaw ? JSON.parse(ipRaw) : null;
     if (eventInProgress && eventInProgress.endTime > Date.now()) {
         alt1.setTitleBarText(`${buildStockFromState()}<vr/>${eventInProgress.message}`);
     } else {
@@ -180,10 +188,12 @@ export function updateTitlebar() {
 }
 
 function buildStockFromState(): string {
-    const state = JSON.parse(alt1.getStatusDaemonState() ?? "") as StatusState;
-    const stock = state?.stock;
     let builder = "";
-
+    const state = JSON.parse(alt1.getStatusDaemonState()) as StatusState;
+    const stock = state?.stock;
+    if (!stock) {
+        return builder;
+    }
     (["A", "B", "C", "D"] as const).forEach((slot) => {
         const slotValue = stock[slot];
         builder += `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
@@ -193,7 +203,7 @@ function buildStockFromState(): string {
 }
 
 export function setDefaultTitleBar() {
-    localStorage.setItem("eventInProgress", JSON.stringify(null));
+    localStorage.removeItem("eventInProgress");
     alt1.setTitleBarText(buildStockFromState());
 }
 
