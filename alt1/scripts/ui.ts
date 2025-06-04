@@ -13,7 +13,6 @@ import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
-import { renderMistyTimers } from "./mistyTimers";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -249,12 +248,11 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
         localStorage.setItem("refreshToken", response.data.refresh_token);
         localStorage.setItem("accessToken", response.data.access_token);
 
-        // Update discord_id to websocket and load profile
-        wsClient.reconnect();
-        await renderMistyTimers();
-
         // Show success toast
         showToast("✅ Verified successfully!");
+
+        // Reload profile
+        window.location.reload();
     } else {
         verificationMessage!.textContent = "❌ Incorrect verification code.";
         verificationMessage!.style.color = "red";
