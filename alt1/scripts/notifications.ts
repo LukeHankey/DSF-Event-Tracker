@@ -1,5 +1,5 @@
 import { eventAbbreviations, EventRecord } from "./events";
-import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
+import { formatTimeLeftValue, getEndTime, getRemainingTime, SPECIAL_WORLDS } from "./eventHistory";
 import { API_URL } from "../config";
 
 type StatusState = {
@@ -10,6 +10,7 @@ type StatusState = {
 type EventInProgress = {
     message: string;
     endTime: number;
+    world: string;
 };
 
 let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -162,6 +163,11 @@ export function notifyEvent(event: EventRecord): void {
     if (notificationModes.includes("system")) {
         alt1.showNotification("DSF Event Tracker", message, "");
     }
+
+    if (notificationModes.includes("audio")) {
+        const audio = new Audio("./assets/sounds/notification.mp3");
+        audio.play();
+    }
 }
 
 export function registerStatusUpdates() {
@@ -181,7 +187,14 @@ export function updateTitlebar() {
     const ipRaw = localStorage.getItem("eventInProgress");
     const eventInProgress: EventInProgress | null = ipRaw ? JSON.parse(ipRaw) : null;
     if (eventInProgress && eventInProgress.endTime > Date.now()) {
-        alt1.setTitleBarText(`${buildStockFromState()}<vr/>${eventInProgress.message}`);
+        const specialWorld = SPECIAL_WORLDS.find((item) => item.world.toString() === eventInProgress.world);
+        const stock = buildStockFromState();
+        let builder = stock.length > 0 ? `${stock}<vr/>` : stock;
+        if (specialWorld) {
+            builder += `<img height='100' width='100' src='${specialWorld.imageSrc}' />`;
+        }
+        builder += eventInProgress.message;
+        alt1.setTitleBarText(builder);
     } else {
         setDefaultTitleBar();
     }
@@ -242,9 +255,10 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
 
         const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
         const titlebarText = `${message} for ${friendlyRemaining}`;
-        const eventInProgress = {
+        const eventInProgress: EventInProgress = {
             message: titlebarText,
             endTime: getEndTime(event),
+            world: event.world,
         };
         localStorage.setItem("eventInProgress", JSON.stringify(eventInProgress));
         updateTitlebar();

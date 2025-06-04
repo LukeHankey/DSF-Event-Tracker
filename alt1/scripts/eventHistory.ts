@@ -111,6 +111,43 @@ export const MEMBER_WORLDS = [
     "259",
 ];
 
+const WorldActivity: Record<string, string> = {
+    legacy: "./assets/world_activity/legacy.png",
+    vip: "./assets/world_activity/vip_badge.png",
+    quickChat: "./assets/world_activity/quick_chat.png",
+    eoc: "./assets/world_activity/revolution.png",
+    fifteenPlus: "./assets/world_activity/1500.png",
+    twentyPlus: "./assets/world_activity/2000.png",
+    twentySixPlus: "./assets/world_activity/2600.png",
+    laggy: "./assets/world_activity/lag.png",
+    dsf: "🎣", // TODO: figure this one out and uncomment w116
+    sixtyNine: "./assets/world_activity/nice.png",
+};
+
+const rawSpecialWorlds: { world: number; key: string }[] = [
+    { world: 18, key: "legacy" },
+    { world: 30, key: "twentyPlus" },
+    { world: 48, key: "twentySixPlus" },
+    { world: 52, key: "vip" },
+    { world: 66, key: "eoc" },
+    { world: 84, key: "laggy" },
+    { world: 86, key: "fifteenPlus" },
+    { world: 96, key: "quickChat" },
+    { world: 114, key: "fifteenPlus" },
+    { world: 115, key: "legacy" },
+    //{ world: 116, key: 'dsf' },
+    { world: 137, key: "legacy" },
+    { world: 69, key: "sixtyNine" },
+];
+
+export const SPECIAL_WORLDS: { world: number; reason: string; imageSrc: string }[] = rawSpecialWorlds.map(
+    ({ world, key }) => ({
+        world,
+        reason: key,
+        imageSrc: WorldActivity[key],
+    }),
+);
+
 /**
  * Updates one or more cells in a table row.
  *
@@ -601,10 +638,23 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     };
 
     // Create cells for event, world, time left, and reportedBy.
+    // event
     row.appendChild(createElement(event.event));
-    row.appendChild(createElement(event.world));
+    // world
+    const worldCell = document.createElement("td");
+    const specialWorld = SPECIAL_WORLDS.find((item) => item.world.toString() === event.world);
+    if (specialWorld) {
+        const worldIcon = document.createElement("img");
+        worldIcon.style.marginRight = "5px";
+        worldIcon.src = specialWorld.imageSrc;
+        worldIcon.alt = specialWorld.reason;
+        worldCell.appendChild(worldIcon);
+    }
+    worldCell.appendChild(createElement(event.world, "", "span"));
+    row.appendChild(worldCell);
+    // time left
     row.appendChild(createElement(formatTimeLeft(event), "time-left"));
-
+    // reported by
     const reportedByCell = document.createElement("td");
 
     // Create an image element for the icon.
