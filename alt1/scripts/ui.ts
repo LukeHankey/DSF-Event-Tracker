@@ -194,19 +194,13 @@ document.getElementById("validateDiscordID")?.addEventListener("click", async ()
                 "Content-Type": "application/json",
                 Origin: ORIGIN,
             },
-            debug: DEBUG,
         });
 
         if (response.status === 200 && response.data.exists) {
+            validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
+            validationMessage!.style.display = "block";
+            validationMessage!.style.color = "green";
             updateIfChanged("discordID", discordID);
-            if (DEBUG) {
-                const verificationCode = document.getElementById("verificationCode") as HTMLInputElement;
-                verificationCode.value = response.data.code;
-            } else {
-                validationMessage!.textContent = "✅ Run /alt1 verify in Discord.";
-                validationMessage!.style.display = "block";
-                validationMessage!.style.color = "green";
-            }
             document.getElementById("verificationSection")!.style.display = "block";
         }
     } catch (err) {
@@ -237,7 +231,6 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
             "Content-Type": "application/json",
             Origin: ORIGIN,
         },
-        debug: DEBUG,
     });
 
     if (response.data.verified && response.data.refresh_token) {
