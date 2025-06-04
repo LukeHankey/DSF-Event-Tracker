@@ -43,7 +43,7 @@ a1lib.on("alt1pressed", async () => {
     await readTextFromDialogBox({ alt1Pressed: true });
 });
 
-a1lib.on("daemonrun", (e) => {
+a1lib.on("daemonrun", () => {
     updateTitlebar();
 });
 
