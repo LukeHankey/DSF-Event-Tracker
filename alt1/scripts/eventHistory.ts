@@ -13,6 +13,12 @@ export const rowMap = new Map<UUIDTypes, HTMLTableRowElement>();
 // Local refresh interval for timer updates.
 let refreshInterval: NodeJS.Timeout | null = null;
 
+type SpecialWorld = {
+    world: number;
+    reason: string;
+    imageSrc: string;
+};
+
 export const MEMBER_WORLDS = [
     "1",
     "2",
@@ -140,13 +146,15 @@ const rawSpecialWorlds: { world: number; key: string }[] = [
     { world: 69, key: "sixtyNine" },
 ];
 
-export const SPECIAL_WORLDS: { world: number; reason: string; imageSrc: string }[] = rawSpecialWorlds.map(
-    ({ world, key }) => ({
-        world,
-        reason: key,
-        imageSrc: WorldActivity[key],
-    }),
-);
+const SPECIAL_WORLDS: SpecialWorld[] = rawSpecialWorlds.map(({ world, key }) => ({
+    world,
+    reason: key,
+    imageSrc: WorldActivity[key],
+}));
+
+export function getSpecialWorld(world: string): SpecialWorld | null {
+    return SPECIAL_WORLDS.find((item) => item.world.toString() === world) ?? null;
+}
 
 /**
  * Updates one or more cells in a table row.
@@ -642,7 +650,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     row.appendChild(createElement(event.event));
     // world
     const worldCell = document.createElement("td");
-    const specialWorld = SPECIAL_WORLDS.find((item) => item.world.toString() === event.world);
+    const specialWorld = getSpecialWorld(event.world);
     if (specialWorld) {
         const worldIcon = document.createElement("img");
         worldIcon.style.marginRight = "5px";

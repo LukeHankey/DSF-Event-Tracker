@@ -1,5 +1,5 @@
 import { eventAbbreviations, EventRecord } from "./events";
-import { formatTimeLeftValue, getEndTime, getRemainingTime, SPECIAL_WORLDS } from "./eventHistory";
+import { formatTimeLeftValue, getEndTime, getRemainingTime, getSpecialWorld } from "./eventHistory";
 import { API_URL } from "../config";
 
 type StatusState = {
@@ -7,17 +7,23 @@ type StatusState = {
     stock: Record<"A" | "B" | "C" | "D", { slot: string; title: string; icon: string }>;
 };
 
-type EventInProgress = {
+type NotifiedEvent = {
     message: string;
     endTime: number;
-    world: string;
+} & EventRecord;
+
+type NotificationSettings = {
+    suppressToday: boolean;
+    useAbbreviatedCall: boolean;
+    notificationModes: string[];
+    favoriteEvents: string[];
+    tooltipNotification: string;
 };
 
 let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
-let titlebarTimeout: ReturnType<typeof setTimeout> | null = null;
+let notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 let titlebarInterval: ReturnType<typeof setTimeout> | null = null;
 let activeCheckTimeout: ReturnType<typeof setTimeout> | null = null;
-let recentEvent: EventRecord | null = null;
 
 // Function to show toast notification using new BEM modifier for "show"
 export function showToast(message: string, type: "error" | "success" = "success"): void {
@@ -42,76 +48,69 @@ export function showToast(message: string, type: "error" | "success" = "success"
     }, 3000);
 }
 
+function getNotificationSettings(): NotificationSettings {
+    const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    const useAbbreviatedCall = localStorage.getItem("useAbbreviatedCall") === "true";
+    const favoriteEvents = JSON.parse(localStorage.getItem("favoriteEvents") ?? "[]");
+    const tooltipNotification = localStorage.getItem("tooltipNotificationSetting") ?? "default";
+    return {
+        suppressToday,
+        useAbbreviatedCall,
+        notificationModes,
+        favoriteEvents,
+        tooltipNotification,
+    };
+}
+
 export function notifyEvent(event: EventRecord): void {
     // early return if we aren't in alt1
     if (!window.alt1) {
         return;
     }
-
-    const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+    const { suppressToday, notificationModes, useAbbreviatedCall, favoriteEvents, tooltipNotification } =
+        getNotificationSettings();
     if (suppressToday) {
         setDefaultTitleBar();
         return;
     }
 
-    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
-    const useAbbreviatedCall = localStorage.getItem("useAbbreviatedCall") === "true";
-    const favoriteEventsRaw = localStorage.getItem("favoriteEvents");
-
     // if favorite events are set, only show the favorites, otherwise, show all
-    let favoriteEvents: string[];
-    if (favoriteEventsRaw) {
-        favoriteEvents = JSON.parse(favoriteEventsRaw);
-        if (favoriteEvents.length > 0 && !favoriteEvents.includes(event.event)) {
-            return;
-        }
+    if (favoriteEvents.length > 0 && !favoriteEvents.includes(event.event)) {
+        return;
     }
 
     if (!notificationModes || notificationModes.length === 0) {
         return;
     }
 
+    const recentEvent = getNotifiedEvent();
+
     if (
         (event.type === "deleteEvent" || (event.type === "editEvent" && event.duration === 0)) &&
         event.id === recentEvent?.id
     ) {
-        const historyRaw = localStorage.getItem("eventHistory");
-
-        if (historyRaw) {
-            const history: EventRecord[] = JSON.parse(historyRaw);
-            const now = Date.now();
-
-            // find an active event they care about as fallback that isn't the same id
-            const fallbackEvent = history.find(
-                (e) =>
-                    e.id !== event.id &&
-                    now < e.timestamp + e.duration * 1000 &&
-                    (favoriteEvents.length === 0 || favoriteEvents.includes(e.event)),
-            );
-            if (fallbackEvent) {
-                event = fallbackEvent;
-            } else {
-                setDefaultTitleBar();
-                return;
-            }
+        const fallbackEvent = getActiveEvent();
+        if (fallbackEvent && fallbackEvent.id !== recentEvent?.id) {
+            event = fallbackEvent;
         } else {
             setDefaultTitleBar();
             return;
         }
     }
 
-    // notification will be sent for this event, set it as the local recentEvent for tracking
-    recentEvent = event;
+    // notification will be sent for this event, set it as the notifiedEvent for tracking
+    localStorage.setItem("notifiedEvent", JSON.stringify({ ...event }));
 
-    let message = `${event.event} on w${event.world}`;
-    if (useAbbreviatedCall) {
-        message = `${eventAbbreviations[event.event]}${event.world}`;
-    }
+    const message = useAbbreviatedCall
+        ? `${eventAbbreviations[event.event]}${event.world}`
+        : `${event.event} on w${event.world}`;
+
+    const durationMs = getRemainingTime(event) * 1000;
 
     if (notificationModes.includes("tooltip")) {
-        const tooltipNotificationSetting = localStorage.getItem("tooltipNotificationSetting");
         let duration = 5_000;
-        switch (tooltipNotificationSetting) {
+        switch (tooltipNotification) {
             case "30s":
                 duration = 30_000;
                 break;
@@ -119,7 +118,7 @@ export function notifyEvent(event: EventRecord): void {
                 duration = 60_000;
                 break;
             case "expire": {
-                duration = getRemainingTime(event) * 1000;
+                duration = durationMs;
                 let lastKnownInactiveMs = alt1.rsLastActive;
                 const minVisibleTime = 2_500;
                 const tooltipShownAt = Date.now();
@@ -157,7 +156,7 @@ export function notifyEvent(event: EventRecord): void {
     }
 
     if (notificationModes.includes("toolbar")) {
-        showTitleBarText(event, message, getRemainingTime(event) * 1000);
+        showTitleBarText(event, message);
     }
 
     if (notificationModes.includes("system")) {
@@ -168,32 +167,60 @@ export function notifyEvent(event: EventRecord): void {
         const audio = new Audio("./assets/sounds/notification.mp3");
         audio.play();
     }
+
+    if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+    }
+    notificationTimeout = setTimeout(() => {
+        setDefaultTitleBar();
+        const active = getActiveEvent();
+        if (active && active.id !== event.id) {
+            notifyEvent(active);
+        }
+        if (titlebarInterval) {
+            clearInterval(titlebarInterval);
+        }
+        titlebarInterval = null;
+        notificationTimeout = null;
+    }, durationMs);
 }
 
 export function registerStatusUpdates() {
     const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     if (API_URL && notificationModes?.includes("toolbar")) {
-        const settings = {
-            favoriteEvents: JSON.parse(localStorage.getItem("favoriteEvents") ?? "[]"),
-            notificationModes: notificationModes ?? null,
-            useAbbreviatedCall: localStorage.getItem("useAbbreviatedCall") === "true",
-            favoriteStock: null,
-        };
+        const settings = getNotificationSettings();
         alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
     }
 }
 
+function getActiveEvent() {
+    const { favoriteEvents } = getNotificationSettings();
+    const history = JSON.parse(localStorage.getItem("eventHistory") ?? "[]") as EventRecord[];
+    const now = Date.now();
+
+    // find an active event they care about
+    return history?.find(
+        (e) =>
+            now < e.timestamp + e.duration * 1000 && (favoriteEvents.length === 0 || favoriteEvents.includes(e.event)),
+    );
+}
+
+function getNotifiedEvent(): NotifiedEvent | null {
+    const ipRaw = localStorage.getItem("notifiedEvent");
+    return ipRaw ? JSON.parse(ipRaw) : null;
+}
+
+function getSpecialWorldIcon(world: string): string {
+    const specialWorld = getSpecialWorld(world);
+    return specialWorld ? `<img height='100' width='100' src='${specialWorld.imageSrc}' />` : "";
+}
+
 export function updateTitlebar() {
-    const ipRaw = localStorage.getItem("eventInProgress");
-    const eventInProgress: EventInProgress | null = ipRaw ? JSON.parse(ipRaw) : null;
-    if (eventInProgress && eventInProgress.endTime > Date.now()) {
-        const specialWorld = SPECIAL_WORLDS.find((item) => item.world.toString() === eventInProgress.world);
+    const notifiedEvent = getNotifiedEvent();
+    if (notifiedEvent && notifiedEvent.endTime > Date.now()) {
         const stock = buildStockFromState();
         let builder = stock.length > 0 ? `${stock}<vr/>` : stock;
-        if (specialWorld) {
-            builder += `<img height='100' width='100' src='${specialWorld.imageSrc}' />`;
-        }
-        builder += eventInProgress.message;
+        builder += `${getSpecialWorldIcon(notifiedEvent.world)}${notifiedEvent.message}`;
         alt1.setTitleBarText(builder);
     } else {
         setDefaultTitleBar();
@@ -216,7 +243,6 @@ function buildStockFromState(): string {
 }
 
 export function setDefaultTitleBar() {
-    localStorage.removeItem("eventInProgress");
     alt1.setTitleBarText(buildStockFromState());
 }
 
@@ -226,7 +252,7 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
     tooltipTimeout = setTimeout(alt1.clearTooltip, durationMs);
 }
 
-function showTitleBarText(event: EventRecord, message: string, durationMs: number = 120_000): void {
+function showTitleBarText(event: EventRecord, message: string): void {
     const updateTitle = () => {
         const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
 
@@ -236,9 +262,9 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
                 clearInterval(titlebarInterval);
                 titlebarInterval = null;
             }
-            if (titlebarTimeout) {
-                clearTimeout(titlebarTimeout);
-                titlebarTimeout = null;
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
             }
             return;
         }
@@ -255,36 +281,23 @@ function showTitleBarText(event: EventRecord, message: string, durationMs: numbe
 
         const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
         const titlebarText = `${message} for ${friendlyRemaining}`;
-        const eventInProgress: EventInProgress = {
+        const notifiedEvent: NotifiedEvent = {
+            ...event,
             message: titlebarText,
             endTime: getEndTime(event),
-            world: event.world,
         };
-        localStorage.setItem("eventInProgress", JSON.stringify(eventInProgress));
+        localStorage.setItem("notifiedEvent", JSON.stringify(notifiedEvent));
         updateTitlebar();
     };
 
     // Immediately update once
     updateTitle();
 
-    // Clear any previous interval/timeout
+    // Clear any previous intervals
     if (titlebarInterval) {
         clearInterval(titlebarInterval);
-    }
-    if (titlebarTimeout) {
-        clearTimeout(titlebarTimeout);
     }
 
     // Start interval to update every half minute
     titlebarInterval = setInterval(updateTitle, 30_000);
-
-    // Final fallback cleanup in case interval missed the end
-    titlebarTimeout = setTimeout(() => {
-        setDefaultTitleBar();
-        if (titlebarInterval) {
-            clearInterval(titlebarInterval);
-        }
-        titlebarInterval = null;
-        titlebarTimeout = null;
-    }, durationMs);
 }
