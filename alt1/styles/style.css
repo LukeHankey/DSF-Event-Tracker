@@ -610,6 +610,10 @@ body.dark-mode .progress-bar {
 /* -------------------------------------
 3) FORMS
 ------------------------------------- */
+form#settingsForm {
+    width: 100%;
+}
+
 form .form__group {
     margin-bottom: 0;
 }
@@ -618,19 +622,53 @@ form .form__group:not(:last-of-type) {
     margin-bottom: 15px;
 }
 
+.form__group.inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form__group.inline input,
+.form__group.inline select {
+  max-width: 55%;
+}
+
 .form__group label {
     display: block;
     margin-bottom: 5px;
 }
 
-.form__group input {
-    width: 80%;
+.form__group input:not([type="checkbox"]), .form__group select {
+    width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-body.dark-mode .form__group input {
+.form__group select[multiple] {
+    padding: 0;
+}
+
+.form__group select[multiple] option:checked,
+.form__group select[multiple] option[selected] {
+  font-weight: 600;
+  padding-left: 8px;
+}
+
+.form__group.inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.form__group.inline input,
+.form__group.inline select {
+  flex: 1;
+  max-width: 60%;
+}
+
+body.dark-mode .form__group input, body.dark-mode .form__group select {
     background: #22303c;
     color: #e0e0e0;
     border-color: #445;
@@ -647,18 +685,10 @@ body.dark-mode .form__group input {
     font-weight: bold;
 }
 
-body.dark-mode .form__group button,
-body.dark-mode .validate-btn {
-    background: linear-gradient(135deg, #4dabf7, #237abf);
-}
-
-.form__group button:hover {
-    background: linear-gradient(135deg, #0099ff, #0077cc);
-}
-
-body.dark-mode .form__group button:hover,
-body.dark-mode .validate-btn:hover {
-    background: linear-gradient(135deg, #6bbcff, #4dabf7);
+.form__group,
+.input-group {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form__saved-message {
@@ -968,4 +998,28 @@ body.dark-mode .mod-actions button:hover {
 
 .switch input:checked + .slider::before {
     transform: translateX(24px);
+}
+
+/* Detail sections */
+details {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #0077cc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+summary {
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px 0;
+  outline: none;
+  text-transform: capitalize;
+}
+
+summary::marker {
+  color: #e1bb34; /* Customize marker color */
 }

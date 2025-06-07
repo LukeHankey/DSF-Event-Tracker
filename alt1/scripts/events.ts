@@ -15,6 +15,10 @@ type EventTimes = {
     [key in EventKeys]: number;
 };
 
+type EventAbbreviations = {
+    [key in EventKeys]: string;
+};
+
 export type Events = {
     [key in EventKeys]: string[];
 };
@@ -119,6 +123,18 @@ export const eventTimes: EventTimes = {
     "Treasure Turtle": ONE_MINUTE * 5,
     Testing: 30,
     Unknown: ONE_MINUTE * 10,
+};
+
+export const eventAbbreviations: EventAbbreviations = {
+    "Travelling merchant": "M",
+    Arkaneo: "A",
+    Jellyfish: "J",
+    Whale: "WH",
+    "Sea Monster": "SM",
+    Whirlpool: "WP",
+    "Treasure Turtle": "TT",
+    Testing: "TEST",
+    Unknown: "UNK",
 };
 
 export interface EventRecord {

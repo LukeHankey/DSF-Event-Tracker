@@ -119,11 +119,31 @@
                         Notifications (Multi-Select)
                         <button id="infoButtonNotificationMode" class="info-button" title="Click for info" type="button">ℹ️</button>
                     </label>
-                    <select id="notificationModes" multiple size="2">
+                    <select id="notificationModes" multiple size="4">
                         <option value="tooltip">Tooltip</option>
                         <option value="toolbar">Toolbar</option>
+                        <option value="system">System</option>
+                        <option value="audio">Audio</option>
                     </select>
-                    <a id="resetNotificationModes" style="display: block; cursor: pointer; margin-top: .5rem;">Reset notification modes</a>
+                </div>
+                <div class="form__group">
+                    <label for="tooltipNotificationSetting">Tooltip Duration</label>
+                    <select id="tooltipNotificationSetting">
+                        <option value="default">Default (5s)</option>
+                        <option value="30s">30s</option>
+                        <option value="1m">1m</option>
+                        <option value="expire">Interaction or expiration</option>
+                    </select>
+                </div>
+                <div class="form__group">
+                    <label for="useAbbreviatedCall">Abbreviate Call</label>
+                    <label class="switch">
+                        <input type="checkbox" id="useAbbreviatedCall" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form__group">
+                    <a id="resetNotificationSettings" style="display: block; cursor: pointer; margin-top: .5rem;">Reset notification settings</a>
                 </div>
                 <div class="form__group">
                     <label for="darkMode">Enable Dark Mode</label>
@@ -180,8 +200,8 @@
                                     Toggle notifications today
                                 </label>
                                 <label id="debugContainer">
-                                <select id="testEventSelect"></select>
-                                <button id="testWS">WS Event</button>
+                                    <select id="testEventSelect"></select>
+                                    <button id="testWS">WS Event</button>
                                 </label>
                             </div>
                             <div class="footer-right">
@@ -338,6 +358,7 @@
                 <ul>
                     <li><strong>Tooltip</strong> – Shows a short message near your cursor for a few seconds.</li>
                     <li><strong>Toolbar</strong> – Displays a message in your RuneScape toolbar until the time remaining expires or a new call is made.</li>
+                    <li><strong>System</strong> – Displays Windows style system notification.</li>
                 </ul>
                 <p>
                     Select multiple modes with <kbd>Ctrl</kbd> or <kbd>Shift</kbd>. To clear selections, click the <strong>Reset notification modes</strong> link.

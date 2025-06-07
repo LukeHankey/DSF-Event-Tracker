@@ -98,7 +98,7 @@ const icons = req.keys().reduce(
     {} as Record<string, string>,
 );
 
-const getRuneDate = () => {
+export const getRuneDate = () => {
     const initialRuneDate = Date.UTC(2002, 1, 27); // Base date
     const now = new Date();
     return Math.floor((now.getTime() - initialRuneDate) / (1000 * 3600 * 24));
@@ -120,7 +120,7 @@ const getSlot = (slot: Exclude<Slot, "A">, runedate: number): string => {
     return slotMap[slot][slotIndex];
 };
 
-const getAllSlots = (runedate: number): { A: string; B: string; C: string; D: string } => {
+export const getAllSlots = (runedate: number): { A: string; B: string; C: string; D: string } => {
     const stock: Partial<{ A: string; B: string; C: string; D: string }> = {};
 
     stock.A = slotMap.A[0];
