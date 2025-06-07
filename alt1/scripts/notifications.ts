@@ -206,8 +206,8 @@ function getActiveEvent() {
 }
 
 function getNotifiedEvent(): NotifiedEvent | null {
-    const ipRaw = localStorage.getItem("notifiedEvent");
-    return ipRaw ? JSON.parse(ipRaw) : null;
+    const notiRaw = localStorage.getItem("notifiedEvent");
+    return notiRaw ? JSON.parse(notiRaw) : null;
 }
 
 function getSpecialWorldIcon(world: string): string {
@@ -247,6 +247,10 @@ export function setDefaultTitleBar() {
 }
 
 function showTooltip(message: string, durationMs: number = 5_000): void {
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+    }
+
     alt1.setTooltip(message);
 
     tooltipTimeout = setTimeout(alt1.clearTooltip, durationMs);
