@@ -12,6 +12,7 @@ interface WorldEventStatusBase {
     world: number;
     status: WorldStatus;
     last_update_timestamp: number;
+    last_checked_timestamp: number;
 }
 
 interface ActiveWorldEventStatus extends WorldEventStatusBase {
@@ -49,6 +50,7 @@ enum TableColumn {
     World = 1,
     Status = 2,
     InactiveFor = 3,
+    LastChecked = 4,
 }
 
 type TableColumnName = keyof typeof TableColumn;
@@ -150,6 +152,7 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
     const cells = row.getElementsByTagName("td");
     const timerCell = cells[3];
     const statusCell = cells[2];
+    const lastCheckedCell = cells[4];
 
     // If the elapsed time has reached or exceeded 2 hours 16 minutes (8160 seconds)
     if (secondsElapsed >= 8160) {
@@ -158,6 +161,7 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
             const updatedEvent: UnknownWorldEventStatus = {
                 world: worldEventStatus.world,
                 last_update_timestamp: worldEventStatus.last_update_timestamp,
+                last_checked_timestamp: worldEventStatus.last_checked_timestamp,
                 status: "Unknown",
             };
             worldMap.set(worldEventStatus.world, updatedEvent);
@@ -182,9 +186,14 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
     if (timerCell) {
         timerCell.textContent = formattedTime;
     }
+
     if (statusCell) {
         statusCell.textContent = worldEventStatus.status;
     }
+
+    const lastChecked = worldEventStatus.last_checked_timestamp ?? worldEventStatus.last_update_timestamp;
+    const secondsSinceChecked = (now - lastChecked) / 1000;
+    if (lastCheckedCell) lastCheckedCell.textContent = formatTimeLeftValueMisty(secondsSinceChecked);
 }
 
 function updateWorldTimers(): void {
@@ -275,6 +284,9 @@ async function appendEventRow(
     // Calculate how long the world has been inactive (in milliseconds)
     const inactiveDuration = (Date.now() - worldEvent.last_update_timestamp) / 1000;
     const formattedInactiveDuration = formatTimeLeftValueMisty(inactiveDuration);
+    const formattedLastChecked = formatTimeLeftValueMisty(
+        (Date.now() - (worldEvent.last_checked_timestamp ?? worldEvent.last_update_timestamp)) / 1000,
+    );
 
     // Helper to create a cell with an optional class.
     const createElement = (text: string, className?: string, element: string = "td"): HTMLElement => {
@@ -311,7 +323,8 @@ async function appendEventRow(
     // Create cells for world, status, and the calculated inactive time.
     row.appendChild(createElement(String(worldEvent.world)));
     row.appendChild(createElement(worldEvent.status));
-    row.appendChild(createElement(formattedInactiveDuration, "time-left"));
+    row.appendChild(createElement(formattedInactiveDuration));
+    row.appendChild(createElement(formattedLastChecked));
 
     // Append the row to the table body
     tbody.appendChild(row);
@@ -359,6 +372,9 @@ function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): v
                 case 3:
                     column = TableColumn.InactiveFor;
                     break;
+                case 4:
+                    column = TableColumn.LastChecked;
+                    break;
                 default:
                     console.warn(`No sortable column defined for header index ${index}`);
                     return;
@@ -381,6 +397,9 @@ function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): v
                 break;
             case 3:
                 column = TableColumn.InactiveFor;
+                break;
+            case 4:
+                column = TableColumn.LastChecked;
                 break;
             default:
                 return;
@@ -416,7 +435,7 @@ function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: bo
         const cellB = rowB.children[column].textContent?.trim() || "";
 
         // For the timer column, parse the timer strings.
-        if (column === TableColumn.InactiveFor) {
+        if (column === TableColumn.InactiveFor || column === TableColumn.LastChecked) {
             const timeA = parseTimerString(cellA);
             const timeB = parseTimerString(cellB);
             return asc ? timeA - timeB : timeB - timeA;
