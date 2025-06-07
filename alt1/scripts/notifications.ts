@@ -259,8 +259,9 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
 function showTitleBarText(event: EventRecord, message: string): void {
     const updateTitle = () => {
         const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+        const remaining = getRemainingTime(event);
 
-        if (suppressToday) {
+        const cleanup = () => {
             setDefaultTitleBar();
             if (titlebarInterval) {
                 clearInterval(titlebarInterval);
@@ -270,16 +271,10 @@ function showTitleBarText(event: EventRecord, message: string): void {
                 clearTimeout(notificationTimeout);
                 notificationTimeout = null;
             }
-            return;
-        }
+        };
 
-        const remaining = getRemainingTime(event);
-        if (remaining <= 0) {
-            setDefaultTitleBar();
-            if (titlebarInterval) {
-                clearInterval(titlebarInterval);
-            }
-            titlebarInterval = null;
+        if (suppressToday || remaining <= 0) {
+            cleanup();
             return;
         }
 
@@ -290,6 +285,7 @@ function showTitleBarText(event: EventRecord, message: string): void {
             message: titlebarText,
             endTime: getEndTime(event),
         };
+
         localStorage.setItem("notifiedEvent", JSON.stringify(notifiedEvent));
         updateTitlebar();
     };
