@@ -126,7 +126,7 @@ const WorldActivity: Record<string, string> = {
     twentyPlus: "./assets/world_activity/2000.png",
     twentySixPlus: "./assets/world_activity/2600.png",
     laggy: "./assets/world_activity/lag.png",
-    dsf: "🎣", // TODO: figure this one out and uncomment w116
+    dsf: "./assets/world_activity/dsf.png",
     sixtyNine: "./assets/world_activity/nice.png",
 };
 
@@ -141,7 +141,7 @@ const rawSpecialWorlds: { world: number; key: string }[] = [
     { world: 96, key: "quickChat" },
     { world: 114, key: "fifteenPlus" },
     { world: 115, key: "legacy" },
-    //{ world: 116, key: 'dsf' },
+    { world: 116, key: "dsf" },
     { world: 137, key: "legacy" },
     { world: 69, key: "sixtyNine" },
 ];
