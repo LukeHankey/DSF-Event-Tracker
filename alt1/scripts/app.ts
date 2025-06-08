@@ -20,11 +20,11 @@ import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./not
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
+    registerStatusUpdates();
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
     // Call scheduleMidnightUpdate once when your app starts.
     scheduleMidnightUpdate();
-    registerStatusUpdates();
     updateTitlebar();
 } else {
     // Not in Alt1, show instructions
