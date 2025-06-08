@@ -153,12 +153,31 @@ async function updateTimersFromMisty(timerData: TimerData): Promise<void> {
     }
 }
 
+async function fetchWorldNumber(): Promise<string> {
+    const world =
+        Number(currentWorld) === alt1.currentWorld
+            ? currentWorld
+            : alt1.currentWorld > 0
+              ? String(alt1.currentWorld)
+              : await findWorldNumber(a1lib.captureHoldFullRs());
+
+    if (!world || world === "-1") {
+        showToast("Misty time not updated - world not found.", "error");
+        console.log("Misty time not updated - world not found.");
+        stopCapturingMisty();
+        throw new Error("World not found");
+    }
+
+    return world;
+}
+
 export async function readTextFromDialogBox({ alt1Pressed = false }: ReadDialogOptions = {}): Promise<void> {
     if (OCRInProgress || (!mistyInterval && !alt1Pressed)) return;
 
     try {
         reader.find();
         const dialogReadable = reader.read();
+        if (!dialogReadable && alt1Pressed) return readNewStyleChatDialog();
         if (!dialogReadable) return;
 
         if (!reader.pos) {
@@ -168,19 +187,7 @@ export async function readTextFromDialogBox({ alt1Pressed = false }: ReadDialogO
 
         if (dialogReadable.title.toLowerCase() !== "misty") return;
 
-        const world =
-            Number(currentWorld) === alt1.currentWorld
-                ? currentWorld
-                : alt1.currentWorld > 0
-                  ? String(alt1.currentWorld)
-                  : await findWorldNumber(a1lib.captureHoldFullRs());
-
-        if (!world || world === "-1") {
-            showToast("Misty time not updated - world not found.", "error");
-            console.log("Misty time not updated - world not found.");
-            stopCapturingMisty();
-            return;
-        }
+        const world = await fetchWorldNumber();
 
         let ocrText = "";
         try {
@@ -223,4 +230,55 @@ export async function readTextFromDialogBox({ alt1Pressed = false }: ReadDialogO
     } catch (err) {
         console.error(err);
     }
+}
+
+async function readNewStyleChatDialog(): Promise<void> {
+    let world = "";
+    try {
+        world = await fetchWorldNumber();
+    } catch {
+        return;
+    }
+
+    let ocrText = "";
+    try {
+        const x = Math.floor(alt1.rsWidth * 0.2);
+        const y = Math.floor(alt1.rsHeight * 0.8);
+        const width = alt1.rsWidth - Math.floor(alt1.rsWidth * 0.2) * 2;
+        const height = Math.floor(alt1.rsHeight * 0.15);
+
+        const imgref = a1lib.captureHold(x, y, width, height);
+        const newStyleImageData = imgref.toData().toPngBase64();
+        alt1.overLayRect(a1lib.mixColor(255, 0, 0), x, y, width, height, 1000, 1);
+
+        OCRInProgress = true;
+        const {
+            data: { text },
+        } = await worker!.recognize(`data:image/png;base64,${newStyleImageData}`);
+        ocrText = text.trim();
+    } catch {
+        showToast("Unable to capture text from dialog", "error");
+        stopCapturingMisty();
+        return;
+    } finally {
+        OCRInProgress = false;
+    }
+
+    const seconds = parseTimeToSeconds(ocrText);
+    if (!seconds || seconds < 0) {
+        stopCapturingMisty();
+        console.error(`Text=${ocrText}, Seconds=${seconds}`);
+        showToast("Unable to parse the time", "error");
+        return;
+    }
+
+    // Misty reports Sea Monster as Sea monster. Lower all text
+    let eventName = getValidEventNames().find((event) => ocrText.toLowerCase().includes(event.toLowerCase()));
+
+    const status: "active" | "inactive" = eventName ? "active" : "inactive";
+    eventName ??= "Unknown";
+
+    console.log(`Misty: ${ocrText} | ${status} | ${eventName} | ${world}`);
+    // Account 2 seconds for OCR reading
+    await updateTimersFromMisty({ seconds: seconds + 2, status, eventName, world });
 }
