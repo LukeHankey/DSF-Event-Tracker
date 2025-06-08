@@ -229,7 +229,13 @@ export function updateTitlebar() {
 
 function buildStockFromState(): string {
     let builder = "";
-    const state = JSON.parse(alt1.getStatusDaemonState()) as StatusState;
+    const toolbarEnabled = JSON.parse(localStorage.getItem("notificationModes") ?? "[]").includes("toolbar");
+    const raw = alt1.getStatusDaemonState();
+    if (!raw || !toolbarEnabled) {
+        return builder;
+    }
+
+    const state = JSON.parse(raw) as StatusState;
     const stock = state?.stock;
     if (!stock) {
         return builder;
