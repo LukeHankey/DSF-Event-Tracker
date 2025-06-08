@@ -15,14 +15,17 @@ import "./ui";
 import { initCapture, startCapturing } from "./capture";
 import { scheduleMidnightUpdate } from "./merchantStock";
 import { readTextFromDialogBox } from "./mistyDialog";
+import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./notifications";
 
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
+    registerStatusUpdates();
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
     // Call scheduleMidnightUpdate once when your app starts.
     scheduleMidnightUpdate();
+    updateTitlebar();
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
@@ -40,6 +43,13 @@ a1lib.on("alt1pressed", async () => {
     await readTextFromDialogBox({ alt1Pressed: true });
 });
 
+a1lib.on("daemonrun", () => {
+    updateTitlebar();
+});
+
 window.addEventListener("unload", () => {
-    alt1.setTitleBarText("");
+    // cleanup to remove any calls and only show stock
+    // this is so the status update can have long intervals between runs
+    // and still be in sync
+    setDefaultTitleBar();
 });
