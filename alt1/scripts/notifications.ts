@@ -271,7 +271,7 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
 
 function showTitleBarText(event: EventRecord, message: string): void {
     const updateTitle = () => {
-        const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+        const { suppressToday, notificationModes } = getNotificationSettings();
         const remaining = getRemainingTime(event);
 
         const cleanup = () => {
@@ -286,7 +286,7 @@ function showTitleBarText(event: EventRecord, message: string): void {
             }
         };
 
-        if (suppressToday || remaining <= 0) {
+        if (suppressToday || remaining <= 0 || !notificationModes.includes("toolbar")) {
             cleanup();
             return;
         }
