@@ -185,11 +185,18 @@ export function notifyEvent(event: EventRecord): void {
     }, durationMs);
 }
 
-export function registerStatusUpdates() {
+export function registerStatusUpdates({ settingsChanged = false } = {}): void {
     const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     if (API_URL && notificationModes?.includes("toolbar")) {
         const settings = getNotificationSettings();
         alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
+
+        if (settingsChanged) {
+            const activeEvent = getActiveEvent();
+            if (activeEvent) {
+                notifyEvent(activeEvent);
+            }
+        }
     }
 }
 
