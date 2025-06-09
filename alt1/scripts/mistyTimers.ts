@@ -676,10 +676,10 @@ async function editMistyTimer(world: number): Promise<void> {
             }
             // Include minute if there's an hour or if minute > 0.
             if (hour > 0 || minute > 0) {
-                parts.push(`${minute.toString().padStart(2, "0")}m`);
+                parts.push(`${minute}m`);
             }
             // Always include seconds.
-            parts.push(`${second.toString().padStart(2, "0")}s`);
+            parts.push(`${second}s`);
 
             const formattedTimer = parts.join(" ");
             timerCell.textContent = formattedTimer;
