@@ -153,6 +153,13 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
     const timerCell = cells[3];
     const statusCell = cells[2];
     const lastCheckedCell = cells[4];
+    const timerStopped = row.getAttribute("data-timer-stopped") === "true";
+
+    const lastChecked = worldEventStatus.last_checked_timestamp ?? worldEventStatus.last_update_timestamp;
+    const secondsSinceChecked = (now - lastChecked) / 1000;
+    if (lastCheckedCell) lastCheckedCell.textContent = formatTimeLeftValueMisty(secondsSinceChecked);
+
+    if (timerStopped) return;
 
     // If the elapsed time has reached or exceeded 2 hours 16 minutes (8160 seconds)
     if (secondsElapsed >= 8160) {
@@ -190,10 +197,6 @@ function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventSt
     if (statusCell) {
         statusCell.textContent = worldEventStatus.status;
     }
-
-    const lastChecked = worldEventStatus.last_checked_timestamp ?? worldEventStatus.last_update_timestamp;
-    const secondsSinceChecked = (now - lastChecked) / 1000;
-    if (lastCheckedCell) lastCheckedCell.textContent = formatTimeLeftValueMisty(secondsSinceChecked);
 }
 
 function updateWorldTimers(): void {
@@ -203,8 +206,6 @@ function updateWorldTimers(): void {
     const rows = Array.from(tbody.getElementsByTagName("tr"));
 
     for (const row of rows) {
-        // Skip this row if it has already been stopped.
-        if (row.getAttribute("data-timer-stopped") === "true") continue;
         if (row.classList.contains("editing")) continue;
 
         // Assuming the world id is stored as a data attribute on the row.
