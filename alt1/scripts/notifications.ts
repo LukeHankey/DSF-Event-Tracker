@@ -253,7 +253,7 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
 
     alt1.setTooltip(message);
 
-    tooltipTimeout = setTimeout(alt1.clearTooltip, durationMs);
+    tooltipTimeout = setTimeout(() => alt1.clearTooltip(), durationMs);
 }
 
 function showTitleBarText(event: EventRecord, message: string): void {
