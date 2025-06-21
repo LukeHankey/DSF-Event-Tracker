@@ -11,9 +11,8 @@ import { wsClient, refreshToken } from "./ws";
 import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
-import { showToast } from "./notifications";
+import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
-import { renderMistyTimers } from "./mistyTimers";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -101,6 +100,20 @@ if (notificationModes && notificationModesSelect) {
     });
 }
 
+const tooltipNotificationSettingSelect = document.getElementById(
+    "tooltipNotificationSetting",
+) as HTMLSelectElement | null;
+const tooltipNotificationSetting = localStorage.getItem("tooltipNotificationSetting");
+if (tooltipNotificationSetting && tooltipNotificationSettingSelect) {
+    tooltipNotificationSettingSelect.value = tooltipNotificationSetting;
+}
+
+const useAbbreviatedCallSwitch = document.getElementById("useAbbreviatedCall") as HTMLInputElement | null;
+const useAbbreviatedCall = localStorage.getItem("useAbbreviatedCall");
+if (useAbbreviatedCall && useAbbreviatedCallSwitch) {
+    useAbbreviatedCallSwitch.checked = useAbbreviatedCall === "true";
+}
+
 const darkModeSwitch = document.getElementById("darkMode") as HTMLInputElement | null;
 const darkMode = localStorage.getItem("darkMode");
 if (darkModeSwitch && darkMode) {
@@ -123,8 +136,8 @@ function setDarkMode(): void {
 setDarkMode();
 
 // Handle reset notification modes
-const resetNotificationModes = document.getElementById("resetNotificationModes") as HTMLAnchorElement | null;
-resetNotificationModes?.addEventListener("click", () => {
+const resetNotificationSettings = document.getElementById("resetNotificationSettings") as HTMLAnchorElement | null;
+resetNotificationSettings?.addEventListener("click", () => {
     if (notificationModesSelect) {
         // Clear all selected options
         Array.from(notificationModesSelect.options).forEach((option) => {
@@ -133,6 +146,14 @@ resetNotificationModes?.addEventListener("click", () => {
 
         // Update localStorage to reflect empty state
         localStorage.setItem("notificationModes", JSON.stringify([]));
+    }
+    if (tooltipNotificationSettingSelect) {
+        localStorage.setItem("tooltipNotificationSetting", "default");
+        tooltipNotificationSettingSelect.value = "default";
+    }
+    if (useAbbreviatedCallSwitch) {
+        localStorage.setItem("useAbbreviatedCall", "false");
+        useAbbreviatedCallSwitch.checked = false;
     }
 });
 
@@ -163,16 +184,26 @@ settingsForm?.addEventListener("submit", (e) => {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
         if (selectedValues && selectedValues.includes("toolbar")) {
-            alt1.setTitleBarText("Listening for DSF events...");
+            setDefaultTitleBar();
         } else {
             alt1.setTitleBarText("");
         }
+    }
+
+    if (tooltipNotificationSettingSelect) {
+        updateIfChanged("tooltipNotificationSetting", tooltipNotificationSettingSelect.value);
+    }
+
+    if (useAbbreviatedCallSwitch) {
+        updateIfChanged("useAbbreviatedCall", useAbbreviatedCallSwitch.checked.toString());
     }
 
     if (darkModeSwitch) {
         updateIfChanged("darkMode", darkModeSwitch.checked.toString());
     }
 
+    // when settings change, reset the status daemon as it relies on user settings
+    registerStatusUpdates();
     setDarkMode();
 
     // Show success toast notification
@@ -249,12 +280,11 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
         localStorage.setItem("refreshToken", response.data.refresh_token);
         localStorage.setItem("accessToken", response.data.access_token);
 
-        // Update discord_id to websocket and load profile
-        wsClient.reconnect();
-        await renderMistyTimers();
-
         // Show success toast
         showToast("✅ Verified successfully!");
+
+        // Reload profile
+        window.location.reload();
     } else {
         verificationMessage!.textContent = "❌ Incorrect verification code.";
         verificationMessage!.style.color = "red";
