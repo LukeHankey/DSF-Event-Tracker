@@ -68,90 +68,105 @@
         <!-- Settings Tab Content -->
         <div id="settingsTab" class="tabs__content">
             <form id="settingsForm">
-                <div class="form__group">
-                    <label for="discordID">Discord ID</label>
-                    <div class="input-group">
-                        <input type="text" id="discordID" placeholder="run /alt1 discord_id" maxlength="20", title="Enter your own Discord ID if you want your stats tracking." />
-                        <button type="button" id="validateDiscordID" class="validate-btn">Validate</button>
+                <details>
+                    <summary>Identification</summary>
+                    <div class="form__group">
+                        <label for="discordID">Discord ID</label>
+                        <div class="input-group">
+                            <input type="text" id="discordID" placeholder="run /alt1 discord_id" maxlength="20", title="Enter your own Discord ID if you want your stats tracking." />
+                            <button type="button" id="validateDiscordID" class="validate-btn">Validate</button>
+                        </div>
+                        <small id="validationMessage"></small>
                     </div>
-                    <small id="validationMessage"></small>
-                </div>
-                <!-- Hidden verification code input (shown after first validation step) -->
-                <div class="form__group" id="verificationSection" style="display: none;">
-                    <label for="verificationCode">Enter Verification Code</label>
-                    <div class="input-group">
-                        <input type="text" id="verificationCode" placeholder="Enter Code" maxlength="8" />
-                        <button type="button" id="submitVerificationCode" class="validate-btn">✔</button>
+                    <!-- Hidden verification code input (shown after first validation step) -->
+                    <div class="form__group" id="verificationSection" style="display: none;">
+                        <label for="verificationCode">Enter Verification Code</label>
+                        <div class="input-group">
+                            <input type="text" id="verificationCode" placeholder="Enter Code" maxlength="8" />
+                            <button type="button" id="submitVerificationCode" class="validate-btn">✔</button>
+                        </div>
+                        <small id="verificationMessage"></small>
                     </div>
-                    <small id="verificationMessage"></small>
-                </div>
-                <div class="form__group">
-                    <label for="rsn">RSN</label>
-                    <input type="text", id="rsn", placeholder="Enter RSN", maxlength="12" title="RuneScape character name."/>
-                </div>
-                <div class="form__group">
-                    <label for="captureFrequency">Screen Capture Frequency</label>
-                    <input type="number", id="captureFrequency", placeholder="Capture frequency (seconds)", min="1", max="10", title="Higher number reduces capturing rate, max=10." value="2"/>
-                </div>
-                <div class="form__group">
-                    <label for="favoriteEvents" title="Select multiple options">Favorite Events (Multi-Select)</label>
-                    <select id="favoriteEvents" multiple size="5">
-                        <option value="Travelling merchant">Travelling merchant</option>
-                        <option value="Whirlpool">Whirlpool</option>
-                        <option value="Treasure Turtle">Treasure Turtle</option>
-                        <option value="Arkaneo">Arkaneo</option>
-                        <option value="Jellyfish">Jellyfish</option>
-                        <option value="Whale">Whale</option>
-                        <option value="Sea Monster">Sea Monster</option>
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label for="favoriteEventsMode">Favorite Events Mode</label>
-                    <select id="favoriteEventsMode">
-                        <option value="none">None</option>
-                        <option value="pin">Pin to top</option>
-                        <option value="highlight">Highlight</option>
-                        <option value="only">Only show favorites</option>
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label for="notificationModes" title="Select multiple options">
-                        Notifications (Multi-Select)
-                        <button id="infoButtonNotificationMode" class="info-button" title="Click for info" type="button">ℹ️</button>
-                    </label>
-                    <select id="notificationModes" multiple size="4">
-                        <option value="tooltip">Tooltip</option>
-                        <option value="toolbar">Toolbar</option>
-                        <option value="system">System</option>
-                        <option value="audio">Audio</option>
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label for="tooltipNotificationSetting">Tooltip Duration</label>
-                    <select id="tooltipNotificationSetting">
-                        <option value="default">Default (5s)</option>
-                        <option value="30s">30s</option>
-                        <option value="1m">1m</option>
-                        <option value="expire">Interaction or expiration</option>
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label for="useAbbreviatedCall">Abbreviate Call</label>
-                    <label class="switch">
-                        <input type="checkbox" id="useAbbreviatedCall" />
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="form__group">
-                    <a id="resetNotificationSettings" style="display: block; cursor: pointer; margin-top: .5rem;">Reset notification settings</a>
-                </div>
-                <div class="form__group">
-                    <label for="darkMode">Enable Dark Mode</label>
-                    <label class="switch">
-                        <input type="checkbox" id="darkMode" />
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <div class="form__group">
+                        <label for="rsn">RSN</label>
+                        <input type="text", id="rsn", placeholder="Enter RSN", maxlength="12" title="RuneScape character name."/>
+                    </div>
+                </details>
+                <details>
+                    <summary>Alt1 General</summary>
+                    <div class="form__group">
+                        <label for="captureFrequency">Screen Capture Frequency</label>
+                        <input type="number", id="captureFrequency", placeholder="Capture frequency (seconds)", min="1", max="10", title="Higher number reduces capturing rate, max=10." value="2"/>
+                    </div>
+                </details>
+                <details>
+                    <summary>Favorites</summary>
+                    <div class="form__group">
+                        <label for="favoriteEvents" title="Select multiple options">Favorite Events (Multi-Select)</label>
+                        <select id="favoriteEvents" multiple size="5">
+                            <option value="Travelling merchant">Travelling merchant</option>
+                            <option value="Whirlpool">Whirlpool</option>
+                            <option value="Treasure Turtle">Treasure Turtle</option>
+                            <option value="Arkaneo">Arkaneo</option>
+                            <option value="Jellyfish">Jellyfish</option>
+                            <option value="Whale">Whale</option>
+                            <option value="Sea Monster">Sea Monster</option>
+                        </select>
+                    </div>
+                    <div class="form__group">
+                        <label for="favoriteEventsMode">Favorite Events Mode</label>
+                        <select id="favoriteEventsMode">
+                            <option value="none">None</option>
+                            <option value="pin">Pin to top</option>
+                            <option value="highlight">Highlight</option>
+                            <option value="only">Only show favorites</option>
+                        </select>
+                    </div>
+                </details>
+                <details>
+                    <summary>Notifications</summary>
+                    <div class="form__group">
+                        <label for="notificationModes" title="Select multiple options">
+                            Modes (Multi-Select)
+                            <button id="infoButtonNotificationMode" class="info-button" title="Click for info" type="button">ℹ️</button>
+                        </label>
+                        <select id="notificationModes" multiple size="4">
+                            <option value="tooltip">Tooltip</option>
+                            <option value="toolbar">Toolbar</option>
+                            <option value="system">System</option>
+                            <option value="audio">Audio</option>
+                        </select>
+                    </div>
+                    <div class="form__group">
+                        <label for="tooltipNotificationSetting">Tooltip Duration</label>
+                        <select id="tooltipNotificationSetting">
+                            <option value="default">Default (5s)</option>
+                            <option value="30s">30s</option>
+                            <option value="1m">1m</option>
+                            <option value="expire">Interaction or expiration</option>
+                        </select>
+                    </div>
+                    <div class="form__group">
+                        <label for="useAbbreviatedCall">Abbreviate Call</label>
+                        <label class="switch">
+                            <input type="checkbox" id="useAbbreviatedCall" />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form__group">
+                        <a id="resetNotificationSettings" style="display: block; cursor: pointer; margin-top: .5rem;">Reset notification settings</a>
+                    </div>
+                </details>
+                <details>
+                    <summary>Appearance</summary>
+                    <div class="form__group">
+                        <label for="darkMode">Enable Dark Mode</label>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </details>
                 <div class="form__group">
                     <button type="submit">Save Settings</button>
                 </div>

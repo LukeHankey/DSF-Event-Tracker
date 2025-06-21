@@ -649,10 +649,14 @@ form .form__group:not(:last-of-type) {
     padding: 0;
 }
 
+.form__group select[multiple] option,
+.form__group select[multiple] option {
+  padding-left: 8px;
+}
+
 .form__group select[multiple] option:checked,
 .form__group select[multiple] option[selected] {
   font-weight: 600;
-  padding-left: 8px;
 }
 
 .form__group.inline {
