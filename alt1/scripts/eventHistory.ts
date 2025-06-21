@@ -449,6 +449,7 @@ export function updateEventTimers(): void {
                         world: Number(event.world),
                         status: "Inactive",
                         last_update_timestamp: Date.now(),
+                        last_checked_timestamp: Date.now(),
                         inactive_time: 0,
                     });
                 }
@@ -661,7 +662,7 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     worldCell.appendChild(createElement(event.world, "", "span"));
     row.appendChild(worldCell);
     // time left
-    row.appendChild(createElement(formatTimeLeft(event), "time-left"));
+    row.appendChild(createElement(formatTimeLeft(event)));
     // reported by
     const reportedByCell = document.createElement("td");
 
