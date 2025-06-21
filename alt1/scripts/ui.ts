@@ -11,7 +11,7 @@ import { wsClient, refreshToken } from "./ws";
 import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
-import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
+import { registerStatusUpdates, showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
 
 // Grab all tabs as HTMLElements using the new BEM class name
@@ -182,12 +182,8 @@ settingsForm?.addEventListener("submit", (e) => {
 
     if (notificationModesSelect) {
         const selectedValues = Array.from(notificationModesSelect.selectedOptions).map((opt) => opt.value);
+        localStorage.setItem("prevNotificationModes", localStorage.getItem("notificationModes") ?? "");
         updateIfChanged("notificationModes", JSON.stringify(selectedValues));
-        if (selectedValues && selectedValues.includes("toolbar")) {
-            setDefaultTitleBar();
-        } else {
-            alt1.setTitleBarText("");
-        }
     }
 
     if (tooltipNotificationSettingSelect) {

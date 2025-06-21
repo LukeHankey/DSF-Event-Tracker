@@ -63,24 +63,16 @@ function getNotificationSettings(): NotificationSettings {
     };
 }
 
-export function notifyEvent(event: EventRecord): void {
+export function notifyEvent(event: EventRecord, settingsChanged: boolean = false): void {
     // early return if we aren't in alt1
     if (!window.alt1) {
         return;
     }
     const { suppressToday, notificationModes, useAbbreviatedCall, favoriteEvents, tooltipNotification } =
         getNotificationSettings();
+
     if (suppressToday) {
         setDefaultTitleBar();
-        return;
-    }
-
-    // if favorite events are set, only show the favorites, otherwise, show all
-    if (favoriteEvents.length > 0 && !favoriteEvents.includes(event.event)) {
-        return;
-    }
-
-    if (!notificationModes || notificationModes.length === 0) {
         return;
     }
 
@@ -94,9 +86,19 @@ export function notifyEvent(event: EventRecord): void {
         if (fallbackEvent && fallbackEvent.id !== recentEvent?.id) {
             event = fallbackEvent;
         } else {
+            localStorage.removeItem("notifiedEvent");
             setDefaultTitleBar();
             return;
         }
+    }
+
+    // if favorite events are set, only show the favorites, otherwise, show all
+    if (favoriteEvents.length > 0 && !favoriteEvents.includes(event.event)) {
+        return;
+    }
+
+    if (!notificationModes || notificationModes.length === 0) {
+        return;
     }
 
     // notification will be sent for this event, set it as the notifiedEvent for tracking
@@ -156,7 +158,7 @@ export function notifyEvent(event: EventRecord): void {
     }
 
     if (notificationModes.includes("toolbar")) {
-        showTitleBarText(event, message);
+        showTitleBarText(event, message, settingsChanged);
     }
 
     if (notificationModes.includes("system")) {
@@ -171,11 +173,13 @@ export function notifyEvent(event: EventRecord): void {
     if (notificationTimeout) {
         clearTimeout(notificationTimeout);
     }
+
     notificationTimeout = setTimeout(() => {
-        setDefaultTitleBar();
         const active = getActiveEvent();
         if (active && active.id !== event.id) {
             notifyEvent(active);
+        } else {
+            setDefaultTitleBar();
         }
         if (titlebarInterval) {
             clearInterval(titlebarInterval);
@@ -186,17 +190,18 @@ export function notifyEvent(event: EventRecord): void {
 }
 
 export function registerStatusUpdates({ settingsChanged = false } = {}): void {
-    const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
-    if (API_URL && notificationModes?.includes("toolbar")) {
-        const settings = getNotificationSettings();
-        alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
+    const settings = getNotificationSettings();
+    const prevModes = JSON.parse(localStorage.getItem("prevNotificationModes") ?? "[]");
+    const toolbarChanged =
+        settingsChanged &&
+        ((prevModes.includes("toolbar") && !settings.notificationModes.includes("toolbar")) ||
+            (!prevModes.includes("toolbar") && settings.notificationModes.includes("toolbar")));
 
-        if (settingsChanged) {
-            const activeEvent = getActiveEvent();
-            if (activeEvent) {
-                notifyEvent(activeEvent);
-            }
-        }
+    const shouldRegister = !settingsChanged || toolbarChanged;
+    if (shouldRegister) {
+        alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
+    } else if (settingsChanged) {
+        updateTitlebar();
     }
 }
 
@@ -224,7 +229,14 @@ function getSpecialWorldIcon(world: string): string {
 
 export function updateTitlebar() {
     const notifiedEvent = getNotifiedEvent();
-    if (notifiedEvent && notifiedEvent.endTime > Date.now()) {
+    const { favoriteEvents, notificationModes } = getNotificationSettings();
+
+    if (
+        notifiedEvent &&
+        notifiedEvent.endTime > Date.now() &&
+        notificationModes.includes("toolbar") &&
+        (favoriteEvents.includes(notifiedEvent.event) || favoriteEvents.length === 0)
+    ) {
         const stock = buildStockFromState();
         let builder = stock.length > 0 ? `${stock}<vr/>` : stock;
         builder += `${getSpecialWorldIcon(notifiedEvent.world)}${notifiedEvent.message}`;
@@ -237,16 +249,15 @@ export function updateTitlebar() {
 function buildStockFromState(): string {
     let builder = "";
     const toolbarEnabled = JSON.parse(localStorage.getItem("notificationModes") ?? "[]").includes("toolbar");
+    if (!toolbarEnabled) return builder;
+
     const raw = alt1.getStatusDaemonState();
-    if (!raw || !toolbarEnabled) {
-        return builder;
-    }
+    if (!raw) return builder;
 
     const state = JSON.parse(raw) as StatusState;
     const stock = state?.stock;
-    if (!stock) {
-        return builder;
-    }
+    if (!stock) return builder;
+
     (["A", "B", "C", "D"] as const).forEach((slot) => {
         const slotValue = stock[slot];
         builder += `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
@@ -269,13 +280,13 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
     tooltipTimeout = setTimeout(alt1.clearTooltip, durationMs);
 }
 
-function showTitleBarText(event: EventRecord, message: string): void {
+function showTitleBarText(event: EventRecord, message: string, settingsChanged: boolean): void {
     const updateTitle = () => {
         const { suppressToday, notificationModes } = getNotificationSettings();
         const remaining = getRemainingTime(event);
 
-        const cleanup = () => {
-            setDefaultTitleBar();
+        const cleanup = (settingsChanged: boolean = false) => {
+            if (!settingsChanged) setDefaultTitleBar();
             if (titlebarInterval) {
                 clearInterval(titlebarInterval);
                 titlebarInterval = null;
@@ -290,6 +301,7 @@ function showTitleBarText(event: EventRecord, message: string): void {
             cleanup();
             return;
         }
+        if (settingsChanged) cleanup(settingsChanged);
 
         const friendlyRemaining = remaining < 60 ? "under 1m" : formatTimeLeftValue(Math.max(remaining, 0), false);
         const titlebarText = `${message} for ${friendlyRemaining}`;

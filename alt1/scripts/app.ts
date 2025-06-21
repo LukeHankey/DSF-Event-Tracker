@@ -20,12 +20,11 @@ import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./not
 // If running in Alt1, identify and start capturing
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
-    registerStatusUpdates();
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
     // Call scheduleMidnightUpdate once when your app starts.
     scheduleMidnightUpdate();
-    updateTitlebar();
+    registerStatusUpdates();
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
@@ -36,7 +35,6 @@ if (window.alt1) {
 // When the RuneScape client gains focus, start capturing
 a1lib.on("rsfocus", () => {
     startCapturing();
-    // Optionally restore main content if needed
 });
 
 a1lib.on("alt1pressed", async () => {
