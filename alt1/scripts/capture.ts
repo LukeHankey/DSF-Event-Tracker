@@ -504,6 +504,10 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     console.log(`Found world number to be ${potentialWorldNumber}.`);
                     currentWorld = potentialWorldNumber;
                 }
+                if (matchingEvent === "Testing" && !DEBUG) {
+                    console.log(`ERROR: Event is Testing in production. ${line} | ${DEBUG}`)
+                    continue;
+                }
                 await reportEvent(matchingEvent, isFirstEvent, currentWorld);
             }
         }
