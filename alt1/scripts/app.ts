@@ -40,7 +40,7 @@ a1lib.on("rsfocus", () => {
 });
 
 a1lib.on("alt1pressed", async () => {
-    await readTextFromDialogBox({ alt1Pressed: true });
+    if (alt1.rsActive) await readTextFromDialogBox({ alt1Pressed: true });
 });
 
 a1lib.on("daemonrun", () => {
