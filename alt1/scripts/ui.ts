@@ -203,7 +203,7 @@ settingsForm?.addEventListener("submit", (e) => {
     }
 
     // when settings change, reset the status daemon as it relies on user settings
-    registerStatusUpdates();
+    registerStatusUpdates({ settingsChanged: true });
     setDarkMode();
 
     // Show success toast notification

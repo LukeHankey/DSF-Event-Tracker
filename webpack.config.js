@@ -32,8 +32,8 @@ module.exports = (env = {}) => {
             library: { type: "umd", name: "DSFEventTracker" },
             clean: true,
         },
-        devtool: "eval",
-        // devtool: "source-map",
+        // devtool: "eval",
+        devtool: "source-map",
         mode: isLocal ? "development" : "production",
         // prevent webpack from bundling these imports (alt1 libs can use them when running in nodejs)
         externals: ["sharp", "canvas", "electron/common"],

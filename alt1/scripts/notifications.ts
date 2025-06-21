@@ -185,11 +185,18 @@ export function notifyEvent(event: EventRecord): void {
     }, durationMs);
 }
 
-export function registerStatusUpdates() {
+export function registerStatusUpdates({ settingsChanged = false } = {}): void {
     const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
     if (API_URL && notificationModes?.includes("toolbar")) {
         const settings = getNotificationSettings();
         alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
+
+        if (settingsChanged) {
+            const activeEvent = getActiveEvent();
+            if (activeEvent) {
+                notifyEvent(activeEvent);
+            }
+        }
     }
 }
 
@@ -229,7 +236,13 @@ export function updateTitlebar() {
 
 function buildStockFromState(): string {
     let builder = "";
-    const state = JSON.parse(alt1.getStatusDaemonState()) as StatusState;
+    const toolbarEnabled = JSON.parse(localStorage.getItem("notificationModes") ?? "[]").includes("toolbar");
+    const raw = alt1.getStatusDaemonState();
+    if (!raw || !toolbarEnabled) {
+        return builder;
+    }
+
+    const state = JSON.parse(raw) as StatusState;
     const stock = state?.stock;
     if (!stock) {
         return builder;
@@ -258,7 +271,7 @@ function showTooltip(message: string, durationMs: number = 5_000): void {
 
 function showTitleBarText(event: EventRecord, message: string): void {
     const updateTitle = () => {
-        const suppressToday = localStorage.getItem("toggleNotificationsToday") === "true";
+        const { suppressToday, notificationModes } = getNotificationSettings();
         const remaining = getRemainingTime(event);
 
         const cleanup = () => {
@@ -273,7 +286,7 @@ function showTitleBarText(event: EventRecord, message: string): void {
             }
         };
 
-        if (suppressToday || remaining <= 0) {
+        if (suppressToday || remaining <= 0 || !notificationModes.includes("toolbar")) {
             cleanup();
             return;
         }
