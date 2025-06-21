@@ -505,7 +505,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
                     currentWorld = potentialWorldNumber;
                 }
                 if (matchingEvent === "Testing" && !DEBUG) {
-                    console.log(`ERROR: Event is Testing in production. ${line} | ${DEBUG}`)
+                    console.log(`ERROR: Event is Testing in production. ${line} | ${DEBUG}`);
                     continue;
                 }
                 await reportEvent(matchingEvent, isFirstEvent, currentWorld);
