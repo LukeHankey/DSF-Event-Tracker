@@ -433,8 +433,12 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         if (!currentWorld) return;
 
         // Check the event, world, and is within 15 minutes (5 min leeway) to make sure it is the correct one
-        const eventRecordEnding = eventHistory
-            .find((event: EventRecord) => event.world === currentWorld && event.event === endingEvent && (Date.now() - event.timestamp) < 15 * 60 * 1000) as EventRecord;
+        const eventRecordEnding = eventHistory.find(
+            (event: EventRecord) =>
+                event.world === currentWorld &&
+                event.event === endingEvent &&
+                Date.now() - event.timestamp < 15 * 60 * 1000,
+        ) as EventRecord;
 
         if (!eventRecordEnding) return;
         const eventToEnd: EventRecord = { ...eventRecordEnding };
