@@ -432,9 +432,15 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         const eventHistory = JSON.parse(localStorage.getItem("eventHistory") ?? "[]");
         if (!currentWorld) return;
 
-        const eventRecordEnding = eventHistory
-            .slice(-10)
-            .find((event: EventRecord) => event.world === currentWorld && event.event === endingEvent) as EventRecord;
+        // Check the event, world, and is within 15 minutes (5 min leeway) to make sure it is the correct one
+        const eventRecordEnding = eventHistory.find(
+            (event: EventRecord) =>
+                event.world === currentWorld &&
+                event.event === endingEvent &&
+                Date.now() - event.timestamp < 15 * 60 * 1000,
+        ) as EventRecord;
+
+        if (!eventRecordEnding) return;
         const eventToEnd: EventRecord = { ...eventRecordEnding };
 
         const token = localStorage.getItem("accessToken");
