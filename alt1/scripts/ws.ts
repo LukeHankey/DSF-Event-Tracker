@@ -15,6 +15,8 @@ interface Version {
 type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | Version;
 declare const __APP_VERSION__: string;
 
+// Always read lastReload from sessionStorage when needed
+
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
@@ -170,7 +172,13 @@ export class WebSocketClient {
             } else if ("type" in parsedData) {
                 this.processEvent(parsedData);
             } else if ("version" in parsedData) {
-                if (__APP_VERSION__ !== parsedData.version) window.location.reload();
+                if (__APP_VERSION__ !== parsedData.version) {
+                    const lastReloadTime = sessionStorage.getItem("lastReload");
+                    if (!lastReloadTime || Date.now() - Number(lastReloadTime) > 30_000) {
+                        sessionStorage.setItem("lastReload", Date.now().toString());
+                        window.location.reload();
+                    }
+                }
             } else {
                 await updateWorld(parsedData);
             }
