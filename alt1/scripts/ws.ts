@@ -174,7 +174,7 @@ export class WebSocketClient {
             } else if ("version" in parsedData) {
                 if (__APP_VERSION__ !== parsedData.version) {
                     if (!lastReload || Date.now() - Number(lastReload) > 30_000) {
-                        sessionStorage.setItem('lastReload', Date.now().toString());
+                        sessionStorage.setItem("lastReload", Date.now().toString());
                         window.location.reload();
                     }
                 }
