@@ -30,6 +30,11 @@ jobs:
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
+      - name: Set Git identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
       - name: Build stable version into dist/alt1/
         id: build_stable
         env:
@@ -57,11 +62,6 @@ jobs:
 
       - name: Build alt1-dev version
         run: npm run build:dev
-
-      - name: Set Git identity
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
 
       - name: Deploy to GitHub Pages
         run: |
