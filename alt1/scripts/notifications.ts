@@ -229,7 +229,7 @@ export function updateTitlebar() {
 
 function buildStockFromState(): string {
     let builder = "";
-    const state = JSON.parse(alt1.getStatusDaemonState()) as StatusState;
+    const state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
     const stock = state?.stock;
     if (!stock) {
         return builder;
