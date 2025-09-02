@@ -229,7 +229,13 @@ export function updateTitlebar() {
 
 function buildStockFromState(): string {
     let builder = "";
-    const state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
+    let state: StatusState | null = null;
+    try {
+        state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
+    } catch (e) {
+        // Optionally log the error, e.g. console.error("Failed to parse status daemon state", e);
+        return builder;
+    }
     const stock = state?.stock;
     if (!stock) {
         return builder;
