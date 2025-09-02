@@ -232,8 +232,8 @@ function buildStockFromState(): string {
     let state: StatusState | null = null;
     try {
         state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
-    } catch (e) {
-        // Optionally log the error, e.g. console.error("Failed to parse status daemon state", e);
+    } catch (error) {
+        console.error("Failed to parse status daemon state", error);
         return builder;
     }
     const stock = state?.stock;
