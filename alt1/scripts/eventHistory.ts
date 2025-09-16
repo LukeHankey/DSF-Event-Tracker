@@ -27,6 +27,7 @@ export const MEMBER_WORLDS = [
     "6",
     "9",
     "10",
+    "13", // leagues
     "12",
     "14",
     "15",
@@ -111,10 +112,64 @@ export const MEMBER_WORLDS = [
     "138",
     "139",
     "140",
+    "142", // leagues
+    "211", // leagues
+    "212", // leagues
+    "213", // leagues
+    "214", // leagues
+    "217", // leagues
+    "218", // leagues
+    "219", // leagues
+    "226", // leagues
+    "227", // leagues
+    "228", // leagues
+    "229", // leagues
+    "237", // leagues
+    "238", // leagues
     "252",
     "257",
     "258",
     "259",
+    "215", // leagues
+    "216", // leagues
+    "261", // leagues
+    "262", // leagues
+    "263", // leagues
+    "264", // leagues
+    "265", // leagues
+    "266", // leagues
+    "267", // leagues
+    "268", // leagues
+    "269", // leagues
+    "270", // leagues
+    "271", // leagues
+    "272", // leagues
+    "273", // leagues
+    "274", // leagues
+    "275", // leagues
+    "276", // leagues
+    "277", // leagues
+    "278", // leagues
+    "279", // leagues
+    "280", // leagues
+    "281", // leagues
+    "282", // leagues
+    "283", // leagues
+    "284", // leagues
+    "285", // leagues
+    "286", // leagues
+    "287", // leagues
+    "288", // leagues
+    "289", // leagues
+    "290", // leagues
+    "291", // leagues
+    "292", // leagues
+    "293", // leagues
+    "294", // leagues
+    "295", // leagues
+    "296", // leagues
+    "297", // leagues
+    "298", // leagues
 ];
 
 const WorldActivity: Record<string, string> = {
