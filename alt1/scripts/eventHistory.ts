@@ -127,6 +127,8 @@ export const MEMBER_WORLDS = [
     "237", // leagues
     "238", // leagues
     "252",
+    "253", // leagues
+    "254", // leagues
     "257",
     "258",
     "259",
@@ -218,6 +220,8 @@ const rawSpecialWorlds: { world: number; key: string }[] = [
     { world: 229, key: "leagues" },
     { world: 237, key: "leagues" },
     { world: 238, key: "leagues" },
+    { world: 253, key: "leagues" },
+    { world: 254, key: "leagues" },
     { world: 261, key: "leagues" },
     { world: 262, key: "leagues" },
     { world: 263, key: "leagues" },
