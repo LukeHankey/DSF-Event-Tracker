@@ -3,6 +3,10 @@ description: "A tool for tracking RuneScape events and scouts"
 baseurl: ""
 url: "https://dsfeventtracker.com"
 
+# SEO settings
+keywords: "RuneScape, events, scouts, tracking, DSF, Deep Sea Fishing, Alt1, toolkit, app, fishing, rs3, travelling merchant, discord"
+author: "LukeHankey"
+
 theme: jekyll-theme-slate
 permalink: pretty
 
@@ -18,4 +22,4 @@ github:
 
 plugins:
   - jekyll-sitemap
-  
+  - jekyll-seo-tag
