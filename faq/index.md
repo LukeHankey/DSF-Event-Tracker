@@ -1,6 +1,8 @@
 ---
 layout: default
 title: FAQ
+description: "Frequently asked questions about the Deep Sea Fishing Alt1 Plugin. Learn how to track RuneScape fishing events, set up notifications, and use the DSF Event Tracker effectively."
+keywords: "Deep Sea Fishing FAQ, Alt1 plugin help, RuneScape DSF guide, fishing event tracker setup, Alt1 toolkit installation, DSF notifications"
 ---
 
 [Home](/) | [FAQ](/faq) | [Alt1 App](/alt1)
