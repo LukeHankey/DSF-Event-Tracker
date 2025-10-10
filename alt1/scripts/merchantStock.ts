@@ -138,10 +138,10 @@ function getOrdinal(n: number): string {
 }
 
 function formatDateWithOrdinal(date: Date): string {
-    const day = date.getDate();
+    const day = date.getUTCDate();
     const ordinal = getOrdinal(day);
-    const month = date.toLocaleString("default", { month: "long" });
-    const year = date.getFullYear();
+    const month = date.toLocaleString("default", { month: "long", timeZone: "UTC" });
+    const year = date.getUTCFullYear();
     return `${day}${ordinal} ${month} ${year}`;
 }
 
