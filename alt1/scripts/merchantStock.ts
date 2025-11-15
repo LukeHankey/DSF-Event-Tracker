@@ -101,7 +101,15 @@ const icons = req.keys().reduce(
 export const getRuneDate = () => {
     const initialRuneDate = Date.UTC(2002, 1, 27); // Base date
     const now = new Date();
-    return Math.floor((now.getTime() - initialRuneDate) / (1000 * 3600 * 24));
+    const nowUTC = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds(),
+    );
+    return Math.floor((nowUTC - initialRuneDate) / (1000 * 3600 * 24));
 };
 
 const getSlot = (slot: Exclude<Slot, "A">, runedate: number): string => {
