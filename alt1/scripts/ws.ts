@@ -128,7 +128,7 @@ export class WebSocketClient {
 
             const token = localStorage.getItem("accessToken");
             if (token) {
-                const eventCounts = (await getEventCountData()) ?? {};
+                const eventCounts = (await getEventCountData(token)) ?? {};
                 updateProfileCounters(eventCounts);
             }
         };

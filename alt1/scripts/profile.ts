@@ -186,13 +186,14 @@ const ROLE_DATA: RoleData[] = [
     },
 ];
 
-export async function getEventCountData(): Promise<UpdateFields | null> {
+export async function getEventCountData(token: string): Promise<UpdateFields | null> {
     const discordID = localStorage.getItem("discordID");
     if (!discordID) return null;
 
     const response = await axios.get(`${API_URL}/profiles/${discordID}`, {
         headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
         },
     });
 
