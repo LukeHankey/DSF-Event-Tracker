@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { API_URL } from "../config";
 import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
@@ -705,15 +705,27 @@ async function editMistyTimer(world: number): Promise<void> {
             return;
         }
 
-        await axios.patch(
-            `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
-            {},
-            {
-                headers: {
-                    "Content-Type": "application/json",
+        try {
+            await axios.patch(
+                `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
+                {},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 },
-            },
-        );
+            );
+        } catch (error) {
+            const axiosErr = error as AxiosError<{ detail?: string }>;
+            if (axiosErr.response?.status === 403) {
+                const message = axiosErr.response?.data?.detail;
+                showToast(`❌ ${message}`, "error");
+                // Revert cells to the original values on error.
+                row.cells[2].textContent = row.dataset.originalStatus || "";
+                row.cells[3].textContent = row.dataset.originalTimer || "";
+                return;
+            }
+        }
         wsClient.send({ world: Number(world) } as WorldRecord);
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
