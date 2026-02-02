@@ -269,6 +269,7 @@ export async function updateWorld(worldEvent: WorldEventStatus): Promise<void> {
         const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
         sortTableByColumn(table, TableColumn[tableSort], tableSortOrder === "asc");
     }
+    hideWorlds();
 }
 
 async function appendEventRow(
@@ -458,7 +459,19 @@ function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: bo
 
     const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
     const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement;
+
     if (hideInactiveWorldsElement.checked || hideUnknownWorldsElement.checked) hideWorlds();
+
+    // Check if any range filters are active (unchecked).
+    // If any are unchecked, we must run hideWorlds() to ensure rows outside the selected ranges are hidden.
+    const r130 = (document.getElementById("range130") as HTMLInputElement)?.checked ?? true;
+    const r3060 = (document.getElementById("range3060") as HTMLInputElement)?.checked ?? true;
+    const r6090 = (document.getElementById("range6090") as HTMLInputElement)?.checked ?? true;
+    const r90Plus = (document.getElementById("range90Plus") as HTMLInputElement)?.checked ?? true;
+
+    if (!r130 || !r3060 || !r6090 || !r90Plus) {
+        hideWorlds();
+    }
 }
 
 function parseTimerString(timerStr: string): number {
@@ -479,10 +492,15 @@ function parseTimerString(timerStr: string): number {
 }
 
 function hideWorlds(): void {
-    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
-    const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement;
-    const hideInactive = hideInactiveWorldsElement.checked;
-    const hideUnknown = hideUnknownWorldsElement.checked;
+    const hideInactive = (document.getElementById("hideInactiveWorlds") as HTMLInputElement).checked;
+    const hideUnknown = (document.getElementById("hideUnknownWorlds") as HTMLInputElement).checked;
+
+    // Range filters
+    const range130 = (document.getElementById("range130") as HTMLInputElement).checked;
+    const range3060 = (document.getElementById("range3060") as HTMLInputElement).checked;
+    const range6090 = (document.getElementById("range6090") as HTMLInputElement).checked;
+    const range90Plus = (document.getElementById("range90Plus") as HTMLInputElement).checked;
+
     const tbody = document.getElementById("mistyTimersTable");
     if (!tbody) return;
 
@@ -492,14 +510,26 @@ function hideWorlds(): void {
         const cells = row.getElementsByTagName("td");
         if (!cells.length) continue;
 
+        const worldText = cells[1].textContent?.trim() || "0";
+        const world = parseInt(worldText, 10);
         const status = cells[2].textContent?.trim() || "";
+
+        let visible = true;
+
         if (hideInactive && status === "Inactive") {
-            row.style.display = "none";
+            visible = false;
         } else if (hideUnknown && status === "Unknown") {
-            row.style.display = "none";
-        } else {
-            row.style.display = "";
+            visible = false;
         }
+
+        if (visible) {
+            if (world <= 30 && !range130) visible = false;
+            else if (world > 30 && world <= 60 && !range3060) visible = false;
+            else if (world > 60 && world <= 90 && !range6090) visible = false;
+            else if (world > 90 && !range90Plus) visible = false;
+        }
+
+        row.style.display = visible ? "" : "none";
     }
 }
 
@@ -526,6 +556,21 @@ if (hideUnknownWorldsElement) {
         hideWorlds();
     });
 }
+// Initialize range filters
+const ranges = ["range130", "range3060", "range6090", "range90Plus"];
+ranges.forEach((id) => {
+    const el = document.getElementById(id) as HTMLInputElement | null;
+    if (el) {
+        const stored = localStorage.getItem(id);
+        // Default to true if not set
+        el.checked = stored === null ? true : stored === "true";
+        el.addEventListener("change", (e) => {
+            const checkbox = e.target as HTMLInputElement;
+            localStorage.setItem(id, checkbox.checked ? "true" : "false");
+            hideWorlds();
+        });
+    }
+});
 
 /**
  * Toggle editing mode for a misty timer row based on the world number.
