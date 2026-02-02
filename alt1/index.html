@@ -304,15 +304,23 @@
                         </table>
                     </div>
                     <div class="event-footer">
-                        <div class="footer-left">
-                            <label>
-                            <input type="checkbox" id="hideInactiveWorlds" />
-                            Hide Inactive
-                            </label>
-                            <label>
-                            <input type="checkbox" id="hideUnknownWorlds" />
-                            Hide Unknown
-                            </label>
+                        <div class="footer-left" style="display: flex; flex-direction: column;">
+                            <div style="display: flex; gap: 10px;">
+                                <label>
+                                    <input type="checkbox" id="hideInactiveWorlds" />
+                                    Hide Inactive
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="hideUnknownWorlds" />
+                                    Hide Unknown
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <label title="Show worlds 1-30"><input type="checkbox" id="range130" checked /> 1-30</label>
+                                <label title="Show worlds 30-60"><input type="checkbox" id="range3060" checked /> 30-60</label>
+                                <label title="Show worlds 60-90"><input type="checkbox" id="range6090" checked /> 60-90</label>
+                                <label title="Show worlds 90+"><input type="checkbox" id="range90Plus" checked /> 90+</label>
+                            </div>
                         </div>
                         <div class="footer-right">
                         </div>
