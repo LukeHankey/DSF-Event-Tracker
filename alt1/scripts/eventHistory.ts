@@ -27,7 +27,6 @@ export const MEMBER_WORLDS = [
     "6",
     "9",
     "10",
-    "13", // leagues
     "12",
     "14",
     "15",
@@ -112,66 +111,10 @@ export const MEMBER_WORLDS = [
     "138",
     "139",
     "140",
-    "142", // leagues
-    "211", // leagues
-    "212", // leagues
-    "213", // leagues
-    "214", // leagues
-    "217", // leagues
-    "218", // leagues
-    "219", // leagues
-    "226", // leagues
-    "227", // leagues
-    "228", // leagues
-    "229", // leagues
-    "237", // leagues
-    "238", // leagues
     "252",
-    "253", // leagues
-    "254", // leagues
     "257",
     "258",
     "259",
-    "215", // leagues
-    "216", // leagues
-    "261", // leagues
-    "262", // leagues
-    "263", // leagues
-    "264", // leagues
-    "265", // leagues
-    "266", // leagues
-    "267", // leagues
-    "268", // leagues
-    "269", // leagues
-    "270", // leagues
-    "271", // leagues
-    "272", // leagues
-    "273", // leagues
-    "274", // leagues
-    "275", // leagues
-    "276", // leagues
-    "277", // leagues
-    "278", // leagues
-    "279", // leagues
-    "280", // leagues
-    "281", // leagues
-    "282", // leagues
-    "283", // leagues
-    "284", // leagues
-    "285", // leagues
-    "286", // leagues
-    "287", // leagues
-    "288", // leagues
-    "289", // leagues
-    "290", // leagues
-    "291", // leagues
-    "292", // leagues
-    "293", // leagues
-    "294", // leagues
-    "295", // leagues
-    "296", // leagues
-    "297", // leagues
-    "298", // leagues
 ];
 
 const WorldActivity: Record<string, string> = {
@@ -185,7 +128,6 @@ const WorldActivity: Record<string, string> = {
     laggy: "./assets/world_activity/lag.png",
     dsf: "./assets/world_activity/dsf.png",
     sixtyNine: "./assets/world_activity/nice.png",
-    leagues: "./assets/world_activity/leagues.png",
 };
 
 const rawSpecialWorlds: { world: number; key: string }[] = [
@@ -202,64 +144,6 @@ const rawSpecialWorlds: { world: number; key: string }[] = [
     { world: 116, key: "dsf" },
     { world: 137, key: "legacy" },
     { world: 69, key: "sixtyNine" },
-    // League worlds
-    { world: 13, key: "leagues" },
-    { world: 142, key: "leagues" },
-    { world: 211, key: "leagues" },
-    { world: 212, key: "leagues" },
-    { world: 213, key: "leagues" },
-    { world: 214, key: "leagues" },
-    { world: 215, key: "leagues" },
-    { world: 216, key: "leagues" },
-    { world: 217, key: "leagues" },
-    { world: 218, key: "leagues" },
-    { world: 219, key: "leagues" },
-    { world: 226, key: "leagues" },
-    { world: 227, key: "leagues" },
-    { world: 228, key: "leagues" },
-    { world: 229, key: "leagues" },
-    { world: 237, key: "leagues" },
-    { world: 238, key: "leagues" },
-    { world: 253, key: "leagues" },
-    { world: 254, key: "leagues" },
-    { world: 261, key: "leagues" },
-    { world: 262, key: "leagues" },
-    { world: 263, key: "leagues" },
-    { world: 264, key: "leagues" },
-    { world: 265, key: "leagues" },
-    { world: 266, key: "leagues" },
-    { world: 267, key: "leagues" },
-    { world: 268, key: "leagues" },
-    { world: 269, key: "leagues" },
-    { world: 270, key: "leagues" },
-    { world: 271, key: "leagues" },
-    { world: 272, key: "leagues" },
-    { world: 273, key: "leagues" },
-    { world: 274, key: "leagues" },
-    { world: 275, key: "leagues" },
-    { world: 276, key: "leagues" },
-    { world: 277, key: "leagues" },
-    { world: 278, key: "leagues" },
-    { world: 279, key: "leagues" },
-    { world: 280, key: "leagues" },
-    { world: 281, key: "leagues" },
-    { world: 282, key: "leagues" },
-    { world: 283, key: "leagues" },
-    { world: 284, key: "leagues" },
-    { world: 285, key: "leagues" },
-    { world: 286, key: "leagues" },
-    { world: 287, key: "leagues" },
-    { world: 288, key: "leagues" },
-    { world: 289, key: "leagues" },
-    { world: 290, key: "leagues" },
-    { world: 291, key: "leagues" },
-    { world: 292, key: "leagues" },
-    { world: 293, key: "leagues" },
-    { world: 294, key: "leagues" },
-    { world: 295, key: "leagues" },
-    { world: 296, key: "leagues" },
-    { world: 297, key: "leagues" },
-    { world: 298, key: "leagues" },
 ];
 
 const SPECIAL_WORLDS: SpecialWorld[] = rawSpecialWorlds.map(({ world, key }) => ({
