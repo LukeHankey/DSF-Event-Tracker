@@ -3,7 +3,7 @@ import ChatBoxReader, { ChatLine } from "alt1/chatbox";
 import * as OCR from "alt1/ocr";
 import axios, { AxiosError } from "axios";
 import { webpackImages } from "alt1/base";
-import font from "alt1/fonts/aa_8px_mono.js";
+import font from "alt1/fonts/chatbox/12pt.js";
 import { EventKeys, events, eventTimes, firstEventTexts, eventExpiredText, EventRecord } from "./events";
 import { DEBUG, API_URL } from "../config";
 import { wsClient, refreshToken } from "./ws";
