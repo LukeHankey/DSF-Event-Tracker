@@ -12,13 +12,13 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: true
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
@@ -34,6 +34,11 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+
+      # Build the dev bundle from the current main HEAD using main's deps
+      # (installed above). This is what lands on /alt1-dev for testers.
+      - name: Build alt1-dev version
+        run: npm run build:dev
 
       - name: Build stable version into dist/alt1/
         id: build_stable
@@ -57,11 +62,13 @@ jobs:
 
           echo "Checking out ${TAG} and building stable…"
           git checkout "$TAG"
+          # Reinstall against the tag's own package-lock.json so production is
+          # built with the dependencies pinned at release time. Without this,
+          # the stable build reuses main's node_modules, so any dependency bump
+          # merged to main would reach production before a version bump.
+          npm ci
           npm run build
           git switch -
-
-      - name: Build alt1-dev version
-        run: npm run build:dev
 
       - name: Deploy to GitHub Pages
         run: |
