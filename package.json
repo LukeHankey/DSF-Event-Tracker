@@ -4,7 +4,7 @@
     "description": "Front end of the DSF Event Tracker Alt1 plugin.",
     "homepage": "https://www.dsfeventtracker.com/",
     "bugs": {
-        "url": "https://github.com/LukeHankey/issues"
+        "url": "https://github.com/LukeHankey/DSF-Event-Tracker/issues"
     },
     "license": "MIT",
     "author": "Luke Hankey",
