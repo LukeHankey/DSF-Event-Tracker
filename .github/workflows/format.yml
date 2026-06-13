@@ -17,19 +17,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Prettier Format
-        run: npm run format
-
-      - name: Check for uncommitted changes
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            echo "Formatting required! Please run 'npm run format' locally and commit the changes."
-            git diff
-            exit 1
-          fi
+      - name: Check formatting
+        run: npm run format:check
