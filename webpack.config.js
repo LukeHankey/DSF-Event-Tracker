@@ -60,6 +60,9 @@ module.exports = (env = {}) => {
             }),
             new DefinePlugin({
                 __APP_VERSION__: JSON.stringify(packageVersion),
+                // Drives config.ts DEBUG off the build mode instead of a hand-edited
+                // constant: true only for the local build (build:local / watch).
+                __DEBUG__: JSON.stringify(isLocal),
             }),
         ],
         module: {
