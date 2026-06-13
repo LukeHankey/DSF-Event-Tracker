@@ -13,7 +13,8 @@
         "url": "git+https://github.com/LukeHankey/DSF-Event-Tracker.git"
     },
     "engines": {
-        "node": ">=23.9.0"
+        "node": ">=24",
+        "npm": ">=11"
     },
     "scripts": {
         "build": "webpack --env VERSION=alt1 && npm run postbuild",
@@ -23,6 +24,7 @@
         "watch": "webpack --env VERSION=alt1-local --watch",
         "deploy": "gh-pages -d dist",
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
+        "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
