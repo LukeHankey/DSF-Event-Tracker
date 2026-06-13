@@ -4,7 +4,7 @@
     "description": "Front end of the DSF Event Tracker Alt1 plugin.",
     "homepage": "https://www.dsfeventtracker.com/",
     "bugs": {
-        "url": "https://github.com/LukeHankey/DSF-Event-Tracker/issues"
+        "url": "https://github.com/LukeHankey/issues"
     },
     "license": "MIT",
     "author": "Luke Hankey",
@@ -13,8 +13,7 @@
         "url": "git+https://github.com/LukeHankey/DSF-Event-Tracker.git"
     },
     "engines": {
-        "node": ">=24",
-        "npm": ">=11"
+        "node": ">=23.9.0"
     },
     "scripts": {
         "build": "webpack --env VERSION=alt1 && npm run postbuild",
@@ -24,7 +23,6 @@
         "watch": "webpack --env VERSION=alt1-local --watch",
         "deploy": "gh-pages -d dist",
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
-        "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
