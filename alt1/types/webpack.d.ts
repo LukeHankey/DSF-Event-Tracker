@@ -10,3 +10,5 @@ declare namespace require {
         (id: string): string;
     };
 }
+
+declare module "*.css";
