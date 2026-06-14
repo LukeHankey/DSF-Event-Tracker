@@ -1,4 +1,5 @@
 import { decodeJWT } from "./permissions";
+import { refreshToken } from "./ws";
 import axios from "axios";
 import { API_URL } from "../config";
 
@@ -190,16 +191,42 @@ export async function getEventCountData(): Promise<UpdateFields | null> {
     const discordID = localStorage.getItem("discordID");
     if (!discordID) return null;
 
-    const response = await axios.get(`${API_URL}/profiles/${discordID}`, {
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
+    // /profiles/{id} is authenticated. Without a token there's nothing to fetch yet —
+    // return quietly instead of firing an unauthenticated request that 401s before the
+    // user has validated.
+    const token = localStorage.getItem("accessToken");
+    if (!token) return null;
 
-    if (response.data.count_data) {
-        console.log("Received event counts");
-        return response.data.count_data;
-    } else {
+    const requestProfile = (authToken: string) =>
+        axios.get(`${API_URL}/profiles/${discordID}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+    try {
+        let response;
+        try {
+            response = await requestProfile(token);
+        } catch (error) {
+            // Access token likely expired — refresh once and retry before giving up.
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                const newToken = await refreshToken();
+                if (!newToken) return null; // No valid session; UI stays in its logged-out state.
+                response = await requestProfile(newToken);
+            } else {
+                throw error;
+            }
+        }
+
+        if (response.data.count_data) {
+            console.log("Received event counts");
+            return response.data.count_data;
+        }
+        return null;
+    } catch (error) {
+        console.error("Failed to load profile event counts:", error);
         return null;
     }
 }

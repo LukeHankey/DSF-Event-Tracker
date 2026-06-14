@@ -53,8 +53,8 @@ export async function refreshToken(): Promise<string | null> {
 
     try {
         const response = await axios.post(
-            `${API_URL}/auth/refresh?token=${refreshToken}`,
-            {},
+            `${API_URL}/auth/refresh`,
+            { token: refreshToken },
             {
                 headers: {
                     "Content-Type": "application/json",
