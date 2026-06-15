@@ -750,12 +750,14 @@ async function editMistyTimer(world: number): Promise<void> {
             return;
         }
 
+        const token = localStorage.getItem("accessToken");
         await axios.patch(
             `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
             {},
             {
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
             },
         );
