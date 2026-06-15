@@ -165,6 +165,16 @@ interface NonAchievableRole extends BaseRoleData {
 // The final type can be either AchievableRole or NonAchievableRole
 type RoleData = AchievableRole | NonAchievableRole;
 
+const MERCHANT_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "count",
+    "count.merchantCount",
+    "count.merchant",
+    "alt1.merchantCount",
+    "alt1.merchant",
+    "alt1First.merchantCount",
+    "alt1First.merchant",
+];
+
 // Define role data structure
 // ORDER is important HERE
 const ROLE_DATA: RoleData[] = [
@@ -300,6 +310,17 @@ export function populateRoles(userEventCounts: UpdateFields) {
 
     userEventCounts = { ...previousEventCounts, ...userEventCounts };
     previousEventCounts = userEventCounts;
+
+    const merchantCount = MERCHANT_COUNT_KEYS.map((key) => userEventCounts[key])
+        .filter((value): value is number => value !== undefined)
+        .reduce((sum, value) => sum + value, 0);
+    if (merchantCount > 0) {
+        const legacyTraderBadge = document.createElement("div");
+        legacyTraderBadge.className = "role-badge role-badge--legacy-trader";
+        legacyTraderBadge.innerText = "Legacy Trader";
+        legacyTraderBadge.title = `Earned with ${merchantCount} legacy merchant event${merchantCount === 1 ? "" : "s"}.`;
+        roleContainer.appendChild(legacyTraderBadge);
+    }
 
     // Track which roles have been achieved
     const achievedRoles = new Set<string>();

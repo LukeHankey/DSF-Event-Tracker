@@ -440,6 +440,14 @@ body.dark-mode .stat-value {
 body.dark-mode .role-badge {
     background: #2196f3;
 }
+.role-badge--legacy-trader {
+    background: #a66a00;
+    color: #fff8df;
+}
+body.dark-mode .role-badge--legacy-trader {
+    background: #c47f00;
+    color: #1d1300;
+}
 .progress-bar {
     background: #e0e0e0;
     border-radius: 4px;
