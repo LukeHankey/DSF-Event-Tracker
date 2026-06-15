@@ -7,7 +7,8 @@
             Content Security Policy. Alt1 applies a restrictive default CSP (connect-src 'none')
             to apps, which blocks the API and WebSocket. Declare the origins the app needs here.
             cdn.jsdelivr.net is required for the tesseract.js OCR worker, wasm core and language
-            data (Misty dialog capture). cloudflareinsights.com is for the Cloudflare Web
+            data (Misty dialog capture); the OCR core also instantiates its wasm from a data:
+            URI, so connect-src must allow data:. cloudflareinsights.com is for the Cloudflare Web
             Analytics beacon that the CF proxy auto-injects in front of the app. localhost is
             included so the local/dev builds (config.ts DEBUG) keep working.
         -->
@@ -19,7 +20,7 @@
                      style-src 'self' 'unsafe-inline' https://runeapps.org;
                      img-src 'self' data: blob: https:;
                      font-src 'self' data: https://runeapps.org;
-                     connect-src 'self' blob: http://localhost:8000 ws://localhost:8000 https://api.dsfeventtracker.com https://ws.dsfeventtracker.com wss://ws.dsfeventtracker.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://cloudflareinsights.com https://static.cloudflareinsights.com;"
+                     connect-src 'self' blob: data: http://localhost:8000 ws://localhost:8000 https://api.dsfeventtracker.com https://ws.dsfeventtracker.com wss://ws.dsfeventtracker.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://cloudflareinsights.com https://static.cloudflareinsights.com;"
         />
         <title>DSF Event Tracker - Alt1 App | RuneScape Deep Sea Fishing Tool</title>
         
