@@ -6,7 +6,15 @@ import { API_URL } from "../config";
 let previousEventCounts: UpdateFields = {};
 
 interface UpdateFields {
+    "count.merchant"?: number;
+    "count.merchantCount"?: number;
+    "count.other"?: number;
+    "count.otherCount"?: number;
+    "alt1.merchant"?: number;
+    "alt1.merchantCount"?: number;
     "alt1.otherCount"?: number;
+    "alt1First.merchant"?: number;
+    "alt1First.merchantCount"?: number;
     "alt1First.otherCount"?: number;
     count?: number;
     otherCount?: number;
@@ -23,21 +31,26 @@ const lastKnownCounts: Record<string, number> = {};
 /**
  * Updates the profile counters in the UI.
  * Assumes the following element IDs exist in the DOM:
+ * - merchantEvents
+ * - alt1Merchant
  * - manualEvents
  * - otherEvents
  * - alt1Other
  * - totalEvents
  *
  * @param updateFields An object with optional keys:
- *   "count", "otherCount", "alt1.otherCount", "alt1First.otherCount"
+ *   "count", "otherCount", "alt1.otherCount", "alt1First.otherCount", plus legacy merchant count keys
  */
 export function updateProfileCounters(updateFields: UpdateFields): void {
     // Get the DOM elements for each counter
+    const merchantBox = document.getElementById("merchantEventsBox")!;
+    const alt1MerchantBox = document.getElementById("alt1MerchantBox")!;
+    const merchantEl = document.getElementById("merchantEvents")!;
+    const alt1MerchantEl = document.getElementById("alt1Merchant")!;
     const manualEl = document.getElementById("manualEvents")!;
     const otherEl = document.getElementById("otherEvents")!;
     const alt1OtherEl = document.getElementById("alt1Other")!;
     const totalEl = document.getElementById("totalEvents")!;
-
 
     // ✅ Extract numerical values safely
     const extractFirstNumber = (text: string | null): number => {
@@ -46,17 +59,57 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
         return match ? parseInt(match[1], 10) : 0;
     };
 
+    const getFirstDefinedCount = (...keys: (keyof UpdateFields)[]): number | undefined => {
+        for (const key of keys) {
+            const value = updateFields[key];
+            if (value !== undefined) return value;
+        }
+        return undefined;
+    };
+
+    const legacyMerchant = getFirstDefinedCount("count.merchantCount", "count.merchant", "count");
+    const legacyManualOther = getFirstDefinedCount("count.otherCount", "count.other", "otherCount");
+    const legacyAlt1Merchant = getFirstDefinedCount("alt1.merchantCount", "alt1.merchant");
+    const legacyAlt1MerchantFirst = getFirstDefinedCount("alt1First.merchantCount", "alt1First.merchant");
+
     // ✅ Get previous stored values or initialize them
-    let manual = lastKnownCounts["count"] ?? extractFirstNumber(manualEl?.textContent);
+    let merchant = lastKnownCounts["count.merchantCount"] ?? extractFirstNumber(merchantEl?.textContent);
+    let manual = lastKnownCounts["count.otherCount"] ?? extractFirstNumber(manualEl?.textContent);
+    let alt1Merchant =
+        lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
+    let alt1MerchantFirst = lastKnownCounts["alt1First.merchantCount"] ?? 0;
     let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
     let alt1Other = lastKnownCounts["alt1.otherCount"] ?? extractFirstNumber(alt1OtherEl?.textContent);
     let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? 0;
 
+    if (legacyMerchant !== undefined) {
+        const diff = legacyMerchant - (lastKnownCounts["count.merchantCount"] ?? merchant);
+        merchant += diff;
+        lastKnownCounts["count.merchantCount"] = legacyMerchant;
+    }
+    if (legacyAlt1Merchant !== undefined) {
+        const diff = legacyAlt1Merchant - (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
+        alt1Merchant += diff;
+        lastKnownCounts["alt1.merchantCount"] = legacyAlt1Merchant;
+    }
+    if (legacyAlt1MerchantFirst !== undefined) {
+        const diff =
+            legacyAlt1MerchantFirst - (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
+        alt1MerchantFirst += diff;
+        lastKnownCounts["alt1First.merchantCount"] = legacyAlt1MerchantFirst;
+    }
+
+    merchantEl.textContent = merchant.toString();
+    const totalAlt1Merchant = alt1Merchant + alt1MerchantFirst;
+    alt1MerchantEl.textContent = `${totalAlt1Merchant} (First: ${alt1MerchantFirst})`;
+    merchantBox.classList.toggle("stat-box--hidden", merchant <= 0);
+    alt1MerchantBox.classList.toggle("stat-box--hidden", totalAlt1Merchant <= 0);
+
     // ✅ Update values correctly (only add the difference)
-    if (updateFields["count"] !== undefined) {
-        const diff = updateFields["count"] - (lastKnownCounts["count"] ?? manual);
+    if (legacyManualOther !== undefined) {
+        const diff = legacyManualOther - (lastKnownCounts["count.otherCount"] ?? manual);
         manual += diff;
-        lastKnownCounts["count"] = updateFields["count"];
+        lastKnownCounts["count.otherCount"] = legacyManualOther;
         manualEl.textContent = manual.toString();
     }
 
@@ -82,7 +135,7 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     alt1OtherEl.textContent = `${totalAlt1Other} (First: ${alt1OtherFirst})`;
 
     // ✅ Calculate total events correctly (including First Found counts)
-    const total = manual + other + totalAlt1Other;
+    const total = manual + merchant + other + totalAlt1Merchant + totalAlt1Other;
     totalEl.textContent = total.toString();
 
     // ✅ Update roles based on new event counts
@@ -147,7 +200,20 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775940649802793000",
         role_name: "Scouter",
         achievable: true, // Has a progress bar
-        type_of_event: ["count", "otherCount", "alt1.otherCount", "alt1First.otherCount"],
+        type_of_event: [
+            "count",
+            "count.merchantCount",
+            "count.merchant",
+            "count.otherCount",
+            "count.other",
+            "otherCount",
+            "alt1.merchantCount",
+            "alt1.merchant",
+            "alt1.otherCount",
+            "alt1First.merchantCount",
+            "alt1First.merchant",
+            "alt1First.otherCount",
+        ],
         num_of_event: 40, // Total required for next milestone
         next_role: "Verified Scouter",
     },
@@ -155,7 +221,20 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775941183716851764",
         role_name: "Verified Scouter",
         achievable: true,
-        type_of_event: ["count", "otherCount", "alt1.otherCount", "alt1First.otherCount"],
+        type_of_event: [
+            "count",
+            "count.merchantCount",
+            "count.merchant",
+            "count.otherCount",
+            "count.other",
+            "otherCount",
+            "alt1.merchantCount",
+            "alt1.merchant",
+            "alt1.otherCount",
+            "alt1First.merchantCount",
+            "alt1First.merchant",
+            "alt1First.otherCount",
+        ],
         num_of_event: 100,
         require: ["Scouter"],
         next_role: null,

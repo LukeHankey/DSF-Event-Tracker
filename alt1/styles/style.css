@@ -116,6 +116,10 @@ body.dark-mode .tabs__tab--active {
     filter: none; /* or remove this rule entirely */
 }
 
+.stat-box--hidden {
+    display: none !important;
+}
+
 /* Tab content */
 .tabs__content {
     margin-top: 0.2rem;
