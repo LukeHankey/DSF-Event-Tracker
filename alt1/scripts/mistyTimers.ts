@@ -780,10 +780,11 @@ async function editMistyTimer(world: number): Promise<void> {
             const status = error.response?.status;
             const message = error.response?.data?.detail;
 
-            // An expired token is swallowed by the backend's optional_scouter dependency,
-            // so the endpoint returns 403 ("Manual edits require scouter permission")
-            // rather than 401. Treat both as a possibly-stale token: refresh once and retry.
-            if (status === 401 || status === 403) {
+            // The backend returns 401 "Token has expired" for a stale token (see
+            // optional_scouter); refresh once and retry. Any other failure (e.g. a
+            // genuine 403 permission denial) is surfaced to the user. Matches the
+            // refresh pattern used in renderMistyTimers and capture.ts.
+            if (status === 401 && message === "Token has expired") {
                 const newToken = await refreshToken();
                 if (!newToken) {
                     revertCells();
