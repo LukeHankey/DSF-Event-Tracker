@@ -1,7 +1,6 @@
 import { UUIDTypes } from "uuid";
 
 export type EventKeys =
-    | "Travelling merchant"
     | "Jellyfish"
     | "Arkaneo"
     | "Sea Monster"
@@ -28,12 +27,6 @@ type EventRecordTypes = "addEvent" | "editEvent" | "deleteEvent";
 // Gold text for event arrival is at the start of each value array
 // Fisherman text is at the end of events, if any
 export const events: Events = {
-    "Travelling merchant": [
-        "The travelling merchant has arrived at the hub!", // First spawn
-        "I wonder what they've got for sale today?",
-        "I've seen them sell some really sweet items before.",
-        "They don't come around these parts too often, so make sure you check them out!",
-    ],
     Jellyfish: [
         "A giant jellyfish has appeared!", // First spawn
         "Jellyfish invasion inbound, get ready!", // Start
@@ -97,7 +90,6 @@ export const events: Events = {
 };
 
 export const eventExpiredText: Events = {
-    "Travelling merchant": ["The travelling merchant has departed..."],
     Jellyfish: ["The giant jellyfish has departed..."],
     Arkaneo: ["The sailfish, Arkaneo, has departed..."],
     "Sea Monster": ["The sea monster has departed..."],
@@ -114,7 +106,6 @@ const ONE_MINUTE = 60;
 
 // In seconds
 export const eventTimes: EventTimes = {
-    "Travelling merchant": ONE_MINUTE * 10,
     Arkaneo: 39,
     Jellyfish: ONE_MINUTE * 2,
     Whale: ONE_MINUTE * 2,
@@ -126,7 +117,6 @@ export const eventTimes: EventTimes = {
 };
 
 export const eventAbbreviations: EventAbbreviations = {
-    "Travelling merchant": "M",
     Arkaneo: "A",
     Jellyfish: "J",
     Whale: "WH",

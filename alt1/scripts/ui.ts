@@ -12,7 +12,6 @@ import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
-import { renderStockTable } from "./merchantStock";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -563,7 +562,6 @@ function populateEventDropdown() {
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
-    renderStockTable();
     const debugContainer = document.getElementById("debugContainer");
     if (debugContainer) {
         if (!DEBUG) {

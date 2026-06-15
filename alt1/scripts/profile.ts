@@ -6,8 +6,14 @@ import { API_URL } from "../config";
 let previousEventCounts: UpdateFields = {};
 
 interface UpdateFields {
+    "count.merchant"?: number;
+    "count.merchantCount"?: number;
+    "count.other"?: number;
+    "count.otherCount"?: number;
+    "alt1.merchant"?: number;
     "alt1.merchantCount"?: number;
     "alt1.otherCount"?: number;
+    "alt1First.merchant"?: number;
     "alt1First.merchantCount"?: number;
     "alt1First.otherCount"?: number;
     count?: number;
@@ -27,23 +33,24 @@ const lastKnownCounts: Record<string, number> = {};
  * Assumes the following element IDs exist in the DOM:
  * - merchantEvents
  * - alt1Merchant
+ * - manualEvents
  * - otherEvents
  * - alt1Other
  * - totalEvents
  *
  * @param updateFields An object with optional keys:
- *   "count", "otherCount", "alt1.merchantCount", "alt1.otherCount", "alt1First.merchantCount", "alt1First.otherCount"
+ *   "count", "otherCount", "alt1.otherCount", "alt1First.otherCount", plus legacy merchant count keys
  */
 export function updateProfileCounters(updateFields: UpdateFields): void {
     // Get the DOM elements for each counter
+    const merchantBox = document.getElementById("merchantEventsBox")!;
+    const alt1MerchantBox = document.getElementById("alt1MerchantBox")!;
     const merchantEl = document.getElementById("merchantEvents")!;
     const alt1MerchantEl = document.getElementById("alt1Merchant")!;
+    const manualEl = document.getElementById("manualEvents")!;
     const otherEl = document.getElementById("otherEvents")!;
     const alt1OtherEl = document.getElementById("alt1Other")!;
     const totalEl = document.getElementById("totalEvents")!;
-
-    const alt1MerchantFirstEl = document.getElementById("alt1MerchantFirst")!;
-    const alt1OtherFirstEl = document.getElementById("alt1OtherFirst")!;
 
     // ✅ Extract numerical values safely
     const extractFirstNumber = (text: string | null): number => {
@@ -52,38 +59,59 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
         return match ? parseInt(match[1], 10) : 0;
     };
 
+    const getFirstDefinedCount = (...keys: (keyof UpdateFields)[]): number | undefined => {
+        for (const key of keys) {
+            const value = updateFields[key];
+            if (value !== undefined) return value;
+        }
+        return undefined;
+    };
+
+    const legacyMerchant = getFirstDefinedCount("count.merchantCount", "count.merchant", "count");
+    const legacyManualOther = getFirstDefinedCount("count.otherCount", "count.other", "otherCount");
+    const legacyAlt1Merchant = getFirstDefinedCount("alt1.merchantCount", "alt1.merchant");
+    const legacyAlt1MerchantFirst = getFirstDefinedCount("alt1First.merchantCount", "alt1First.merchant");
+
     // ✅ Get previous stored values or initialize them
-    let merchant = lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
-    let alt1Merchant = lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
+    let merchant = lastKnownCounts["count.merchantCount"] ?? extractFirstNumber(merchantEl?.textContent);
+    let manual = lastKnownCounts["count.otherCount"] ?? extractFirstNumber(manualEl?.textContent);
+    let alt1Merchant =
+        lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
+    let alt1MerchantFirst = lastKnownCounts["alt1First.merchantCount"] ?? 0;
     let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
     let alt1Other = lastKnownCounts["alt1.otherCount"] ?? extractFirstNumber(alt1OtherEl?.textContent);
+    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? 0;
 
-    let alt1MerchantFirst =
-        lastKnownCounts["alt1First.merchantCount"] ?? extractFirstNumber(alt1MerchantFirstEl?.textContent);
-    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? extractFirstNumber(alt1OtherFirstEl?.textContent);
-
-    // ✅ Update values correctly (only add the difference)
-    if (updateFields["count"] !== undefined) {
-        const diff = updateFields["count"] - (lastKnownCounts["count"] ?? merchant);
+    if (legacyMerchant !== undefined) {
+        const diff = legacyMerchant - (lastKnownCounts["count.merchantCount"] ?? merchant);
         merchant += diff;
-        lastKnownCounts["count"] = updateFields["count"];
-        merchantEl.textContent = merchant.toString();
+        lastKnownCounts["count.merchantCount"] = legacyMerchant;
     }
-    if (updateFields["alt1.merchantCount"] !== undefined) {
-        const diff = updateFields["alt1.merchantCount"] - (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
+    if (legacyAlt1Merchant !== undefined) {
+        const diff = legacyAlt1Merchant - (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
         alt1Merchant += diff;
-        lastKnownCounts["alt1.merchantCount"] = updateFields["alt1.merchantCount"];
+        lastKnownCounts["alt1.merchantCount"] = legacyAlt1Merchant;
     }
-    if (updateFields["alt1First.merchantCount"] !== undefined) {
+    if (legacyAlt1MerchantFirst !== undefined) {
         const diff =
-            updateFields["alt1First.merchantCount"] - (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
+            legacyAlt1MerchantFirst - (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
         alt1MerchantFirst += diff;
-        lastKnownCounts["alt1First.merchantCount"] = updateFields["alt1First.merchantCount"];
+        lastKnownCounts["alt1First.merchantCount"] = legacyAlt1MerchantFirst;
     }
 
-    // ✅ Now Alt1 Merchant includes First Found count
+    merchantEl.textContent = merchant.toString();
     const totalAlt1Merchant = alt1Merchant + alt1MerchantFirst;
     alt1MerchantEl.textContent = `${totalAlt1Merchant} (First: ${alt1MerchantFirst})`;
+    merchantBox.classList.toggle("stat-box--hidden", merchant <= 0);
+    alt1MerchantBox.classList.toggle("stat-box--hidden", totalAlt1Merchant <= 0);
+
+    // ✅ Update values correctly (only add the difference)
+    if (legacyManualOther !== undefined) {
+        const diff = legacyManualOther - (lastKnownCounts["count.otherCount"] ?? manual);
+        manual += diff;
+        lastKnownCounts["count.otherCount"] = legacyManualOther;
+        manualEl.textContent = manual.toString();
+    }
 
     if (updateFields["otherCount"] !== undefined) {
         const diff = updateFields["otherCount"] - (lastKnownCounts["otherCount"] ?? other);
@@ -107,7 +135,7 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     alt1OtherEl.textContent = `${totalAlt1Other} (First: ${alt1OtherFirst})`;
 
     // ✅ Calculate total events correctly (including First Found counts)
-    const total = merchant + other + totalAlt1Merchant + totalAlt1Other;
+    const total = manual + merchant + other + totalAlt1Merchant + totalAlt1Other;
     totalEl.textContent = total.toString();
 
     // ✅ Update roles based on new event counts
@@ -136,6 +164,68 @@ interface NonAchievableRole extends BaseRoleData {
 
 // The final type can be either AchievableRole or NonAchievableRole
 type RoleData = AchievableRole | NonAchievableRole;
+
+interface SourceProgressData {
+    role_name: string;
+    type_of_event: (keyof UpdateFields)[];
+    num_of_event: number;
+    next_role?: string | null;
+}
+
+const MERCHANT_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "count",
+    "count.merchantCount",
+    "count.merchant",
+    "alt1.merchantCount",
+    "alt1.merchant",
+    "alt1First.merchantCount",
+    "alt1First.merchant",
+];
+
+const DISCORD_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "count",
+    "count.merchantCount",
+    "count.merchant",
+    "count.otherCount",
+    "count.other",
+    "otherCount",
+];
+
+const ALT1_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "alt1.merchantCount",
+    "alt1.merchant",
+    "alt1.otherCount",
+    "alt1First.merchantCount",
+    "alt1First.merchant",
+    "alt1First.otherCount",
+];
+
+const SOURCE_PROGRESS_DATA: SourceProgressData[] = [
+    {
+        role_name: "Discord Caller",
+        type_of_event: DISCORD_COUNT_KEYS,
+        num_of_event: 1,
+        next_role: "Discord Specialist",
+    },
+    {
+        role_name: "Discord Specialist",
+        type_of_event: DISCORD_COUNT_KEYS,
+        num_of_event: 100,
+        next_role: null,
+    },
+    {
+        role_name: "Alt1 Caller",
+        type_of_event: ALT1_COUNT_KEYS,
+        num_of_event: 1,
+        next_role: "Alt1 Specialist",
+    },
+    {
+        role_name: "Alt1 Specialist",
+        type_of_event: ALT1_COUNT_KEYS,
+        num_of_event: 100,
+        next_role: null,
+    },
+];
 
 // Define role data structure
 // ORDER is important HERE
@@ -172,16 +262,42 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775940649802793000",
         role_name: "Scouter",
         achievable: true, // Has a progress bar
-        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
-        num_of_event: 40, // Total required for next milestone
+        type_of_event: [
+            "count",
+            "count.merchantCount",
+            "count.merchant",
+            "count.otherCount",
+            "count.other",
+            "otherCount",
+            "alt1.merchantCount",
+            "alt1.merchant",
+            "alt1.otherCount",
+            "alt1First.merchantCount",
+            "alt1First.merchant",
+            "alt1First.otherCount",
+        ],
+        num_of_event: 100, // Total required for next milestone
         next_role: "Verified Scouter",
     },
     {
         role_id: "775941183716851764",
         role_name: "Verified Scouter",
         achievable: true,
-        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
-        num_of_event: 100,
+        type_of_event: [
+            "count",
+            "count.merchantCount",
+            "count.merchant",
+            "count.otherCount",
+            "count.other",
+            "otherCount",
+            "alt1.merchantCount",
+            "alt1.merchant",
+            "alt1.otherCount",
+            "alt1First.merchantCount",
+            "alt1First.merchant",
+            "alt1First.otherCount",
+        ],
+        num_of_event: 250,
         require: ["Scouter"],
         next_role: null,
     },
@@ -247,6 +363,51 @@ export function populateRoles(userEventCounts: UpdateFields) {
     userEventCounts = { ...previousEventCounts, ...userEventCounts };
     previousEventCounts = userEventCounts;
 
+    const getCountTotal = (keys: (keyof UpdateFields)[]) =>
+        keys
+            .map((key) => userEventCounts[key])
+            .filter((value): value is number => value !== undefined)
+            .reduce((sum, value) => sum + value, 0);
+
+    const addAchievementBadge = (name: string, className: string, title: string) => {
+        const badge = document.createElement("div");
+        badge.className = `role-badge ${className}`;
+        badge.innerText = name;
+        badge.title = title;
+        roleContainer.appendChild(badge);
+    };
+
+    const addProgressBar = (name: string, userEventCount: number, requiredEventCount: number) => {
+        const progressPercentage = Math.min((userEventCount / requiredEventCount) * 100, 100);
+        const progressWrapper = document.createElement("div");
+        progressWrapper.className = "progress-wrapper";
+
+        progressWrapper.innerHTML = `
+            <div class="progress-label">${name}: ${userEventCount} / ${requiredEventCount}</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+            </div>
+        `;
+
+        progressContainer.appendChild(progressWrapper);
+    };
+
+    const merchantCount = MERCHANT_COUNT_KEYS.map((key) => userEventCounts[key])
+        .filter((value): value is number => value !== undefined)
+        .reduce((sum, value) => sum + value, 0);
+    if (merchantCount > 0) {
+        addAchievementBadge(
+            "Legacy Trader",
+            "role-badge--legacy-trader",
+            `Earned with ${merchantCount} legacy merchant event${merchantCount === 1 ? "" : "s"}.`,
+        );
+    }
+
+    SOURCE_PROGRESS_DATA.forEach((role) => {
+        const userEventCount = getCountTotal(role.type_of_event);
+        addProgressBar(role.role_name, userEventCount, role.num_of_event);
+    });
+
     // Track which roles have been achieved
     const achievedRoles = new Set<string>();
     const unlockedRoles = new Set<string>();
@@ -278,17 +439,6 @@ export function populateRoles(userEventCounts: UpdateFields) {
                     .reduce((sum: number, value: number) => sum + value, 0) || 0;
             const progressPercentage = Math.min((userEventCount / role.num_of_event) * 100, 100); // Cap at 100%
 
-            // Create progress bar
-            const progressWrapper = document.createElement("div");
-            progressWrapper.className = "progress-wrapper";
-
-            progressWrapper.innerHTML = `
-                <div class="progress-label">${role.role_name}: ${userEventCount} / ${role.num_of_event}</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progressPercentage}%"></div>
-                </div>
-            `;
-
             // If role is fully achieved, add it to the achievedRoles list
             if (progressPercentage >= 100) {
                 roleAchieved = true;
@@ -299,7 +449,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
                     unlockedRoles.add(role.next_role);
                 }
             } else {
-                progressContainer.appendChild(progressWrapper);
+                addProgressBar(role.role_name, userEventCount, role.num_of_event);
             }
         } else {
             roleAchieved = true;

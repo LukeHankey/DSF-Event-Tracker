@@ -6,9 +6,6 @@ This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneSc
 
 ## ✨ Key Features
 - 📋 A fully event-driven **Scouting Tab** to view all active events and your previous history.
-- 🛒 View the current day (and any other day) of **Merchant Stock** at a glance.
-  - 🔮 Next 7 days of stock available immediately.
-  - 🗓 Select any date to view stock in more detail.
 - 🌍 Real-time world tracking via Misty NPC.
 - 🔁 **Discord Relay:**
   - Event calls are relayed to and from Discord for a wider reach.
@@ -26,7 +23,7 @@ After installing the app, every user will have basic access to the tracker. Some
 While on the Deep Sea Fishing platform, keep the app open or minimized. Any events that appear on your current world will automatically be detected and shared with the community.
 
 ### 🔍 Scouting
-If you’re actively scouting for the Travelling Merchant or other events:
+If you’re actively scouting for events:
 - Stand next to **Misty** NPC.
 - Ask her when the world was last active.
 - This will automatically update that world’s timer for everyone using the app — making it easier to plan and coordinate scouting.
