@@ -6,16 +6,19 @@
         <!--
             Content Security Policy. Alt1 applies a restrictive default CSP (connect-src 'none')
             to apps, which blocks the API and WebSocket. Declare the origins the app needs here.
-            localhost is included so the local/dev builds (config.ts DEBUG) keep working.
+            cdn.jsdelivr.net is required for the tesseract.js OCR worker, wasm core and language
+            data (Misty dialog capture). localhost is included so the local/dev builds
+            (config.ts DEBUG) keep working.
         -->
         <meta
             http-equiv="Content-Security-Policy"
             content="default-src 'self';
-                     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://runeapps.org;
+                     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://runeapps.org https://cdn.jsdelivr.net;
+                     worker-src 'self' blob: https://cdn.jsdelivr.net;
                      style-src 'self' 'unsafe-inline' https://runeapps.org;
                      img-src 'self' data: blob: https:;
                      font-src 'self' data: https://runeapps.org;
-                     connect-src 'self' http://localhost:8000 ws://localhost:8000 https://api.dsfeventtracker.com https://ws.dsfeventtracker.com wss://ws.dsfeventtracker.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com;"
+                     connect-src 'self' blob: http://localhost:8000 ws://localhost:8000 https://api.dsfeventtracker.com https://ws.dsfeventtracker.com wss://ws.dsfeventtracker.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net;"
         />
         <title>DSF Event Tracker - Alt1 App | RuneScape Deep Sea Fishing Tool</title>
         
