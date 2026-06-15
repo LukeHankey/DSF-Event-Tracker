@@ -6,9 +6,7 @@ import { API_URL } from "../config";
 let previousEventCounts: UpdateFields = {};
 
 interface UpdateFields {
-    "alt1.merchantCount"?: number;
     "alt1.otherCount"?: number;
-    "alt1First.merchantCount"?: number;
     "alt1First.otherCount"?: number;
     count?: number;
     otherCount?: number;
@@ -25,25 +23,21 @@ const lastKnownCounts: Record<string, number> = {};
 /**
  * Updates the profile counters in the UI.
  * Assumes the following element IDs exist in the DOM:
- * - merchantEvents
- * - alt1Merchant
+ * - manualEvents
  * - otherEvents
  * - alt1Other
  * - totalEvents
  *
  * @param updateFields An object with optional keys:
- *   "count", "otherCount", "alt1.merchantCount", "alt1.otherCount", "alt1First.merchantCount", "alt1First.otherCount"
+ *   "count", "otherCount", "alt1.otherCount", "alt1First.otherCount"
  */
 export function updateProfileCounters(updateFields: UpdateFields): void {
     // Get the DOM elements for each counter
-    const merchantEl = document.getElementById("merchantEvents")!;
-    const alt1MerchantEl = document.getElementById("alt1Merchant")!;
+    const manualEl = document.getElementById("manualEvents")!;
     const otherEl = document.getElementById("otherEvents")!;
     const alt1OtherEl = document.getElementById("alt1Other")!;
     const totalEl = document.getElementById("totalEvents")!;
 
-    const alt1MerchantFirstEl = document.getElementById("alt1MerchantFirst")!;
-    const alt1OtherFirstEl = document.getElementById("alt1OtherFirst")!;
 
     // ✅ Extract numerical values safely
     const extractFirstNumber = (text: string | null): number => {
@@ -53,37 +47,18 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     };
 
     // ✅ Get previous stored values or initialize them
-    let merchant = lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
-    let alt1Merchant = lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
+    let manual = lastKnownCounts["count"] ?? extractFirstNumber(manualEl?.textContent);
     let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
     let alt1Other = lastKnownCounts["alt1.otherCount"] ?? extractFirstNumber(alt1OtherEl?.textContent);
-
-    let alt1MerchantFirst =
-        lastKnownCounts["alt1First.merchantCount"] ?? extractFirstNumber(alt1MerchantFirstEl?.textContent);
-    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? extractFirstNumber(alt1OtherFirstEl?.textContent);
+    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? 0;
 
     // ✅ Update values correctly (only add the difference)
     if (updateFields["count"] !== undefined) {
-        const diff = updateFields["count"] - (lastKnownCounts["count"] ?? merchant);
-        merchant += diff;
+        const diff = updateFields["count"] - (lastKnownCounts["count"] ?? manual);
+        manual += diff;
         lastKnownCounts["count"] = updateFields["count"];
-        merchantEl.textContent = merchant.toString();
+        manualEl.textContent = manual.toString();
     }
-    if (updateFields["alt1.merchantCount"] !== undefined) {
-        const diff = updateFields["alt1.merchantCount"] - (lastKnownCounts["alt1.merchantCount"] ?? alt1Merchant);
-        alt1Merchant += diff;
-        lastKnownCounts["alt1.merchantCount"] = updateFields["alt1.merchantCount"];
-    }
-    if (updateFields["alt1First.merchantCount"] !== undefined) {
-        const diff =
-            updateFields["alt1First.merchantCount"] - (lastKnownCounts["alt1First.merchantCount"] ?? alt1MerchantFirst);
-        alt1MerchantFirst += diff;
-        lastKnownCounts["alt1First.merchantCount"] = updateFields["alt1First.merchantCount"];
-    }
-
-    // ✅ Now Alt1 Merchant includes First Found count
-    const totalAlt1Merchant = alt1Merchant + alt1MerchantFirst;
-    alt1MerchantEl.textContent = `${totalAlt1Merchant} (First: ${alt1MerchantFirst})`;
 
     if (updateFields["otherCount"] !== undefined) {
         const diff = updateFields["otherCount"] - (lastKnownCounts["otherCount"] ?? other);
@@ -107,7 +82,7 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     alt1OtherEl.textContent = `${totalAlt1Other} (First: ${alt1OtherFirst})`;
 
     // ✅ Calculate total events correctly (including First Found counts)
-    const total = merchant + other + totalAlt1Merchant + totalAlt1Other;
+    const total = manual + other + totalAlt1Other;
     totalEl.textContent = total.toString();
 
     // ✅ Update roles based on new event counts
@@ -172,7 +147,7 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775940649802793000",
         role_name: "Scouter",
         achievable: true, // Has a progress bar
-        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
+        type_of_event: ["count", "otherCount", "alt1.otherCount", "alt1First.otherCount"],
         num_of_event: 40, // Total required for next milestone
         next_role: "Verified Scouter",
     },
@@ -180,7 +155,7 @@ const ROLE_DATA: RoleData[] = [
         role_id: "775941183716851764",
         role_name: "Verified Scouter",
         achievable: true,
-        type_of_event: ["count", "alt1.merchantCount", "alt1First.merchantCount"],
+        type_of_event: ["count", "otherCount", "alt1.otherCount", "alt1First.otherCount"],
         num_of_event: 100,
         require: ["Scouter"],
         next_role: null,
