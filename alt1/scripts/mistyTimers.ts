@@ -750,17 +750,65 @@ async function editMistyTimer(world: number): Promise<void> {
             return;
         }
 
-        const token = localStorage.getItem("accessToken");
-        await axios.patch(
-            `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
-            {},
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+        const sendManualUpdate = (authToken: string | null) =>
+            axios.patch(
+                `${API_URL}/worlds/${world}/event?type=inactive&seconds=${totalSeconds}&editor=Manual`,
+                {},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${authToken}`,
+                    },
                 },
-            },
-        );
+            );
+
+        const revertCells = (): void => {
+            row.cells[2].textContent = row.dataset.originalStatus || "";
+            row.cells[3].textContent = row.dataset.originalTimer || "";
+        };
+
+        try {
+            await sendManualUpdate(localStorage.getItem("accessToken"));
+        } catch (error) {
+            if (!axios.isAxiosError(error)) {
+                console.error("Unexpected error updating Misty timer", error);
+                revertCells();
+                showToast("Failed to update Misty timer", "error");
+                return;
+            }
+
+            const status = error.response?.status;
+            const message = error.response?.data?.detail;
+
+            // An expired token is swallowed by the backend's optional_scouter dependency,
+            // so the endpoint returns 403 ("Manual edits require scouter permission")
+            // rather than 401. Treat both as a possibly-stale token: refresh once and retry.
+            if (status === 401 || status === 403) {
+                const newToken = await refreshToken();
+                if (!newToken) {
+                    revertCells();
+                    showToast("Session expired. Please re-authenticate.", "error");
+                    return;
+                }
+                try {
+                    await sendManualUpdate(newToken);
+                } catch (retryError) {
+                    console.error(retryError);
+                    const retryMessage = axios.isAxiosError(retryError)
+                        ? retryError.response?.data?.detail
+                        : undefined;
+                    revertCells();
+                    showToast(retryMessage ?? "Failed to update Misty timer", "error");
+                    return;
+                }
+            } else {
+                console.error(error);
+                revertCells();
+                showToast(message ?? "Failed to update Misty timer", "error");
+                return;
+            }
+        }
+
         wsClient.send({ world: Number(world) } as WorldRecord);
         showToast(`Misty time updated for world ${world}`);
         console.log(`Misty time updated for world ${world}`);
