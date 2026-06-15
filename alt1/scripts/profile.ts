@@ -175,6 +175,24 @@ const MERCHANT_COUNT_KEYS: (keyof UpdateFields)[] = [
     "alt1First.merchant",
 ];
 
+const DISCORD_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "count",
+    "count.merchantCount",
+    "count.merchant",
+    "count.otherCount",
+    "count.other",
+    "otherCount",
+];
+
+const ALT1_COUNT_KEYS: (keyof UpdateFields)[] = [
+    "alt1.merchantCount",
+    "alt1.merchant",
+    "alt1.otherCount",
+    "alt1First.merchantCount",
+    "alt1First.merchant",
+    "alt1First.otherCount",
+];
+
 // Define role data structure
 // ORDER is important HERE
 const ROLE_DATA: RoleData[] = [
@@ -224,7 +242,7 @@ const ROLE_DATA: RoleData[] = [
             "alt1First.merchant",
             "alt1First.otherCount",
         ],
-        num_of_event: 40, // Total required for next milestone
+        num_of_event: 100, // Total required for next milestone
         next_role: "Verified Scouter",
     },
     {
@@ -245,7 +263,7 @@ const ROLE_DATA: RoleData[] = [
             "alt1First.merchant",
             "alt1First.otherCount",
         ],
-        num_of_event: 100,
+        num_of_event: 250,
         require: ["Scouter"],
         next_role: null,
     },
@@ -311,15 +329,61 @@ export function populateRoles(userEventCounts: UpdateFields) {
     userEventCounts = { ...previousEventCounts, ...userEventCounts };
     previousEventCounts = userEventCounts;
 
+    const getCountTotal = (keys: (keyof UpdateFields)[]) =>
+        keys
+            .map((key) => userEventCounts[key])
+            .filter((value): value is number => value !== undefined)
+            .reduce((sum, value) => sum + value, 0);
+
+    const addAchievementBadge = (name: string, className: string, title: string) => {
+        const badge = document.createElement("div");
+        badge.className = `role-badge ${className}`;
+        badge.innerText = name;
+        badge.title = title;
+        roleContainer.appendChild(badge);
+    };
+
     const merchantCount = MERCHANT_COUNT_KEYS.map((key) => userEventCounts[key])
         .filter((value): value is number => value !== undefined)
         .reduce((sum, value) => sum + value, 0);
     if (merchantCount > 0) {
-        const legacyTraderBadge = document.createElement("div");
-        legacyTraderBadge.className = "role-badge role-badge--legacy-trader";
-        legacyTraderBadge.innerText = "Legacy Trader";
-        legacyTraderBadge.title = `Earned with ${merchantCount} legacy merchant event${merchantCount === 1 ? "" : "s"}.`;
-        roleContainer.appendChild(legacyTraderBadge);
+        addAchievementBadge(
+            "Legacy Trader",
+            "role-badge--legacy-trader",
+            `Earned with ${merchantCount} legacy merchant event${merchantCount === 1 ? "" : "s"}.`,
+        );
+    }
+
+    const discordCount = getCountTotal(DISCORD_COUNT_KEYS);
+    if (discordCount > 0) {
+        addAchievementBadge(
+            "Discord Caller",
+            "role-badge--discord-caller",
+            `Earned with ${discordCount} Discord call${discordCount === 1 ? "" : "s"}.`,
+        );
+    }
+    if (discordCount >= 100) {
+        addAchievementBadge(
+            "Discord Specialist",
+            "role-badge--discord-specialist",
+            `Earned with ${discordCount} Discord calls.`,
+        );
+    }
+
+    const alt1Count = getCountTotal(ALT1_COUNT_KEYS);
+    if (alt1Count > 0) {
+        addAchievementBadge(
+            "Alt1 Caller",
+            "role-badge--alt1-caller",
+            `Earned with ${alt1Count} Alt1 call${alt1Count === 1 ? "" : "s"}.`,
+        );
+    }
+    if (alt1Count >= 100) {
+        addAchievementBadge(
+            "Alt1 Specialist",
+            "role-badge--alt1-specialist",
+            `Earned with ${alt1Count} Alt1 calls.`,
+        );
     }
 
     // Track which roles have been achieved

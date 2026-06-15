@@ -448,6 +448,38 @@ body.dark-mode .role-badge--legacy-trader {
     background: #c47f00;
     color: #1d1300;
 }
+.role-badge--discord-caller {
+    background: #5865f2;
+    color: #fff;
+}
+body.dark-mode .role-badge--discord-caller {
+    background: #7b85ff;
+    color: #10133a;
+}
+.role-badge--discord-specialist {
+    background: #3949ab;
+    color: #fff;
+}
+body.dark-mode .role-badge--discord-specialist {
+    background: #9fa8ff;
+    color: #0f1648;
+}
+.role-badge--alt1-caller {
+    background: #2e7d32;
+    color: #f1fff2;
+}
+body.dark-mode .role-badge--alt1-caller {
+    background: #66bb6a;
+    color: #08220b;
+}
+.role-badge--alt1-specialist {
+    background: #00695c;
+    color: #e7fffb;
+}
+body.dark-mode .role-badge--alt1-specialist {
+    background: #4db6ac;
+    color: #00251f;
+}
 .progress-bar {
     background: #e0e0e0;
     border-radius: 4px;
