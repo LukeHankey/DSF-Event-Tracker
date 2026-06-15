@@ -165,6 +165,13 @@ interface NonAchievableRole extends BaseRoleData {
 // The final type can be either AchievableRole or NonAchievableRole
 type RoleData = AchievableRole | NonAchievableRole;
 
+interface SourceProgressData {
+    role_name: string;
+    type_of_event: (keyof UpdateFields)[];
+    num_of_event: number;
+    next_role?: string | null;
+}
+
 const MERCHANT_COUNT_KEYS: (keyof UpdateFields)[] = [
     "count",
     "count.merchantCount",
@@ -191,6 +198,33 @@ const ALT1_COUNT_KEYS: (keyof UpdateFields)[] = [
     "alt1First.merchantCount",
     "alt1First.merchant",
     "alt1First.otherCount",
+];
+
+const SOURCE_PROGRESS_DATA: SourceProgressData[] = [
+    {
+        role_name: "Discord Caller",
+        type_of_event: DISCORD_COUNT_KEYS,
+        num_of_event: 1,
+        next_role: "Discord Specialist",
+    },
+    {
+        role_name: "Discord Specialist",
+        type_of_event: DISCORD_COUNT_KEYS,
+        num_of_event: 100,
+        next_role: null,
+    },
+    {
+        role_name: "Alt1 Caller",
+        type_of_event: ALT1_COUNT_KEYS,
+        num_of_event: 1,
+        next_role: "Alt1 Specialist",
+    },
+    {
+        role_name: "Alt1 Specialist",
+        type_of_event: ALT1_COUNT_KEYS,
+        num_of_event: 100,
+        next_role: null,
+    },
 ];
 
 // Define role data structure
@@ -343,6 +377,21 @@ export function populateRoles(userEventCounts: UpdateFields) {
         roleContainer.appendChild(badge);
     };
 
+    const addProgressBar = (name: string, userEventCount: number, requiredEventCount: number) => {
+        const progressPercentage = Math.min((userEventCount / requiredEventCount) * 100, 100);
+        const progressWrapper = document.createElement("div");
+        progressWrapper.className = "progress-wrapper";
+
+        progressWrapper.innerHTML = `
+            <div class="progress-label">${name}: ${userEventCount} / ${requiredEventCount}</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+            </div>
+        `;
+
+        progressContainer.appendChild(progressWrapper);
+    };
+
     const merchantCount = MERCHANT_COUNT_KEYS.map((key) => userEventCounts[key])
         .filter((value): value is number => value !== undefined)
         .reduce((sum, value) => sum + value, 0);
@@ -354,37 +403,10 @@ export function populateRoles(userEventCounts: UpdateFields) {
         );
     }
 
-    const discordCount = getCountTotal(DISCORD_COUNT_KEYS);
-    if (discordCount > 0) {
-        addAchievementBadge(
-            "Discord Caller",
-            "role-badge--discord-caller",
-            `Earned with ${discordCount} Discord call${discordCount === 1 ? "" : "s"}.`,
-        );
-    }
-    if (discordCount >= 100) {
-        addAchievementBadge(
-            "Discord Specialist",
-            "role-badge--discord-specialist",
-            `Earned with ${discordCount} Discord calls.`,
-        );
-    }
-
-    const alt1Count = getCountTotal(ALT1_COUNT_KEYS);
-    if (alt1Count > 0) {
-        addAchievementBadge(
-            "Alt1 Caller",
-            "role-badge--alt1-caller",
-            `Earned with ${alt1Count} Alt1 call${alt1Count === 1 ? "" : "s"}.`,
-        );
-    }
-    if (alt1Count >= 100) {
-        addAchievementBadge(
-            "Alt1 Specialist",
-            "role-badge--alt1-specialist",
-            `Earned with ${alt1Count} Alt1 calls.`,
-        );
-    }
+    SOURCE_PROGRESS_DATA.forEach((role) => {
+        const userEventCount = getCountTotal(role.type_of_event);
+        addProgressBar(role.role_name, userEventCount, role.num_of_event);
+    });
 
     // Track which roles have been achieved
     const achievedRoles = new Set<string>();
@@ -417,17 +439,6 @@ export function populateRoles(userEventCounts: UpdateFields) {
                     .reduce((sum: number, value: number) => sum + value, 0) || 0;
             const progressPercentage = Math.min((userEventCount / role.num_of_event) * 100, 100); // Cap at 100%
 
-            // Create progress bar
-            const progressWrapper = document.createElement("div");
-            progressWrapper.className = "progress-wrapper";
-
-            progressWrapper.innerHTML = `
-                <div class="progress-label">${role.role_name}: ${userEventCount} / ${role.num_of_event}</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progressPercentage}%"></div>
-                </div>
-            `;
-
             // If role is fully achieved, add it to the achievedRoles list
             if (progressPercentage >= 100) {
                 roleAchieved = true;
@@ -438,7 +449,7 @@ export function populateRoles(userEventCounts: UpdateFields) {
                     unlockedRoles.add(role.next_role);
                 }
             } else {
-                progressContainer.appendChild(progressWrapper);
+                addProgressBar(role.role_name, userEventCount, role.num_of_event);
             }
         } else {
             roleAchieved = true;
