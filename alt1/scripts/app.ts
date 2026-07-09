@@ -13,7 +13,6 @@ import "./ui";
 
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
-import { scheduleMidnightUpdate } from "./merchantStock";
 import { readTextFromDialogBox } from "./mistyDialog";
 import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./notifications";
 
@@ -23,14 +22,14 @@ if (window.alt1) {
     registerStatusUpdates();
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
-    // Call scheduleMidnightUpdate once when your app starts.
-    scheduleMidnightUpdate();
     updateTitlebar();
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-    document.querySelector("#mainTab h2")!.innerHTML =
-        `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
+    document.querySelector("#scoutsTab")!.insertAdjacentHTML(
+        "afterbegin",
+        `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`,
+    );
 }
 
 // When the RuneScape client gains focus, start capturing

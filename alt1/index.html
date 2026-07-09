@@ -25,15 +25,15 @@
         <title>DSF Event Tracker - Alt1 App | RuneScape Deep Sea Fishing Tool</title>
         
         <!-- SEO Meta Tags -->
-        <meta name="description" content="Track RuneScape Deep Sea Fishing events and scouts with our comprehensive Alt1 toolkit app. Real-time notifications for fishing events, merchant stock, and world activities." />
-        <meta name="keywords" content="RuneScape, Deep Sea Fishing, DSF events, fishing scouts, Alt1 app, travelling merchant, discord, merchant stock, world activities, whirlpooldnd, rs3, dsf, Alt1 toolkit, RuneScape tracker" />
+        <meta name="description" content="Track RuneScape Deep Sea Fishing events and scouts with our comprehensive Alt1 toolkit app. Real-time notifications for fishing events and world activities." />
+        <meta name="keywords" content="RuneScape, Deep Sea Fishing, DSF events, fishing scouts, Alt1 app, discord, world activities, whirlpooldnd, rs3, dsf, Alt1 toolkit, RuneScape tracker" />
         <meta name="author" content="LukeHankey" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://dsfeventtracker.com/alt1/" />
         
         <!-- Open Graph Meta Tags -->
         <meta property="og:title" content="DSF Event Tracker - Alt1 App" />
-        <meta property="og:description" content="Track RuneScape Deep Sea Fishing events and scouts with our comprehensive Alt1 toolkit app. Real-time notifications for fishing events, merchant stock, and world activities." />
+        <meta property="og:description" content="Track RuneScape Deep Sea Fishing events and scouts with our comprehensive Alt1 toolkit app. Real-time notifications for fishing events and world activities." />
         <meta property="og:url" content="https://dsfeventtracker.com/alt1/" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="DSF Event Tracker" />
@@ -58,47 +58,7 @@
         <div class="tabs">
             <div class="tabs__tab tabs__tab--active" data-tab="scoutsTab">Scouts</div>
             <div class="tabs__tab" data-tab="mistyTab">Misty</div>
-            <div class="tabs__tab" data-tab="mainTab">Merch Stock</div>
             <div class="tabs__tab" data-tab="settingsTab">Settings</div>
-        </div>
-        <!-- Main Tab Content -->
-        <div id="mainTab" class="tabs__content">
-            <h2>DSF Event Tracker</h2>
-            <div id="stock-table" class="stock-table-container">
-                <div class="table-scroll">
-                  <table class="event-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Slot A</th>
-                        <th>Slot B</th>
-                        <th>Slot C</th>
-                        <th>Slot D</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- JavaScript will populate rows for the 7 days here -->
-                    </tbody>
-                  </table>
-                </div>
-            </div>
-            <div class="event-footer">
-                <label for="datePicker">Select Date for more information: </label>
-                <input type="date" id="datePicker">
-            </div>
-            <!-- The Modal (hidden by default) -->
-            <div id="merchantModal" class="merchant-modal">
-                <div class="merchant-modal-content">
-                <!-- Close button -->
-                <div class="merchant-modal-header">
-                    <h3 id="merchantDateHeading"></h3>
-                    <span class="close" id="merchantModalClose">&times;</span>
-                </div>
-                <div id="merchantCardsContainer" class="merchant-cards">
-                    <!-- Cards will be populated dynamically -->
-                </div>
-                </div>
-            </div>
         </div>
         <!-- Settings Tab Content -->
         <div id="settingsTab" class="tabs__content">
@@ -139,7 +99,6 @@
                     <div class="form__group">
                         <label for="favoriteEvents" title="Select multiple options">Favorite Events (Multi-Select)</label>
                         <select id="favoriteEvents" multiple size="5">
-                            <option value="Travelling merchant">Travelling merchant</option>
                             <option value="Whirlpool">Whirlpool</option>
                             <option value="Treasure Turtle">Treasure Turtle</option>
                             <option value="Arkaneo">Arkaneo</option>
@@ -271,13 +230,17 @@
                             </div>
                             <!-- 2x2 Stats Grid -->
                             <div class="stats-grid">
-                                <div class="stat-box">
+                                <div class="stat-box stat-box--hidden" id="merchantEventsBox">
                                     <div class="stat-label">Merchant Events</div>
                                     <div class="stat-value" id="merchantEvents">0</div>
                                 </div>
-                                <div class="stat-box">
+                                <div class="stat-box stat-box--hidden" id="alt1MerchantBox">
                                     <div class="stat-label">Alt1 Merchant</div>
                                     <div class="stat-value" id="alt1Merchant">0</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-label">Manual Events</div>
+                                    <div class="stat-value" id="manualEvents">0</div>
                                 </div>
                                 <div class="stat-box">
                                     <div class="stat-label">Other Events</div>

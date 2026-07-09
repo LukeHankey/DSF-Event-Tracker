@@ -4,7 +4,7 @@ baseurl: ""
 url: "https://dsfeventtracker.com"
 
 # SEO settings
-keywords: "RuneScape, events, scouts, tracking, DSF, Deep Sea Fishing, Alt1, toolkit, app, fishing, rs3, travelling merchant, discord"
+keywords: "RuneScape, events, scouts, tracking, DSF, Deep Sea Fishing, Alt1, toolkit, app, fishing, rs3, discord"
 author: "LukeHankey"
 
 theme: jekyll-theme-slate

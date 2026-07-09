@@ -23,7 +23,7 @@ const chatbox = new ChatBoxReader();
 chatbox.readargs.colors.push(
     a1lib.mixColor(...[239, 0, 0]), // red text
     a1lib.mixColor(...[255, 100, 0]), // dark orange text
-    a1lib.mixColor(...[255, 136, 0]), // dsf merch text
+    a1lib.mixColor(...[255, 136, 0]), // DSF event text
     a1lib.mixColor(...[0, 166, 82]), // misty text
     a1lib.mixColor(...[50, 120, 190]), // fisherman
 );
@@ -51,9 +51,18 @@ let worldHopMessage = false;
 let mainboxRect = false;
 
 function updateMainTab(message: string): void {
-    const mainTabHeader = document.querySelector("#mainTab h2");
-    if (mainTabHeader) {
-        mainTabHeader.textContent = message;
+    let status = document.querySelector<HTMLElement>(".app-status");
+    if (status) {
+        status.textContent = message;
+        return;
+    }
+
+    const activeTab = document.querySelector(".tabs__content--active");
+    if (activeTab) {
+        status = document.createElement("div");
+        status.className = "app-status";
+        status.textContent = message;
+        activeTab.prepend(status);
     }
 }
 
@@ -195,8 +204,7 @@ export async function reportEvent(
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
     const eventId = uuid();
-    const eventKey = matchingEvent === "Travelling merchant" ? "merchantCount" : "otherCount";
-    const profileEventKey = `${isFirstEvent ? "alt1First" : "alt1"}.${eventKey}`;
+    const profileEventKey = `${isFirstEvent ? "alt1First" : "alt1"}.otherCount`;
     const eventRecord: EventRecord = {
         id: eventId,
         type: "addEvent",
