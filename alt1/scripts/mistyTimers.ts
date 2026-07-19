@@ -38,10 +38,7 @@ interface UnknownWorldEventStatus extends WorldEventStatusBase {
 }
 
 export type WorldEventStatus =
-    | ActiveWorldEventStatus
-    | InactiveWorldEventStatus
-    | SpawnableWorldEventStatus
-    | UnknownWorldEventStatus;
+    ActiveWorldEventStatus | InactiveWorldEventStatus | SpawnableWorldEventStatus | UnknownWorldEventStatus;
 
 type NonActiveWorldEventStatus = Exclude<WorldEventStatus, ActiveWorldEventStatus>;
 
