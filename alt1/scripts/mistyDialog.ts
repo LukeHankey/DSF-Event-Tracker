@@ -233,12 +233,8 @@ export async function readTextFromDialogBox({ alt1Pressed = false }: ReadDialogO
 }
 
 async function readNewStyleChatDialog(): Promise<void> {
-    let world = "";
-    try {
-        world = await fetchWorldNumber();
-    } catch {
-        return;
-    }
+    const world = await fetchWorldNumber().catch(() => null);
+    if (world === null) return;
 
     let ocrText = "";
     try {
