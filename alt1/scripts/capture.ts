@@ -357,7 +357,7 @@ async function readChatFromImage(img: a1lib.ImgRefBind): Promise<void> {
         document.querySelector("#mainTab h2")!.innerHTML = previousMainContent;
     }
 
-    let lines: ChatLine[] = [];
+    let lines: ChatLine[];
     try {
         lines = (chatbox.read() as ChatLine[])?.filter((line) => line.text) ?? []; // Read lines from the detected chat box
     } catch {

@@ -109,7 +109,7 @@ export function notifyEvent(event: EventRecord): void {
     const durationMs = getRemainingTime(event) * 1000;
 
     if (notificationModes.includes("tooltip")) {
-        let duration = 5_000;
+        let duration;
         switch (tooltipNotification) {
             case "30s":
                 duration = 30_000;
@@ -228,24 +228,22 @@ export function updateTitlebar() {
 }
 
 function buildStockFromState(): string {
-    let builder = "";
-    let state: StatusState | null = null;
+    let state: StatusState | null;
     try {
         state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
     } catch (error) {
         console.error("Failed to parse status daemon state", error);
-        return builder;
+        return "";
     }
     const stock = state?.stock;
-    if (!stock) {
-        return builder;
-    }
-    (["A", "B", "C", "D"] as const).forEach((slot) => {
-        const slotValue = stock[slot];
-        builder += `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
-    });
+    if (!stock) return "";
 
-    return builder;
+    return (["A", "B", "C", "D"] as const)
+        .map((slot) => {
+            const slotValue = stock[slot];
+            return `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
+        })
+        .join("");
 }
 
 export function setDefaultTitleBar() {
