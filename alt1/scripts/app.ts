@@ -16,8 +16,13 @@ import { initCapture, startCapturing } from "./capture";
 import { scheduleMidnightUpdate } from "./merchantStock";
 import { readTextFromDialogBox } from "./mistyDialog";
 import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./notifications";
+import { fetchRegistry } from "./worldRegistry";
 
 // If running in Alt1, identify and start capturing
+// The world lists come from the server; until this resolves the client runs
+// on its bundled fallback, and later changes arrive over the websocket.
+void fetchRegistry();
+
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
     registerStatusUpdates();

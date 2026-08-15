@@ -4,7 +4,6 @@ import {
     renderEventHistory,
     clearEventHistory,
     updateHideExpiredRows,
-    MEMBER_WORLDS,
 } from "./eventHistory";
 import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient, refreshToken } from "./ws";
@@ -13,6 +12,7 @@ import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
 import { renderStockTable } from "./merchantStock";
+import { getMemberWorlds } from "./worldRegistry";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -528,7 +528,8 @@ if (testEventButton && DEBUG) {
         // Get user-selected event
         const selectedEvent = (eventSelect.value as EventKeys) || "Testing";
         const eventDuration = eventTimes[selectedEvent] ?? 15; // Default to 15 if not found
-        const randomWorld = MEMBER_WORLDS[Math.floor(Math.random() * MEMBER_WORLDS.length)];
+        const memberWorlds = getMemberWorlds();
+        const randomWorld = memberWorlds[Math.floor(Math.random() * memberWorlds.length)];
 
         const testEvent: EventRecord = {
             id: uuid(),

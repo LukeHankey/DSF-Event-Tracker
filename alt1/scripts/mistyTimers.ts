@@ -4,7 +4,7 @@ import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
-import { MEMBER_WORLDS } from "./eventHistory";
+import { getMemberWorlds } from "./worldRegistry";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -110,7 +110,7 @@ export async function renderMistyTimers(): Promise<void> {
                 last_update_timestamp: Date.now(),
                 inactive_time: 0,
             } as InactiveWorldEventStatus;
-            for (const world_str of MEMBER_WORLDS) {
+            for (const world_str of getMemberWorlds()) {
                 const world = Number(world_str);
                 dummyData = { ...dummyData, world };
                 worldMap.set(world, dummyData);

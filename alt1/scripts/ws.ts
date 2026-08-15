@@ -5,14 +5,17 @@ import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
-import { WorldEventStatus, updateWorld } from "./mistyTimers";
+import { WorldEventStatus, updateWorld, renderMistyTimers } from "./mistyTimers";
+import { applyRegistryPayload, WorldRegistryPayload } from "./worldRegistry";
 import { WorldRecord } from "./mistyDialog";
 import { notifyEvent } from "./notifications";
 
 interface Version {
     version: string;
 }
-type ReceivedData = EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | Version;
+type RegistryUpdate = WorldRegistryPayload & { type: "worldRegistryUpdate" };
+type ReceivedData =
+    EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | RegistryUpdate | Version;
 declare const __APP_VERSION__: string;
 
 // Always read lastReload from sessionStorage when needed
@@ -167,6 +170,10 @@ export class WebSocketClient {
                         console.log("✅ Event sent successfully");
                     }
                 }
+            } else if ("type" in parsedData && parsedData.type === "worldRegistryUpdate") {
+                // A /worlds change on Discord reaches open clients here, so a
+                // league season starts without anyone restarting the app.
+                if (applyRegistryPayload(parsedData)) await renderMistyTimers();
             } else if ("type" in parsedData && parsedData.type === "clientProfileUpdate") {
                 this.processProfileUpdate(parsedData);
             } else if ("type" in parsedData) {
