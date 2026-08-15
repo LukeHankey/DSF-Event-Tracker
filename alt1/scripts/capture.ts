@@ -23,7 +23,7 @@ const chatbox = new ChatBoxReader();
 chatbox.readargs.colors.push(
     a1lib.mixColor(...[239, 0, 0]), // red text
     a1lib.mixColor(...[255, 100, 0]), // dark orange text
-    a1lib.mixColor(...[255, 136, 0]), // dsf merch text
+    a1lib.mixColor(...[255, 136, 0]), // dsf event text
     a1lib.mixColor(...[0, 166, 82]), // misty text
     a1lib.mixColor(...[50, 120, 190]), // fisherman
 );
@@ -195,7 +195,8 @@ export async function reportEvent(
     const rsn = localStorage.getItem("rsn") ?? sessionStorage.getItem("rsn") ?? "";
     const token = localStorage.getItem("accessToken");
     const eventId = uuid();
-    const eventKey = matchingEvent === "Travelling merchant" ? "merchantCount" : "otherCount";
+    // Every remaining event counts as "other": merchant counts are historical only.
+    const eventKey = "otherCount";
     const profileEventKey = `${isFirstEvent ? "alt1First" : "alt1"}.${eventKey}`;
     const eventRecord: EventRecord = {
         id: eventId,
