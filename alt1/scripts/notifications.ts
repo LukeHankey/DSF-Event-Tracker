@@ -1,5 +1,6 @@
 import { eventAbbreviations, EventRecord } from "./events";
-import { formatTimeLeftValue, getEndTime, getRemainingTime, getSpecialWorld } from "./eventHistory";
+import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
+import { getSpecialWorlds } from "./worldRegistry";
 import { API_URL } from "../config";
 
 type StatusState = {
@@ -211,8 +212,10 @@ function getNotifiedEvent(): NotifiedEvent | null {
 }
 
 function getSpecialWorldIcon(world: string): string {
-    const specialWorld = getSpecialWorld(world);
-    return specialWorld ? `<img height='100' width='100' src='${specialWorld.imageSrc}' />` : "";
+    // One icon per group the world belongs to, in registry order.
+    return getSpecialWorlds(world)
+        .map((specialWorld) => `<img height='100' width='100' src='${specialWorld.imageSrc}' />`)
+        .join("");
 }
 
 export function updateTitlebar() {

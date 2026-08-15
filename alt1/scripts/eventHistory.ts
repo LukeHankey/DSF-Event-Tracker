@@ -5,6 +5,7 @@ import { DEBUG } from "../config";
 import { userHasRequiredRole } from "./permissions";
 import { showToast } from "./notifications";
 import { updateWorld } from "./mistyTimers";
+import { getMemberWorlds, getSpecialWorlds } from "./worldRegistry";
 
 export let eventHistory: EventRecord[] = [];
 export let expiredEvents: EventRecord[] = [];
@@ -12,149 +13,6 @@ export const rowMap = new Map<UUIDTypes, HTMLTableRowElement>();
 
 // Local refresh interval for timer updates.
 let refreshInterval: NodeJS.Timeout | null = null;
-
-type SpecialWorld = {
-    world: number;
-    reason: string;
-    imageSrc: string;
-};
-
-export const MEMBER_WORLDS = [
-    "1",
-    "2",
-    "4",
-    "5",
-    "6",
-    "9",
-    "10",
-    "12",
-    "14",
-    "15",
-    "16",
-    "18",
-    "21",
-    "22",
-    "23",
-    "24",
-    "25",
-    "26",
-    "27",
-    "28",
-    "30",
-    "31",
-    "32",
-    "35",
-    "36",
-    "37",
-    "39",
-    "40",
-    "42",
-    "44",
-    "45",
-    "46",
-    "48",
-    "49",
-    "50",
-    "51",
-    "52",
-    "53",
-    "54",
-    "56",
-    "58",
-    "59",
-    "60",
-    "62",
-    "63",
-    "64",
-    "65",
-    "66",
-    "67",
-    "68",
-    "69",
-    "70",
-    "71",
-    "72",
-    "73",
-    "74",
-    "76",
-    "77",
-    "78",
-    "79",
-    "82",
-    "83",
-    "84",
-    "85",
-    "86",
-    "87",
-    "88",
-    "89",
-    "91",
-    "92",
-    "96",
-    "97",
-    "98",
-    "99",
-    "100",
-    "103",
-    "104",
-    "105",
-    "106",
-    "114",
-    "115",
-    "116",
-    "117",
-    "119",
-    "123",
-    "124",
-    "134",
-    "137",
-    "138",
-    "139",
-    "140",
-    "252",
-    "257",
-    "258",
-    "259",
-];
-
-const WorldActivity: Record<string, string> = {
-    legacy: "./assets/world_activity/legacy.png",
-    vip: "./assets/world_activity/vip_badge.png",
-    quickChat: "./assets/world_activity/quick_chat.png",
-    eoc: "./assets/world_activity/revolution.png",
-    fifteenPlus: "./assets/world_activity/1500.png",
-    twentyPlus: "./assets/world_activity/2000.png",
-    twentySixPlus: "./assets/world_activity/2600.png",
-    laggy: "./assets/world_activity/lag.png",
-    dsf: "./assets/world_activity/dsf.png",
-    sixtyNine: "./assets/world_activity/nice.png",
-};
-
-const rawSpecialWorlds: { world: number; key: string }[] = [
-    { world: 18, key: "legacy" },
-    { world: 30, key: "twentyPlus" },
-    { world: 48, key: "twentySixPlus" },
-    { world: 52, key: "vip" },
-    { world: 66, key: "eoc" },
-    { world: 84, key: "laggy" },
-    { world: 86, key: "fifteenPlus" },
-    { world: 96, key: "quickChat" },
-    { world: 114, key: "fifteenPlus" },
-    { world: 115, key: "legacy" },
-    { world: 116, key: "dsf" },
-    { world: 137, key: "legacy" },
-    { world: 69, key: "sixtyNine" },
-];
-
-const SPECIAL_WORLDS: SpecialWorld[] = rawSpecialWorlds.map(({ world, key }) => ({
-    world,
-    reason: key,
-    imageSrc: WorldActivity[key],
-}));
-
-export function getSpecialWorld(world: string): SpecialWorld | null {
-    return SPECIAL_WORLDS.find((item) => item.world.toString() === world) ?? null;
-}
 
 /**
  * Updates one or more cells in a table row.
@@ -651,12 +509,14 @@ function appendEventRow(event: EventRecord, highlight: boolean = false, pin: boo
     row.appendChild(createElement(event.event));
     // world
     const worldCell = document.createElement("td");
-    const specialWorld = getSpecialWorld(event.world);
-    if (specialWorld) {
+    // A world can belong to several groups at once (leagues on the DSF world,
+    // say), so every matching icon is shown, in registry order.
+    for (const specialWorld of getSpecialWorlds(event.world)) {
         const worldIcon = document.createElement("img");
         worldIcon.style.marginRight = "5px";
         worldIcon.src = specialWorld.imageSrc;
-        worldIcon.alt = specialWorld.reason;
+        worldIcon.alt = specialWorld.label;
+        worldIcon.title = specialWorld.label;
         worldCell.appendChild(worldIcon);
     }
     worldCell.appendChild(createElement(event.world, "", "span"));
@@ -852,7 +712,7 @@ function editEvent(event: EventRecord): void {
         const eventName = row.cells[1].textContent?.trim() as EventKeys;
 
         const newWorld = row.cells[2].textContent?.trim() || "";
-        if (!MEMBER_WORLDS.includes(newWorld)) {
+        if (!getMemberWorlds().includes(newWorld)) {
             row.cells[1].textContent = row.dataset.originalEvent ?? "";
             row.cells[2].textContent = row.dataset.originalWorld ?? "";
             row.cells[3].textContent = row.dataset.originalDuration ?? "";
