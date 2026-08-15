@@ -13,9 +13,8 @@ import "./ui";
 
 // Our new capture logic
 import { initCapture, startCapturing } from "./capture";
-import { scheduleMidnightUpdate } from "./merchantStock";
 import { readTextFromDialogBox } from "./mistyDialog";
-import { registerStatusUpdates, setDefaultTitleBar, updateTitlebar } from "./notifications";
+import { setDefaultTitleBar, updateTitlebar } from "./notifications";
 import { fetchRegistry } from "./worldRegistry";
 
 // If running in Alt1, identify and start capturing
@@ -25,11 +24,8 @@ void fetchRegistry();
 
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
-    registerStatusUpdates();
     initCapture(); // Set up any needed initial states
     startCapturing(); // Begin capturing every 1s
-    // Call scheduleMidnightUpdate once when your app starts.
-    scheduleMidnightUpdate();
     updateTitlebar();
 } else {
     // Not in Alt1, show instructions

@@ -1,12 +1,6 @@
 import { eventAbbreviations, EventRecord } from "./events";
 import { formatTimeLeftValue, getEndTime, getRemainingTime } from "./eventHistory";
 import { getSpecialWorlds } from "./worldRegistry";
-import { API_URL } from "../config";
-
-type StatusState = {
-    forDay: string;
-    stock: Record<"A" | "B" | "C" | "D", { slot: string; title: string; icon: string }>;
-};
 
 type NotifiedEvent = {
     message: string;
@@ -186,14 +180,6 @@ export function notifyEvent(event: EventRecord): void {
     }, durationMs);
 }
 
-export function registerStatusUpdates() {
-    const notificationModes: string[] = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
-    if (API_URL && notificationModes?.includes("toolbar")) {
-        const settings = getNotificationSettings();
-        alt1.registerStatusDaemon(`${API_URL}/merchant-stock/notify`, JSON.stringify({ settings }));
-    }
-}
-
 function getActiveEvent() {
     const { favoriteEvents } = getNotificationSettings();
     const history = JSON.parse(localStorage.getItem("eventHistory") ?? "[]") as EventRecord[];
@@ -221,36 +207,14 @@ function getSpecialWorldIcon(world: string): string {
 export function updateTitlebar() {
     const notifiedEvent = getNotifiedEvent();
     if (notifiedEvent && notifiedEvent.endTime > Date.now()) {
-        const stock = buildStockFromState();
-        let builder = stock.length > 0 ? `${stock}<vr/>` : stock;
-        builder += `${getSpecialWorldIcon(notifiedEvent.world)}${notifiedEvent.message}`;
-        alt1.setTitleBarText(builder);
+        alt1.setTitleBarText(`${getSpecialWorldIcon(notifiedEvent.world)}${notifiedEvent.message}`);
     } else {
         setDefaultTitleBar();
     }
 }
 
-function buildStockFromState(): string {
-    let state: StatusState | null;
-    try {
-        state = JSON.parse(alt1.getStatusDaemonState() || "{}") as StatusState;
-    } catch (error) {
-        console.error("Failed to parse status daemon state", error);
-        return "";
-    }
-    const stock = state?.stock;
-    if (!stock) return "";
-
-    return (["A", "B", "C", "D"] as const)
-        .map((slot) => {
-            const slotValue = stock[slot];
-            return `<img height='100' width='100' title='${slotValue.title}' src='${slotValue.icon}' />`;
-        })
-        .join("");
-}
-
 export function setDefaultTitleBar() {
-    alt1.setTitleBarText(buildStockFromState());
+    alt1.setTitleBarText("");
 }
 
 function showTooltip(message: string, durationMs: number = 5_000): void {

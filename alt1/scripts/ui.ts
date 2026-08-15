@@ -10,8 +10,7 @@ import { wsClient, refreshToken } from "./ws";
 import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
-import { registerStatusUpdates, setDefaultTitleBar, showToast } from "./notifications";
-import { renderStockTable } from "./merchantStock";
+import { setDefaultTitleBar, showToast } from "./notifications";
 import { getMemberWorlds } from "./worldRegistry";
 
 // Grab all tabs as HTMLElements using the new BEM class name
@@ -203,7 +202,6 @@ settingsForm?.addEventListener("submit", (e) => {
     }
 
     // when settings change, reset the status daemon as it relies on user settings
-    registerStatusUpdates();
     setDarkMode();
 
     // Show success toast notification
@@ -564,7 +562,6 @@ function populateEventDropdown() {
 
 // When the page loads, hide the debug container if not in debug mode.
 window.addEventListener("DOMContentLoaded", () => {
-    renderStockTable();
     const debugContainer = document.getElementById("debugContainer");
     if (debugContainer) {
         if (!DEBUG) {
