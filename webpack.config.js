@@ -74,7 +74,9 @@ module.exports = (env = {}) => {
                     test: /\.(png|jpe?g|gif)$/i,
                     type: "asset/resource",
                     generator: {
-                        filename: "assets/stock_icons/[name][ext]",
+                        // Applies to every imported image, not just the merchant
+                        // stock icons this was originally named for.
+                        filename: "assets/images/[name][ext]",
                     },
                 },
                 // file types useful for writing alt1 apps, make sure these two loader come after any other json or png loaders, otherwise they will be ignored
