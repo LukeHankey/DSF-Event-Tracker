@@ -10,6 +10,7 @@ import {
     mistyWindowRemainingMs,
 } from "./clientFeatures";
 import { hasLeagueWorlds, isLeagueWorld } from "./worldRegistry";
+import { shouldShowWorld } from "./worldFilters";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
@@ -572,21 +573,13 @@ function sortTableByColumn(table: HTMLTableElement, column: TableColumn, asc: bo
     // Reattach the rows in sorted order.
     rows.forEach((row) => tbody.appendChild(row));
 
-    const hideInactiveWorldsElement = document.getElementById("hideInactiveWorlds") as HTMLInputElement;
-    const hideUnknownWorldsElement = document.getElementById("hideUnknownWorlds") as HTMLInputElement;
-
-    if (hideInactiveWorldsElement.checked || hideUnknownWorldsElement.checked) hideWorlds();
-
-    // Check if any range filters are active (unchecked).
-    // If any are unchecked, we must run hideWorlds() to ensure rows outside the selected ranges are hidden.
-    const r130 = (document.getElementById("range130") as HTMLInputElement)?.checked ?? true;
-    const r3060 = (document.getElementById("range3060") as HTMLInputElement)?.checked ?? true;
-    const r6090 = (document.getElementById("range6090") as HTMLInputElement)?.checked ?? true;
-    const r90Plus = (document.getElementById("range90Plus") as HTMLInputElement)?.checked ?? true;
-
-    if (!r130 || !r3060 || !r6090 || !r90Plus) {
-        hideWorlds();
-    }
+    // Always re-apply the filters. This used to enumerate the checkboxes and
+    // call hideWorlds() only when one of them looked active, which meant every
+    // new filter had to be added here as well as to hideWorlds() — and the
+    // Leagues checkbox was not, so with only Leagues unticked nothing ran and
+    // league worlds reappeared on every tab switch. hideWorlds() sets display
+    // in both directions, so calling it unconditionally is correct and cheap.
+    hideWorlds();
 }
 
 function parseTimerString(timerStr: string): number {
@@ -630,25 +623,15 @@ function hideWorlds(): void {
         const world = parseInt(worldText, 10);
         const status = cells[2].textContent?.trim() || "";
 
-        let visible = true;
-
-        if (hideInactive && status === "Inactive") {
-            visible = false;
-        } else if (hideUnknown && status === "Unknown") {
-            visible = false;
-        }
-
-        if (visible) {
-            // League worlds answer to their own filter rather than the ranges.
-            // They all sit above 90, so otherwise unticking "90+" would hide
-            // them even with Leagues ticked.
-            if (isLeagueWorld(String(world))) {
-                visible = showLeagues;
-            } else if (world <= 30 && !range130) visible = false;
-            else if (world > 30 && world <= 60 && !range3060) visible = false;
-            else if (world > 60 && world <= 90 && !range6090) visible = false;
-            else if (world > 90 && !range90Plus) visible = false;
-        }
+        const visible = shouldShowWorld(world, status, isLeagueWorld(String(world)), {
+            hideInactive,
+            hideUnknown,
+            range130,
+            range3060,
+            range6090,
+            range90Plus,
+            showLeagues,
+        });
 
         row.style.display = visible ? "" : "none";
     }
