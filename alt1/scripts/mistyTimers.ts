@@ -63,7 +63,6 @@ type TableColumnName = keyof typeof TableColumn;
 type TableSortOrder = "asc" | "desc";
 
 export const worldMap = new Map<number, WorldEventStatus>();
-const worldsOnDisplay = new Set<number>();
 let refreshIntervalMisty: NodeJS.Timeout | null = null;
 
 /**
@@ -345,33 +344,28 @@ export async function updateWorld(worldEvent: WorldEventStatus): Promise<void> {
     const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
     const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
+    // Whether a world has a row is asked of the table itself. A parallel Set
+    // used to track it, and nothing cleared that Set when the table was emptied
+    // — on lock, or at the start of a re-render. A world that was on screen,
+    // went Active while the tab was rebuilt, and later went inactive again was
+    // then believed to still have a row: the update found nothing to write to
+    // and appended nothing, so the world stayed missing until the next full
+    // render.
+    const tbody = document.getElementById("mistyTimerBody");
+    const existingRow = tbody?.querySelector(`tr[data-world="${worldEvent.world}"]`) as HTMLTableRowElement | null;
+
     if (worldEvent.status === "Active") {
         // If the world is now active, remove its row from the table.
-        const tbody = document.getElementById("mistyTimerBody");
-        if (tbody) {
-            const row = tbody.querySelector(`tr[data-world="${worldEvent.world}"]`);
-            if (row) {
-                row.remove();
-            }
-        }
-        // Also remove it from the set of displayed worlds.
-        worldsOnDisplay.delete(worldEvent.world);
-    } else if (!worldsOnDisplay.has(worldEvent.world)) {
-        // If the world is not active and not already displayed, append its row.
+        existingRow?.remove();
+    } else if (!existingRow) {
+        // If the world is not active and has no row yet, append one.
         await appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
     } else {
-        // This is the case for an update on an already-displayed non-active world.
-        const tbody = document.getElementById("mistyTimerBody");
-        if (tbody) {
-            // Get the row for the current world.
-            const row = tbody.querySelector(`tr[data-world="${worldEvent.world}"]`) as HTMLTableRowElement | null;
-            if (row) {
-                // Remove the "stopped" attribute so the row updates again.
-                row.removeAttribute("data-timer-stopped");
-                // Update this row with the latest timing info immediately.
-                updateRowTimer(row, worldEvent, Date.now());
-            }
-        }
+        // An update on an already-displayed non-active world.
+        // Remove the "stopped" attribute so the row updates again.
+        existingRow.removeAttribute("data-timer-stopped");
+        updateRowTimer(existingRow, worldEvent, Date.now());
+
         const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
         sortTableByColumn(table, TableColumn[tableSort], tableSortOrder === "asc");
     }
@@ -436,7 +430,6 @@ async function appendEventRow(
 
     // Append the row to the table body
     tbody.appendChild(row);
-    worldsOnDisplay.add(worldEvent.world);
 
     // Map the sortBy option (e.g. "World" | "Status" | "InactiveFor") to its numeric index.
     const columnIndex = TableColumn[sortBy];
