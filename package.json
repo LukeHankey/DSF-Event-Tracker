@@ -47,7 +47,6 @@
         "copy-webpack-plugin": "^14.0.0",
         "css-loader": "^7.1.4",
         "eslint": "^10.8.1",
-        "express": "^4.21.2",
         "gh-pages": "^6.3.0",
         "globals": "^17.11.0",
         "html-webpack-plugin": "^5.6.8",
