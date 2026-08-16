@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { applyFeaturesPayload, canViewMisty, getFeatures, mistyLockMessage, resetFeatures } from "./clientFeatures";
+import {
+    applyFeaturesPayload,
+    canViewMisty,
+    formatCountdown,
+    getFeatures,
+    mistyLockMessage,
+    mistyWindowRemainingMs,
+    resetFeatures,
+} from "./clientFeatures";
 
 beforeEach(() => {
     resetFeatures();
@@ -60,5 +68,74 @@ describe("lock message", () => {
 
     it("tells a signed-in user they need the Scouter role when closed", () => {
         expect(mistyLockMessage(["another-role"])).toMatch(/scouter/i);
+    });
+});
+
+describe("window expiry", () => {
+    it("treats a window whose end has passed as closed", () => {
+        applyFeaturesPayload({
+            mistyPublic: { open: true, until: new Date(Date.now() - 1000).toISOString(), reason: null },
+        });
+
+        expect(canViewMisty(["another-role"])).toBe(false);
+    });
+
+    it("keeps a window with time left open", () => {
+        applyFeaturesPayload({
+            mistyPublic: { open: true, until: new Date(Date.now() + 60_000).toISOString(), reason: null },
+        });
+
+        expect(canViewMisty(["another-role"])).toBe(true);
+    });
+
+    it("keeps an open-ended window open", () => {
+        applyFeaturesPayload({ mistyPublic: { open: true, until: null, reason: null } });
+
+        expect(canViewMisty(["another-role"])).toBe(true);
+    });
+});
+
+describe("countdown", () => {
+    it("reports the milliseconds left", () => {
+        applyFeaturesPayload({
+            mistyPublic: { open: true, until: new Date(Date.now() + 90_000).toISOString(), reason: null },
+        });
+
+        expect(mistyWindowRemainingMs()).toBeGreaterThan(88_000);
+        expect(mistyWindowRemainingMs()).toBeLessThanOrEqual(90_000);
+    });
+
+    it("reports null for an open-ended window, which has nothing to count down", () => {
+        applyFeaturesPayload({ mistyPublic: { open: true, until: null, reason: null } });
+
+        expect(mistyWindowRemainingMs()).toBeNull();
+    });
+
+    it("never reports a negative remainder", () => {
+        applyFeaturesPayload({
+            mistyPublic: { open: true, until: new Date(Date.now() - 60_000).toISOString(), reason: null },
+        });
+
+        expect(mistyWindowRemainingMs()).toBe(0);
+    });
+
+    it("formats seconds", () => {
+        expect(formatCountdown(43_000)).toBe("43s");
+    });
+
+    it("formats minutes and seconds", () => {
+        expect(formatCountdown(9 * 60_000 + 43_000)).toBe("9m 43s");
+    });
+
+    it("formats hours and minutes, dropping seconds", () => {
+        expect(formatCountdown(3 * 3_600_000 + 12 * 60_000 + 5_000)).toBe("3h 12m");
+    });
+
+    it("formats days and hours for a long window", () => {
+        expect(formatCountdown(2 * 86_400_000 + 3 * 3_600_000)).toBe("2d 3h");
+    });
+
+    it("formats zero", () => {
+        expect(formatCountdown(0)).toBe("0s");
     });
 });

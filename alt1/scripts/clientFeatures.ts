@@ -63,7 +63,50 @@ export function canViewMisty(roleIds: string[] | null): boolean {
     if (roleIds?.includes(SCOUTER_ROLE_ID)) return true;
     if (!roleIds) return false;
 
-    return currentFeatures.mistyPublic.open;
+    return isWindowOpen();
+}
+
+/**
+ * Whether the window is open *now*.
+ *
+ * The server computes `open` when it sends the payload, so a client holding a
+ * payload from earlier would stay unlocked past the end time until something
+ * else arrived. Checking `until` here means the window closes itself on the
+ * client too.
+ */
+function isWindowOpen(): boolean {
+    const { open, until } = currentFeatures.mistyPublic;
+    if (!open) return false;
+    if (!until) return true;
+
+    return new Date(until).getTime() > Date.now();
+}
+
+/** Milliseconds left in the window, or null when it has no end. */
+export function mistyWindowRemainingMs(): number | null {
+    const { until } = currentFeatures.mistyPublic;
+    if (!until) return null;
+
+    return Math.max(0, new Date(until).getTime() - Date.now());
+}
+
+/**
+ * A countdown that stays short at every scale: "2d 3h", "3h 12m", "9m 43s".
+ *
+ * Seconds only matter when the end is close, so they are dropped above an
+ * hour where they would just be noise in a banner.
+ */
+export function formatCountdown(remainingMs: number): string {
+    const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+    const days = Math.floor(totalSeconds / 86_400);
+    const hours = Math.floor((totalSeconds % 86_400) / 3_600);
+    const minutes = Math.floor((totalSeconds % 3_600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (days) return `${days}d ${hours}h`;
+    if (hours) return `${hours}h ${minutes}m`;
+    if (minutes) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
 }
 
 /** What to tell someone who cannot see the tab, so the lock is not a mystery. */

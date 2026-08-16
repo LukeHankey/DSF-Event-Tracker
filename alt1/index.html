@@ -83,6 +83,11 @@
                         </div>
                         <small id="verificationMessage"></small>
                     </div>
+                    <!-- Signing out has to revoke the session, not just clear the field above. -->
+                    <div class="form__group" id="signOutSection" style="display: none;">
+                        <button type="button" id="signOutButton" class="validate-btn">Sign out</button>
+                        <small id="signOutMessage">Clears this device and ends the session.</small>
+                    </div>
                     <div class="form__group">
                         <label for="rsn">RSN</label>
                         <input type="text", id="rsn", placeholder="Enter RSN", maxlength="12" title="RuneScape character name."/>
