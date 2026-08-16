@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { API_URL } from "../config";
+import { clearSessionId } from "./session";
 
 /**
  * End the session.
@@ -31,4 +32,7 @@ export async function signOut(): Promise<void> {
     // The form field is how someone identifies themselves; leaving it filled in
     // after signing out invites the same confusion again.
     localStorage.removeItem("discordID");
+    // The server has just removed this session, so the id refers to nothing.
+    // Signing in again starts a fresh one rather than reusing a dead name.
+    clearSessionId();
 }

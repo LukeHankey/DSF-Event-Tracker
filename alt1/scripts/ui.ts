@@ -9,6 +9,7 @@ import { EventKeys, EventRecord, eventTimes } from "./events";
 import { wsClient, refreshToken } from "./ws";
 import { DEBUG, API_URL } from "../config";
 import { v4 as uuid, UUIDTypes } from "uuid";
+import { getSessionId } from "./session";
 import axios from "axios";
 import { setDefaultTitleBar, showToast } from "./notifications";
 import { getMemberWorlds } from "./worldRegistry";
@@ -291,8 +292,10 @@ document.getElementById("submitVerificationCode")?.addEventListener("click", asy
         return;
     }
 
+    // The session id tells the server which client this is, so signing in here
+    // does not end the session in another Alt1 instance or on another machine.
     const response = await axios.post(
-        `${API_URL}/auth/verify/${discordID}?code=${verificationCode}`,
+        `${API_URL}/auth/verify/${discordID}?code=${verificationCode}&session_id=${getSessionId()}`,
         {},
         {
             headers: {
