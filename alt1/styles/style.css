@@ -297,6 +297,17 @@ body.dark-mode .event-table td {
     border: 1px dashed #ccc;
 }
 
+/* Row hover: the table is read across while looking at the game, so it needs to
+   be obvious which row the cursor is on. Kept off the row being edited, which
+   has its own dashed border. */
+.event-table tbody tr:not(.editing):hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .event-table tbody tr:not(.editing):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
 .table-scroll {
     flex: 1;
     overflow: auto;
