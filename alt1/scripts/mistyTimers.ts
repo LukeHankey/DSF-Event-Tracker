@@ -433,49 +433,57 @@ async function appendEventRow(
 }
 
 // Initialize sorting for each header cell.
+// renderMistyTimers() runs on every websocket broadcast, tab switch and capture,
+// and it calls initTableSorting each time. The headers are static markup, so
+// addEventListener stacked another handler on every render: with two handlers a
+// click toggled asc -> desc -> asc and the direction never appeared to change,
+// which is why a column could only be sorted once. Handlers are bound once.
+let tableSortingBound = false;
+
 function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): void {
     const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
     if (!table) return;
     const headers = table.querySelectorAll("th");
     headers.forEach((header, index) => {
         if (index === 0) return;
-        header.addEventListener("click", () => {
-            // Toggle sort direction using a data attribute.
-            const currentDir = header.getAttribute("data-sort-dir") || "asc";
-            const newDir: TableSortOrder = currentDir === "asc" ? "desc" : "asc";
-            header.setAttribute("data-sort-dir", newDir);
+        if (!tableSortingBound)
+            header.addEventListener("click", () => {
+                // Toggle sort direction using a data attribute.
+                const currentDir = header.getAttribute("data-sort-dir") || "asc";
+                const newDir: TableSortOrder = currentDir === "asc" ? "desc" : "asc";
+                header.setAttribute("data-sort-dir", newDir);
 
-            // Update icon in this header.
-            const icon = header.querySelector(".sort-icon");
-            if (icon) {
-                icon.textContent = newDir === "asc" ? "▲" : "▼";
-            }
+                // Update icon in this header.
+                const icon = header.querySelector(".sort-icon");
+                if (icon) {
+                    icon.textContent = newDir === "asc" ? "▲" : "▼";
+                }
 
-            // Map the header index to our enum.
-            let column: TableColumn;
-            switch (index) {
-                case 1:
-                    column = TableColumn.World;
-                    break;
-                case 2:
-                    column = TableColumn.Status;
-                    break;
-                case 3:
-                    column = TableColumn.InactiveFor;
-                    break;
-                case 4:
-                    column = TableColumn.LastChecked;
-                    break;
-                default:
-                    console.warn(`No sortable column defined for header index ${index}`);
-                    return;
-            }
+                // Map the header index to our enum.
+                let column: TableColumn;
+                switch (index) {
+                    case 1:
+                        column = TableColumn.World;
+                        break;
+                    case 2:
+                        column = TableColumn.Status;
+                        break;
+                    case 3:
+                        column = TableColumn.InactiveFor;
+                        break;
+                    case 4:
+                        column = TableColumn.LastChecked;
+                        break;
+                    default:
+                        console.warn(`No sortable column defined for header index ${index}`);
+                        return;
+                }
 
-            localStorage.setItem("tableSort", TableColumn[column]);
-            localStorage.setItem("tableSortOrder", newDir);
+                localStorage.setItem("tableSort", TableColumn[column]);
+                localStorage.setItem("tableSortOrder", newDir);
 
-            sortTableByColumn(table, column, newDir === "asc");
-        });
+                sortTableByColumn(table, column, newDir === "asc");
+            });
 
         // On startup, if this header corresponds to the stored sort column, update its UI.
         let column: TableColumn | undefined;
@@ -513,6 +521,8 @@ function initTableSorting(sortBy: TableColumnName, sortOrder: TableSortOrder): v
             sortTableByColumn(table, sortColumn, sortOrder === "asc");
         }
     });
+
+    tableSortingBound = true;
 }
 
 // Sort the table rows by a specific column index.
