@@ -10,43 +10,60 @@
 export interface WorldFilters {
     hideInactive: boolean;
     hideUnknown: boolean;
+    hideLeagues: boolean;
+    hideLegacy: boolean;
     range130: boolean;
     range3060: boolean;
     range6090: boolean;
     range90Plus: boolean;
-    showLeagues: boolean;
 }
 
 export const ALL_VISIBLE: WorldFilters = {
     hideInactive: false,
     hideUnknown: false,
+    hideLeagues: false,
+    hideLegacy: false,
     range130: true,
     range3060: true,
     range6090: true,
     range90Plus: true,
-    showLeagues: true,
 };
+
+/** Which special groups a world belongs to, as far as the filters care. */
+export interface WorldGroups {
+    isLeague: boolean;
+    isLegacy: boolean;
+}
 
 /**
  * Whether a row survives the current filters.
  *
- * `isLeague` is passed in rather than looked up so this stays independent of
- * the registry: the caller knows which worlds belong to the current season.
+ * Group membership is passed in rather than looked up so this stays
+ * independent of the registry: the caller knows which worlds are in which
+ * group this season.
  *
- * League worlds answer to the Leagues checkbox *instead of* the ranges. Every
- * league world sits above 90, so applying both would mean unticking "90+" hid
- * them even with Leagues ticked, and the two controls would fight.
+ * The "Hide X" filters are subtractive and all read the same way — ticked
+ * removes those rows — which is why Leagues reads as "Hide Leagues" alongside
+ * "Hide Inactive" and "Hide Unknown" rather than as a range.
+ *
+ * League worlds still bypass the *ranges*. Every league world sits above 90,
+ * so unticking "90+" would otherwise hide them all and the two controls would
+ * fight. Legacy worlds are scattered across the ranges and get no such
+ * exemption.
  */
 export const shouldShowWorld = (
     world: number,
     status: string,
-    isLeague: boolean,
+    groups: WorldGroups,
     filters: WorldFilters = ALL_VISIBLE,
 ): boolean => {
     if (filters.hideInactive && status === "Inactive") return false;
     if (filters.hideUnknown && status === "Unknown") return false;
 
-    if (isLeague) return filters.showLeagues;
+    if (groups.isLeague && filters.hideLeagues) return false;
+    if (groups.isLegacy && filters.hideLegacy) return false;
+
+    if (groups.isLeague) return true;
 
     if (world <= 30) return filters.range130;
     if (world <= 60) return filters.range3060;

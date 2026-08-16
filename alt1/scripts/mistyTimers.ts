@@ -9,11 +9,14 @@ import {
     mistyLockMessage,
     mistyWindowRemainingMs,
 } from "./clientFeatures";
-import { hasLeagueWorlds, isLeagueWorld } from "./worldRegistry";
+import { hasLeagueWorlds, hasSpecialWorlds, isLeagueWorld, isSpecialWorld } from "./worldRegistry";
 import { shouldShowWorld } from "./worldFilters";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
+
+/** The registry key for legacy-combat worlds. */
+const LEGACY_KEY = "legacy";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -63,7 +66,6 @@ type TableColumnName = keyof typeof TableColumn;
 type TableSortOrder = "asc" | "desc";
 
 export const worldMap = new Map<number, WorldEventStatus>();
-const worldsOnDisplay = new Set<number>();
 let refreshIntervalMisty: NodeJS.Timeout | null = null;
 
 /**
@@ -220,8 +222,12 @@ export function startMistyimerRefresh(): void {
  * filter nothing, so it stays out of the way.
  */
 export function updateLeaguesFilterVisibility(): void {
-    const label = document.getElementById("leaguesFilterLabel");
-    if (label) label.hidden = !hasLeagueWorlds();
+    const leagues = document.getElementById("leaguesFilterLabel");
+    if (leagues) leagues.hidden = !hasLeagueWorlds();
+
+    // Same rule for legacy: a filter that would remove nothing is only clutter.
+    const legacy = document.getElementById("legacyFilterLabel");
+    if (legacy) legacy.hidden = !hasSpecialWorlds(LEGACY_KEY);
 }
 
 /** Stop the per-second refresh when the tab is not being looked at. */
@@ -345,33 +351,28 @@ export async function updateWorld(worldEvent: WorldEventStatus): Promise<void> {
     const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
     const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
 
+    // Whether a world has a row is asked of the table itself. A parallel Set
+    // used to track it, and nothing cleared that Set when the table was emptied
+    // — on lock, or at the start of a re-render. A world that was on screen,
+    // went Active while the tab was rebuilt, and later went inactive again was
+    // then believed to still have a row: the update found nothing to write to
+    // and appended nothing, so the world stayed missing until the next full
+    // render.
+    const tbody = document.getElementById("mistyTimerBody");
+    const existingRow = tbody?.querySelector(`tr[data-world="${worldEvent.world}"]`) as HTMLTableRowElement | null;
+
     if (worldEvent.status === "Active") {
         // If the world is now active, remove its row from the table.
-        const tbody = document.getElementById("mistyTimerBody");
-        if (tbody) {
-            const row = tbody.querySelector(`tr[data-world="${worldEvent.world}"]`);
-            if (row) {
-                row.remove();
-            }
-        }
-        // Also remove it from the set of displayed worlds.
-        worldsOnDisplay.delete(worldEvent.world);
-    } else if (!worldsOnDisplay.has(worldEvent.world)) {
-        // If the world is not active and not already displayed, append its row.
+        existingRow?.remove();
+    } else if (!existingRow) {
+        // If the world is not active and has no row yet, append one.
         await appendEventRow(worldEvent as NonActiveWorldEventStatus, tableSort, tableSortOrder);
     } else {
-        // This is the case for an update on an already-displayed non-active world.
-        const tbody = document.getElementById("mistyTimerBody");
-        if (tbody) {
-            // Get the row for the current world.
-            const row = tbody.querySelector(`tr[data-world="${worldEvent.world}"]`) as HTMLTableRowElement | null;
-            if (row) {
-                // Remove the "stopped" attribute so the row updates again.
-                row.removeAttribute("data-timer-stopped");
-                // Update this row with the latest timing info immediately.
-                updateRowTimer(row, worldEvent, Date.now());
-            }
-        }
+        // An update on an already-displayed non-active world.
+        // Remove the "stopped" attribute so the row updates again.
+        existingRow.removeAttribute("data-timer-stopped");
+        updateRowTimer(existingRow, worldEvent, Date.now());
+
         const table = document.getElementById("mistyTimersTable") as HTMLTableElement;
         sortTableByColumn(table, TableColumn[tableSort], tableSortOrder === "asc");
     }
@@ -436,7 +437,6 @@ async function appendEventRow(
 
     // Append the row to the table body
     tbody.appendChild(row);
-    worldsOnDisplay.add(worldEvent.world);
 
     // Map the sortBy option (e.g. "World" | "Status" | "InactiveFor") to its numeric index.
     const columnIndex = TableColumn[sortBy];
@@ -608,7 +608,8 @@ function hideWorlds(): void {
     const range3060 = (document.getElementById("range3060") as HTMLInputElement).checked;
     const range6090 = (document.getElementById("range6090") as HTMLInputElement).checked;
     const range90Plus = (document.getElementById("range90Plus") as HTMLInputElement).checked;
-    const showLeagues = (document.getElementById("rangeLeagues") as HTMLInputElement | null)?.checked ?? true;
+    const hideLeagues = (document.getElementById("hideLeagues") as HTMLInputElement | null)?.checked ?? false;
+    const hideLegacy = (document.getElementById("hideLegacy") as HTMLInputElement | null)?.checked ?? false;
 
     const tbody = document.getElementById("mistyTimersTable");
     if (!tbody) return;
@@ -623,15 +624,12 @@ function hideWorlds(): void {
         const world = parseInt(worldText, 10);
         const status = cells[2].textContent?.trim() || "";
 
-        const visible = shouldShowWorld(world, status, isLeagueWorld(String(world)), {
-            hideInactive,
-            hideUnknown,
-            range130,
-            range3060,
-            range6090,
-            range90Plus,
-            showLeagues,
-        });
+        const visible = shouldShowWorld(
+            world,
+            status,
+            { isLeague: isLeagueWorld(String(world)), isLegacy: isSpecialWorld(LEGACY_KEY, String(world)) },
+            { hideInactive, hideUnknown, hideLeagues, hideLegacy, range130, range3060, range6090, range90Plus },
+        );
 
         row.style.display = visible ? "" : "none";
     }
@@ -660,14 +658,46 @@ if (hideUnknownWorldsElement) {
         hideWorlds();
     });
 }
-// Initialize range filters
-const ranges = ["range130", "range3060", "range6090", "range90Plus", "rangeLeagues"];
+// Initialize range filters. Ticked shows that range, and unticked hides it, so
+// these default to on.
+const ranges = ["range130", "range3060", "range6090", "range90Plus"];
 ranges.forEach((id) => {
     const el = document.getElementById(id) as HTMLInputElement | null;
     if (el) {
         const stored = localStorage.getItem(id);
         // Default to true if not set
         el.checked = stored === null ? true : stored === "true";
+        el.addEventListener("change", (e) => {
+            const checkbox = e.target as HTMLInputElement;
+            localStorage.setItem(id, checkbox.checked ? "true" : "false");
+            hideWorlds();
+        });
+    }
+});
+
+/**
+ * The leagues filter used to be a range — "Leagues", ticked to show them.
+ * It reads as "Hide Leagues" now, beside Hide Inactive and Hide Unknown, so
+ * every filter in that row means the same thing when ticked. Anyone who had
+ * the old setting keeps their intent: showing leagues becomes not hiding them.
+ */
+const migrateLeaguesFilter = (): void => {
+    const old = localStorage.getItem("rangeLeagues");
+    if (old === null) return;
+
+    if (localStorage.getItem("hideLeagues") === null) {
+        localStorage.setItem("hideLeagues", old === "false" ? "true" : "false");
+    }
+    localStorage.removeItem("rangeLeagues");
+};
+
+migrateLeaguesFilter();
+
+// Hide filters: unticked by default, because the default is to show everything.
+["hideLeagues", "hideLegacy"].forEach((id) => {
+    const el = document.getElementById(id) as HTMLInputElement | null;
+    if (el) {
+        el.checked = localStorage.getItem(id) === "true";
         el.addEventListener("change", (e) => {
             const checkbox = e.target as HTMLInputElement;
             localStorage.setItem(id, checkbox.checked ? "true" : "false");
