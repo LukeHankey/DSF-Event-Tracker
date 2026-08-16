@@ -6,6 +6,8 @@ import {
     getMemberWorlds,
     getRegistry,
     getSpecialWorlds,
+    isLeagueWorld,
+    hasLeagueWorlds,
     isRegistryPayload,
     resetRegistry,
     WORLD_ACTIVITY_ICONS,
@@ -150,5 +152,53 @@ describe("payload type guard", () => {
 
     it("rejects non-string member worlds", () => {
         expect(isRegistryPayload(payload({ memberWorlds: [1, 2, 3] }))).toBe(false);
+    });
+});
+
+describe("league worlds", () => {
+    it("knows a world belongs to an enabled leagues group", () => {
+        applyRegistryPayload(
+            payload({ specials: [{ key: "leagues", label: "Leagues", enabled: true, worlds: ["143", "172"] }] }),
+        );
+
+        expect(isLeagueWorld("172")).toBe(true);
+    });
+
+    it("does not treat other worlds as league worlds", () => {
+        applyRegistryPayload(
+            payload({ specials: [{ key: "leagues", label: "Leagues", enabled: true, worlds: ["143"] }] }),
+        );
+
+        expect(isLeagueWorld("84")).toBe(false);
+    });
+
+    it("ignores a disabled leagues group, since the season is over", () => {
+        applyRegistryPayload(
+            payload({ specials: [{ key: "leagues", label: "Leagues", enabled: false, worlds: ["143"] }] }),
+        );
+
+        expect(isLeagueWorld("143")).toBe(false);
+    });
+
+    it("reports whether leagues are running at all", () => {
+        applyRegistryPayload(
+            payload({ specials: [{ key: "leagues", label: "Leagues", enabled: true, worlds: ["143"] }] }),
+        );
+
+        expect(hasLeagueWorlds()).toBe(true);
+    });
+
+    it("reports no leagues when the group is disabled", () => {
+        applyRegistryPayload(
+            payload({ specials: [{ key: "leagues", label: "Leagues", enabled: false, worlds: ["143"] }] }),
+        );
+
+        expect(hasLeagueWorlds()).toBe(false);
+    });
+
+    it("reports no leagues when there is no such group", () => {
+        applyRegistryPayload(payload({ specials: [{ key: "dsf", label: "DSF", enabled: true, worlds: ["116"] }] }));
+
+        expect(hasLeagueWorlds()).toBe(false);
     });
 });
