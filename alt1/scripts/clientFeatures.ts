@@ -63,7 +63,7 @@ export function canViewMisty(roleIds: string[] | null): boolean {
     if (roleIds?.includes(SCOUTER_ROLE_ID)) return true;
     if (!roleIds) return false;
 
-    return isWindowOpen();
+    return isMistyWindowOpen();
 }
 
 /**
@@ -74,12 +74,25 @@ export function canViewMisty(roleIds: string[] | null): boolean {
  * else arrived. Checking `until` here means the window closes itself on the
  * client too.
  */
-function isWindowOpen(): boolean {
+export function isMistyWindowOpen(): boolean {
     const { open, until } = currentFeatures.mistyPublic;
     if (!open) return false;
     if (!until) return true;
 
-    return new Date(until).getTime() > Date.now();
+    return parseServerTime(until) > Date.now();
+}
+
+/**
+ * Parse a server timestamp, assuming UTC when it carries no offset.
+ *
+ * A bare "2026-08-16T01:52:08" is read as *local* time by Date, so a window
+ * ending an hour from now looked already over to anyone east of UTC — the tab
+ * locked while the window was open. The server now sends an offset; this keeps
+ * an older payload from reintroducing it.
+ */
+function parseServerTime(value: string): number {
+    const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/.test(value);
+    return new Date(hasZone ? value : `${value}Z`).getTime();
 }
 
 /** Milliseconds left in the window, or null when it has no end. */
@@ -87,7 +100,7 @@ export function mistyWindowRemainingMs(): number | null {
     const { until } = currentFeatures.mistyPublic;
     if (!until) return null;
 
-    return Math.max(0, new Date(until).getTime() - Date.now());
+    return Math.max(0, parseServerTime(until) - Date.now());
 }
 
 /**

@@ -139,3 +139,37 @@ describe("countdown", () => {
         expect(formatCountdown(0)).toBe("0s");
     });
 });
+
+describe("timestamps without an offset", () => {
+    it("reads a bare timestamp as UTC, not local time", () => {
+        // The server used to send these. Parsed as local time, a window ending
+        // an hour from now looks already over to anyone east of UTC.
+        const inAnHour = new Date(Date.now() + 3_600_000).toISOString().replace("Z", "");
+        applyFeaturesPayload({ mistyPublic: { open: true, until: inAnHour, reason: null } });
+
+        expect(canViewMisty(["another-role"])).toBe(true);
+    });
+
+    it("still treats a bare timestamp in the past as expired", () => {
+        const anHourAgo = new Date(Date.now() - 3_600_000).toISOString().replace("Z", "");
+        applyFeaturesPayload({ mistyPublic: { open: true, until: anHourAgo, reason: null } });
+
+        expect(canViewMisty(["another-role"])).toBe(false);
+    });
+
+    it("accepts a timestamp that does carry an offset", () => {
+        const inAnHour = new Date(Date.now() + 3_600_000).toISOString();
+        applyFeaturesPayload({ mistyPublic: { open: true, until: inAnHour, reason: null } });
+
+        expect(canViewMisty(["another-role"])).toBe(true);
+    });
+
+    it("counts down from a bare timestamp correctly", () => {
+        const inTenMinutes = new Date(Date.now() + 600_000).toISOString().replace("Z", "");
+        applyFeaturesPayload({ mistyPublic: { open: true, until: inTenMinutes, reason: null } });
+
+        const remaining = mistyWindowRemainingMs() ?? 0;
+        expect(remaining).toBeGreaterThan(590_000);
+        expect(remaining).toBeLessThanOrEqual(600_000);
+    });
+});
