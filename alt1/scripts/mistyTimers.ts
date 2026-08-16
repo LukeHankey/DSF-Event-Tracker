@@ -1,10 +1,10 @@
 import axios from "axios";
 import { API_URL } from "../config";
-import { userHasRequiredRole } from "./permissions";
+import { currentRoleIds, userHasRequiredRole } from "./permissions";
+import { canViewMisty, getFeatures, mistyLockMessage } from "./clientFeatures";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
-import { getMemberWorlds } from "./worldRegistry";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -57,10 +57,45 @@ export const worldMap = new Map<number, WorldEventStatus>();
 const worldsOnDisplay = new Set<number>();
 let refreshIntervalMisty: NodeJS.Timeout | null = null;
 
+/** Show the locked overlay with an explanation of why the tab is locked. */
+function showMistyLockedOverlay(message: string): void {
+    const overlay = document.getElementById("mistyLockedOverlay");
+    if (overlay) overlay.textContent = message;
+}
+
+/**
+ * Say when the tab is open to everyone, so it is obvious this is temporary
+ * rather than a permanent change nobody announced.
+ */
+function showMistyPublicBanner(): void {
+    const tab = document.getElementById("mistyTab");
+    if (!tab) return;
+
+    const existing = document.getElementById("mistyPublicBanner");
+    const { open, reason, until } = getFeatures().mistyPublic;
+
+    if (!open) {
+        existing?.remove();
+        return;
+    }
+
+    const banner = existing ?? document.createElement("div");
+    banner.id = "mistyPublicBanner";
+    banner.className = "misty-public-banner";
+
+    const ends = until ? ` until ${new Date(until).toLocaleString()}` : "";
+    banner.textContent = `Misty is open to everyone${reason ? ` for ${reason}` : ""}${ends}.`;
+
+    if (!existing) tab.prepend(banner);
+}
+
 export async function renderMistyTimers(): Promise<void> {
     try {
-        const allowedRoles = ["775940649802793000"]; // Scouter role
-        const hasEditPermission = userHasRequiredRole(allowedRoles);
+        // Scouters always; everyone signed in while a moderator has opened the
+        // tab with /misty. The server enforces the same rule and simply does
+        // not send world state otherwise.
+        const roleIds = currentRoleIds();
+        const hasEditPermission = canViewMisty(roleIds);
 
         const tableSort = (localStorage.getItem("tableSort") ?? "World") as TableColumnName;
         const tableSortOrder = (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder;
@@ -105,18 +140,14 @@ export async function renderMistyTimers(): Promise<void> {
                 await appendEventRow(currentWorldEvent, tableSort, tableSortOrder);
             }
         } else {
-            let dummyData = {
-                status: "Inactive",
-                last_update_timestamp: Date.now(),
-                inactive_time: 0,
-            } as InactiveWorldEventStatus;
-            for (const world_str of getMemberWorlds()) {
-                const world = Number(world_str);
-                dummyData = { ...dummyData, world };
-                worldMap.set(world, dummyData);
-                await appendEventRow(dummyData, tableSort, tableSortOrder);
-            }
+            // No placeholder rows. They used to be filled with fake Inactive
+            // entries, which implied the table was protected while the real
+            // data arrived over the websocket and overwrote them. The server
+            // now sends nothing, so the table is genuinely empty and the
+            // overlay explains why.
+            showMistyLockedOverlay(mistyLockMessage(roleIds));
         }
+        showMistyPublicBanner();
         initTableSorting(tableSort, tableSortOrder);
     } catch (error) {
         if (axios.isAxiosError(error)) {
