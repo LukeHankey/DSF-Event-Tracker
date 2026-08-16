@@ -125,7 +125,7 @@ function showMistyPublicBanner(): void {
     if (!existing) footer.prepend(banner);
 }
 
-export async function renderMistyTimers(): Promise<void> {
+export async function renderMistyTimers(retrying = false): Promise<void> {
     try {
         // Scouters always; everyone signed in while a moderator has opened the
         // tab with /misty. The server enforces the same rule and simply does
@@ -176,8 +176,24 @@ export async function renderMistyTimers(): Promise<void> {
             const status = error.response?.status;
             const message = error.response?.data?.detail;
             if (status === 401 && message === "Token has expired") {
-                await refreshToken();
-                await renderMistyTimers();
+                // Refresh once, then retry once. This used to call refreshToken()
+                // without checking it worked and then recurse unconditionally, so
+                // a refresh that kept failing — a stale token the server refuses,
+                // say — turned into unbounded recursion: an endless stream of
+                // GET /events/current and POST /auth/refresh 401s, a console full
+                // of nested renderMistyTimers frames, and a tab that never loads.
+                if (retrying) {
+                    showToast("Session expired. Please sign in again.", "error");
+                    return;
+                }
+
+                const newToken = await refreshToken();
+                if (!newToken) {
+                    showToast("Session expired. Please sign in again.", "error");
+                    return;
+                }
+
+                await renderMistyTimers(true);
             } else {
                 return showToast(message, "error");
             }
