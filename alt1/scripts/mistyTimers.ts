@@ -1,7 +1,14 @@
 import axios from "axios";
 import { API_URL } from "../config";
 import { currentRoleIds, userHasRequiredRole } from "./permissions";
-import { canViewMisty, formatCountdown, getFeatures, mistyLockMessage, mistyWindowRemainingMs } from "./clientFeatures";
+import {
+    canViewMisty,
+    formatCountdown,
+    getFeatures,
+    isMistyWindowOpen,
+    mistyLockMessage,
+    mistyWindowRemainingMs,
+} from "./clientFeatures";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
@@ -96,9 +103,12 @@ function showMistyPublicBanner(): void {
     if (!footer) return;
 
     const existing = document.getElementById("mistyPublicBanner");
-    const { open, reason } = getFeatures().mistyPublic;
+    const { reason } = getFeatures().mistyPublic;
 
-    if (!open) {
+    // The same check the lock uses. Reading the raw flag let the banner claim
+    // the tab was open while the tab itself was locked, which is what made the
+    // timezone bug so confusing to look at.
+    if (!isMistyWindowOpen()) {
         existing?.remove();
         return;
     }
