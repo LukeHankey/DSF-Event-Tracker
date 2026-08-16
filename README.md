@@ -6,10 +6,8 @@ This event tracker is an Alt1 Toolkit app for the Deep Sea Fishing Hub in RuneSc
 
 ## ✨ Key Features
 - 📋 A fully event-driven **Scouting Tab** to view all active events and your previous history.
-- 🛒 View the current day (and any other day) of **Merchant Stock** at a glance.
-  - 🔮 Next 7 days of stock available immediately.
-  - 🗓 Select any date to view stock in more detail.
 - 🌍 Real-time world tracking via Misty NPC.
+- 🏆 League worlds and other special worlds are marked with their own icons.
 - 🔁 **Discord Relay:**
   - Event calls are relayed to and from Discord for a wider reach.
   - Both Alt1 and Discord are kept in sync.
@@ -26,10 +24,29 @@ After installing the app, every user will have basic access to the tracker. Some
 While on the Deep Sea Fishing platform, keep the app open or minimized. Any events that appear on your current world will automatically be detected and shared with the community.
 
 ### 🔍 Scouting
-If you’re actively scouting for the Travelling Merchant or other events:
+If you’re actively scouting for events:
 - Stand next to **Misty** NPC.
 - Ask her when the world was last active.
 - This will automatically update that world’s timer for everyone using the app — making it easier to plan and coordinate scouting.
+
+## 👀 The Misty tab
+
+The Misty tab shows the state of every world — active, inactive, how long since
+it was last checked — built from what scouters report and from Misty readings
+sent by everyone running the app. Reading Misty updates it for the whole
+community, whether or not you can see the tab yourself.
+
+It is normally limited to the Scouter role. Moderators can open it to everyone
+signed in for a period, for a double XP weekend or an event; a banner appears in
+the tab while that window is open.
+
+Editing a world's timer stays with Scouters.
+
+## 🌍 World list
+
+Which worlds the app tracks — including league worlds each season — comes from
+the server, not the app. New worlds appear without an update, and while the app
+is running.
 
 ## 📌 Requirements & 💡 Recommendations
 
