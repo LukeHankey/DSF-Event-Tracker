@@ -2,6 +2,7 @@ import { decodeJWT } from "./permissions";
 import { refreshToken } from "./ws";
 import axios from "axios";
 import { API_URL } from "../config";
+import { parseAlt1Tile } from "./profileCounts";
 
 let previousEventCounts: UpdateFields = {};
 
@@ -42,9 +43,6 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
     const alt1OtherEl = document.getElementById("alt1Other")!;
     const totalEl = document.getElementById("totalEvents")!;
 
-    const alt1MerchantFirstEl = document.getElementById("alt1MerchantFirst")!;
-    const alt1OtherFirstEl = document.getElementById("alt1OtherFirst")!;
-
     // ✅ Extract numerical values safely
     const extractFirstNumber = (text: string | null): number => {
         if (!text) return 0;
@@ -54,13 +52,17 @@ export function updateProfileCounters(updateFields: UpdateFields): void {
 
     // ✅ Get previous stored values or initialize them
     let merchant = lastKnownCounts["count"] ?? extractFirstNumber(merchantEl?.textContent);
-    let alt1Merchant = lastKnownCounts["alt1.merchantCount"] ?? extractFirstNumber(alt1MerchantEl?.textContent);
-    let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
-    let alt1Other = lastKnownCounts["alt1.otherCount"] ?? extractFirstNumber(alt1OtherEl?.textContent);
+    // The Alt1 tiles render base and first together, so both come out of the
+    // same text: "12 (First: 5)".
+    const renderedMerchant = parseAlt1Tile(alt1MerchantEl?.textContent ?? null);
+    const renderedOther = parseAlt1Tile(alt1OtherEl?.textContent ?? null);
 
-    let alt1MerchantFirst =
-        lastKnownCounts["alt1First.merchantCount"] ?? extractFirstNumber(alt1MerchantFirstEl?.textContent);
-    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? extractFirstNumber(alt1OtherFirstEl?.textContent);
+    let alt1Merchant = lastKnownCounts["alt1.merchantCount"] ?? renderedMerchant.base;
+    let other = lastKnownCounts["otherCount"] ?? extractFirstNumber(otherEl?.textContent);
+    let alt1Other = lastKnownCounts["alt1.otherCount"] ?? renderedOther.base;
+
+    let alt1MerchantFirst = lastKnownCounts["alt1First.merchantCount"] ?? renderedMerchant.first;
+    let alt1OtherFirst = lastKnownCounts["alt1First.otherCount"] ?? renderedOther.first;
 
     // ✅ Update values correctly (only add the difference)
     if (updateFields["count"] !== undefined) {
