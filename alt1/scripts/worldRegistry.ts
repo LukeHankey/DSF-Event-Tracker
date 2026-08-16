@@ -206,7 +206,25 @@ export function getSpecialWorlds(world: string): SpecialWorld[] {
 /** The registry key for the seasonal league worlds. */
 const LEAGUES_KEY = "leagues";
 
-const enabledLeagues = () => currentRegistry.specials.find((special) => special.key === LEAGUES_KEY && special.enabled);
+const enabledGroup = (key: string) =>
+    currentRegistry.specials.find((special) => special.key === key && special.enabled);
+
+const enabledLeagues = () => enabledGroup(LEAGUES_KEY);
+
+/**
+ * Whether any world belongs to an enabled group with this key.
+ *
+ * Used to decide whether a filter for that group is worth showing: a control
+ * that would filter nothing is only clutter.
+ */
+export function hasSpecialWorlds(key: string): boolean {
+    return Boolean(enabledGroup(key)?.worlds.length);
+}
+
+/** Whether a world belongs to an enabled group with this key. */
+export function isSpecialWorld(key: string, world: string): boolean {
+    return enabledGroup(key)?.worlds.includes(world) ?? false;
+}
 
 /**
  * Whether a league season is running.

@@ -9,11 +9,14 @@ import {
     mistyLockMessage,
     mistyWindowRemainingMs,
 } from "./clientFeatures";
-import { hasLeagueWorlds, isLeagueWorld } from "./worldRegistry";
+import { hasLeagueWorlds, hasSpecialWorlds, isLeagueWorld, isSpecialWorld } from "./worldRegistry";
 import { shouldShowWorld } from "./worldFilters";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
+
+/** The registry key for legacy-combat worlds. */
+const LEGACY_KEY = "legacy";
 
 type WorldStatus = "Inactive" | "Active" | "Spawnable" | "Unknown";
 
@@ -219,8 +222,12 @@ export function startMistyimerRefresh(): void {
  * filter nothing, so it stays out of the way.
  */
 export function updateLeaguesFilterVisibility(): void {
-    const label = document.getElementById("leaguesFilterLabel");
-    if (label) label.hidden = !hasLeagueWorlds();
+    const leagues = document.getElementById("leaguesFilterLabel");
+    if (leagues) leagues.hidden = !hasLeagueWorlds();
+
+    // Same rule for legacy: a filter that would remove nothing is only clutter.
+    const legacy = document.getElementById("legacyFilterLabel");
+    if (legacy) legacy.hidden = !hasSpecialWorlds(LEGACY_KEY);
 }
 
 /** Stop the per-second refresh when the tab is not being looked at. */
@@ -601,7 +608,8 @@ function hideWorlds(): void {
     const range3060 = (document.getElementById("range3060") as HTMLInputElement).checked;
     const range6090 = (document.getElementById("range6090") as HTMLInputElement).checked;
     const range90Plus = (document.getElementById("range90Plus") as HTMLInputElement).checked;
-    const showLeagues = (document.getElementById("rangeLeagues") as HTMLInputElement | null)?.checked ?? true;
+    const hideLeagues = (document.getElementById("hideLeagues") as HTMLInputElement | null)?.checked ?? false;
+    const hideLegacy = (document.getElementById("hideLegacy") as HTMLInputElement | null)?.checked ?? false;
 
     const tbody = document.getElementById("mistyTimersTable");
     if (!tbody) return;
@@ -616,15 +624,12 @@ function hideWorlds(): void {
         const world = parseInt(worldText, 10);
         const status = cells[2].textContent?.trim() || "";
 
-        const visible = shouldShowWorld(world, status, isLeagueWorld(String(world)), {
-            hideInactive,
-            hideUnknown,
-            range130,
-            range3060,
-            range6090,
-            range90Plus,
-            showLeagues,
-        });
+        const visible = shouldShowWorld(
+            world,
+            status,
+            { isLeague: isLeagueWorld(String(world)), isLegacy: isSpecialWorld(LEGACY_KEY, String(world)) },
+            { hideInactive, hideUnknown, hideLeagues, hideLegacy, range130, range3060, range6090, range90Plus },
+        );
 
         row.style.display = visible ? "" : "none";
     }
@@ -653,14 +658,46 @@ if (hideUnknownWorldsElement) {
         hideWorlds();
     });
 }
-// Initialize range filters
-const ranges = ["range130", "range3060", "range6090", "range90Plus", "rangeLeagues"];
+// Initialize range filters. Ticked shows that range, and unticked hides it, so
+// these default to on.
+const ranges = ["range130", "range3060", "range6090", "range90Plus"];
 ranges.forEach((id) => {
     const el = document.getElementById(id) as HTMLInputElement | null;
     if (el) {
         const stored = localStorage.getItem(id);
         // Default to true if not set
         el.checked = stored === null ? true : stored === "true";
+        el.addEventListener("change", (e) => {
+            const checkbox = e.target as HTMLInputElement;
+            localStorage.setItem(id, checkbox.checked ? "true" : "false");
+            hideWorlds();
+        });
+    }
+});
+
+/**
+ * The leagues filter used to be a range — "Leagues", ticked to show them.
+ * It reads as "Hide Leagues" now, beside Hide Inactive and Hide Unknown, so
+ * every filter in that row means the same thing when ticked. Anyone who had
+ * the old setting keeps their intent: showing leagues becomes not hiding them.
+ */
+const migrateLeaguesFilter = (): void => {
+    const old = localStorage.getItem("rangeLeagues");
+    if (old === null) return;
+
+    if (localStorage.getItem("hideLeagues") === null) {
+        localStorage.setItem("hideLeagues", old === "false" ? "true" : "false");
+    }
+    localStorage.removeItem("rangeLeagues");
+};
+
+migrateLeaguesFilter();
+
+// Hide filters: unticked by default, because the default is to show everything.
+["hideLeagues", "hideLegacy"].forEach((id) => {
+    const el = document.getElementById(id) as HTMLInputElement | null;
+    if (el) {
+        el.checked = localStorage.getItem(id) === "true";
         el.addEventListener("change", (e) => {
             const checkbox = e.target as HTMLInputElement;
             localStorage.setItem(id, checkbox.checked ? "true" : "false");
