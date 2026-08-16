@@ -939,8 +939,6 @@ body.dark-mode .mod-actions button:hover {
        class rather than by deleting this wrapper, which could not be undone
        without rebuilding the page. */
     filter: none;
-    pointer-events: none; /* If you want to disable interaction */
-    user-select: none;
     overflow: auto;
     position: relative;
     display: flex;
@@ -949,6 +947,11 @@ body.dark-mode .mod-actions button:hover {
 /* The overlay sits above the blurred content */
 .misty-blurred.is-locked {
     filter: blur(5px);
+    /* Interaction is disabled only while locked. Leaving these on the base
+       class made the unlocked tab unclickable — sorting, filters and the info
+       button all dead. */
+    pointer-events: none;
+    user-select: none;
 }
 
 .locked-overlay[hidden] {
