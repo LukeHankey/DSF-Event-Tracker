@@ -1,6 +1,7 @@
 {
     "name": "dsfeventtracker",
     "version": "1.4.0",
+    "private": true,
     "description": "Front end of the DSF Event Tracker Alt1 plugin.",
     "homepage": "https://www.dsfeventtracker.com/",
     "bugs": {
