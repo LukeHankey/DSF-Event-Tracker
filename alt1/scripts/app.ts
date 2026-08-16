@@ -34,8 +34,10 @@ if (window.alt1) {
 } else {
     // Not in Alt1, show instructions
     const addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-    document.querySelector("#mainTab h2")!.innerHTML =
-        `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
+    const status = document.getElementById("appStatus");
+    if (status) {
+        status.innerHTML = `Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1.`;
+    }
 }
 
 // When the RuneScape client gains focus, start capturing

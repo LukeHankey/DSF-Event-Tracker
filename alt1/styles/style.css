@@ -1051,3 +1051,14 @@ summary::marker {
     padding: 3px 6px;
     text-align: center;
 }
+
+/* Only takes space when it has something to say. */
+.app-status:empty {
+    display: none;
+}
+
+.app-status {
+    font-size: 12px;
+    margin: 4px;
+    text-align: center;
+}
