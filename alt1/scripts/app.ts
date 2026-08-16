@@ -16,11 +16,15 @@ import { initCapture, startCapturing } from "./capture";
 import { readTextFromDialogBox } from "./mistyDialog";
 import { setDefaultTitleBar, updateTitlebar } from "./notifications";
 import { fetchRegistry } from "./worldRegistry";
+import { renderMistyTimers } from "./mistyTimers";
 
 // If running in Alt1, identify and start capturing
-// The world lists come from the server; until this resolves the client runs
-// on its bundled fallback, and later changes arrive over the websocket.
-void fetchRegistry();
+// The world lists and feature windows come from the server; until this
+// resolves the client runs on its bundled fallback. Re-render the Misty tab
+// afterwards: it may have painted its locked state before the answer arrived.
+void fetchRegistry(() => {
+    void renderMistyTimers();
+});
 
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");
