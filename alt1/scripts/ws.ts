@@ -9,6 +9,7 @@ import { WorldEventStatus, updateWorld, renderMistyTimers } from "./mistyTimers"
 import { applyRegistryPayload, WorldRegistryPayload } from "./worldRegistry";
 import { WorldRecord } from "./mistyDialog";
 import { notifyEvent } from "./notifications";
+import { sendAuth } from "./wsAuth";
 
 interface Version {
     version: string;
@@ -68,6 +69,9 @@ export async function refreshToken(): Promise<string | null> {
         if (response.data.access_token) {
             console.log("🔄 Token refreshed successfully");
             localStorage.setItem("accessToken", response.data.access_token);
+            // The socket authenticated with the old token; re-send so the
+            // connection does not quietly fall back to guest access.
+            wsClient.authenticate();
             return response.data.access_token; // ✅ Return new token for immediate use
         } else {
             console.error("⚠️ Failed to refresh token, user must re-authenticate.");
@@ -122,6 +126,10 @@ export class WebSocketClient {
 
         this.socket.onopen = async () => {
             console.log("✅ Connected to WebSocket!");
+            // Identify before anything else: the server only sends world state
+            // to connections it can verify, and a guest connection is fine but
+            // gets none of it.
+            this.authenticate();
             // Send a SYNC message with the last known event timestamp
             const lastEvent = JSON.parse(localStorage.getItem("eventHistory") ?? "[]").slice(-1)[0] as EventRecord;
             const lastEventTimestamp = lastEvent?.timestamp;
@@ -225,6 +233,11 @@ export class WebSocketClient {
         } else {
             console.warn("⚠️ WebSocket is not open. Unable to send message.");
         }
+    }
+
+    /** Identify this connection to the server, if we have a token. */
+    authenticate(): boolean {
+        return sendAuth(this.socket, localStorage.getItem("accessToken"));
     }
 
     reconnect(): void {
