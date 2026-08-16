@@ -170,9 +170,6 @@ export async function renderMistyTimers(retrying = false): Promise<void> {
             // overlay explains why.
             setMistyLocked(true, mistyLockMessage(roleIds));
         }
-        updateLeaguesFilterVisibility();
-        showMistyPublicBanner();
-        initTableSorting(tableSort, tableSortOrder);
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error(error);
@@ -203,6 +200,18 @@ export async function renderMistyTimers(retrying = false): Promise<void> {
         } else {
             console.error("Unexpected error", error);
         }
+    } finally {
+        // The controls do not depend on the fetch. They used to run after it,
+        // inside the try, so an expired session took the filter checkboxes and
+        // the column sorting with it — the tab lost its Hide Leagues and Hide
+        // Legacy boxes and no longer sorted, which looks like those features
+        // were never deployed rather than like a sign-in problem.
+        updateLeaguesFilterVisibility();
+        showMistyPublicBanner();
+        initTableSorting(
+            (localStorage.getItem("tableSort") ?? "World") as TableColumnName,
+            (localStorage.getItem("tableSortOrder") ?? "asc") as TableSortOrder,
+        );
     }
 }
 
