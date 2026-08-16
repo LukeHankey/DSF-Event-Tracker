@@ -12,7 +12,7 @@ import "../styles/style.css";
 import "./ui";
 
 // Our new capture logic
-import { initCapture, startCapturing } from "./capture";
+import { initCapture, initInterface, startCapturing } from "./capture";
 import { readTextFromDialogBox } from "./mistyDialog";
 import { setDefaultTitleBar, updateTitlebar } from "./notifications";
 import { fetchRegistry } from "./worldRegistry";
@@ -25,6 +25,11 @@ import { renderMistyTimers } from "./mistyTimers";
 void fetchRegistry(() => {
     void renderMistyTimers();
 });
+
+// Everything that does not need Alt1: history, world timers and their
+// per-second refreshes. Outside the guard below so the website behaves like the
+// app for anything that is not screen capture.
+initInterface();
 
 if (window.alt1) {
     alt1.identifyAppUrl("./appconfig.json");

@@ -84,29 +84,39 @@ function getCaptureFrequency(): number {
     return freq ? parseInt(freq) || 2 : 2;
 }
 
-export function initCapture(): void {
-    if (localStorage.getItem("captureFrequency") == null) {
-        localStorage.setItem("captureFrequency", "2");
-    }
-    previousMainContent = document.getElementById("appStatus")?.innerHTML ?? "";
+/**
+ * Set up the parts of the interface that do not need Alt1.
+ *
+ * History, world timers and their refreshes are ordinary DOM work. They used to
+ * be inside initCapture(), which only runs inside Alt1, so on the website the
+ * tables rendered once and then sat frozen — nothing ever ticked.
+ */
+export function initInterface(): void {
     loadEventHistory();
     renderMistyTimers();
-
-    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
-    if (notificationModes && notificationModes.includes("toolbar")) {
-        setDefaultTitleBar();
-    } else {
-        alt1.setTitleBarText("");
-    }
 
     const eventHistoryTab = document.getElementById("eventHistoryTab");
     if (eventHistoryTab?.classList.contains("sub-tab__content--active")) {
         startEventTimerRefresh();
     }
 
-    const mistyTab = document.getElementById("mistyTimersTab");
-    if (mistyTab?.classList.contains("sub-tab__content--active")) {
+    const mistyTab = document.getElementById("mistyTab");
+    if (mistyTab?.classList.contains("tabs__content--active")) {
         startMistyimerRefresh();
+    }
+}
+
+export function initCapture(): void {
+    if (localStorage.getItem("captureFrequency") == null) {
+        localStorage.setItem("captureFrequency", "2");
+    }
+    previousMainContent = document.getElementById("appStatus")?.innerHTML ?? "";
+
+    const notificationModes = JSON.parse(localStorage.getItem("notificationModes") ?? "[]");
+    if (notificationModes && notificationModes.includes("toolbar")) {
+        setDefaultTitleBar();
+    } else {
+        alt1.setTitleBarText("");
     }
 }
 

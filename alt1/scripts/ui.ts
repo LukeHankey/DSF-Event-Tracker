@@ -13,7 +13,7 @@ import axios from "axios";
 import { setDefaultTitleBar, showToast } from "./notifications";
 import { getMemberWorlds } from "./worldRegistry";
 import { signOut } from "./signOut";
-import { renderMistyTimers } from "./mistyTimers";
+import { renderMistyTimers, startMistyimerRefresh, stopMistyTimerRefresh } from "./mistyTimers";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -40,6 +40,16 @@ tabs.forEach((tab) => {
             const targetElement = document.getElementById(targetTabId);
             if (targetElement) {
                 targetElement.classList.add("tabs__content--active");
+            }
+
+            // The Misty timers count up every second while that tab is open.
+            // Nothing used to start them on a tab switch: the only caller ran
+            // at startup and only if Misty happened to be the active tab.
+            if (targetTabId === "mistyTab") {
+                void renderMistyTimers();
+                startMistyimerRefresh();
+            } else {
+                stopMistyTimerRefresh();
             }
 
             // If the Scouts tab is not active, ensure the event timer is stopped.

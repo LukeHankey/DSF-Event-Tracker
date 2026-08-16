@@ -194,6 +194,14 @@ export function startMistyimerRefresh(): void {
     }
 }
 
+/** Stop the per-second refresh when the tab is not being looked at. */
+export function stopMistyTimerRefresh(): void {
+    if (refreshIntervalMisty) {
+        clearInterval(refreshIntervalMisty);
+        refreshIntervalMisty = null;
+    }
+}
+
 /**
  * Keep the banner counting down, and relock when the window runs out.
  *
