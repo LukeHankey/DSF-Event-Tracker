@@ -136,7 +136,7 @@ function detectTimestamps(lines: ChatLine[]): boolean {
     return lines.some((line) => line.fragments.length > 1 && /\d\d:\d\d:\d\d/.test(line.fragments[1].text));
 }
 
-async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
+async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean, retrying = false) {
     const token = localStorage.getItem("accessToken");
     if (token) {
         const discordID = decodeJWT(token)?.discord_id;
@@ -166,8 +166,21 @@ async function addEventCount(matchingEvent: EventKeys, isFirstEvent: boolean) {
                 const status = error.response?.status;
                 const message = error.response?.data?.detail;
                 if (status === 401 && message === "Token has expired") {
-                    await refreshToken();
-                    await addEventCount(matchingEvent, isFirstEvent);
+                    // Refresh once, retry once. Recursing without checking the
+                    // refresh worked turned a session that could not be renewed
+                    // into an endless loop of PATCH /profiles and
+                    // POST /auth/refresh — the same fault fixed in
+                    // renderMistyTimers, and worse here because event capture
+                    // fires this automatically rather than on a click.
+                    if (retrying) return;
+
+                    const newToken = await refreshToken();
+                    if (!newToken) {
+                        showToast("Session expired. Please sign in again.", "error");
+                        return;
+                    }
+
+                    await addEventCount(matchingEvent, isFirstEvent, true);
                 } else {
                     return showToast(message, "error");
                 }

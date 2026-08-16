@@ -720,7 +720,7 @@ modGlobalDeleteBtn.addEventListener("click", () => {
 
     modModal.style.display = "none"; // 👈 hide the mod modal first
 
-    const confirmAndDelete = async () => {
+    const confirmAndDelete = async (retrying = false) => {
         const eventHistory: EventRecord[] = JSON.parse(localStorage.getItem("eventHistory") ?? "[]");
         const event = eventHistory.find((e) => e.id === eventId);
         if (!event) return;
@@ -741,8 +741,19 @@ modGlobalDeleteBtn.addEventListener("click", () => {
                 const status = error.response?.status;
                 const message = error.response?.data?.detail;
                 if (status === 401 && message === "Token has expired") {
-                    await refreshToken();
-                    await confirmAndDelete();
+                    // Refresh once, retry once — recursing on a refresh that
+                    // never succeeds loops forever. Returning here also skips
+                    // the wsClient.send below, so a delete that did not happen
+                    // is not broadcast as though it had.
+                    if (retrying) return;
+
+                    const newToken = await refreshToken();
+                    if (!newToken) {
+                        showToast("Session expired. Please sign in again.", "error");
+                        return;
+                    }
+
+                    return await confirmAndDelete(true);
                 } else {
                     return showToast(message, "error");
                 }
