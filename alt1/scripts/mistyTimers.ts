@@ -57,10 +57,32 @@ export const worldMap = new Map<number, WorldEventStatus>();
 const worldsOnDisplay = new Set<number>();
 let refreshIntervalMisty: NodeJS.Timeout | null = null;
 
-/** Show the locked overlay with an explanation of why the tab is locked. */
-function showMistyLockedOverlay(message: string): void {
+/**
+ * Lock or unlock the tab.
+ *
+ * Both directions have to work: a moderator can close the window while the tab
+ * is open, and the tab must relock without a reload. The previous code deleted
+ * the overlay and unwrapped the blur container, which could not be undone —
+ * closing the window left every row on screen until the page was rebuilt.
+ */
+function setMistyLocked(locked: boolean, message = ""): void {
+    const content = document.getElementById("mistyContent");
     const overlay = document.getElementById("mistyLockedOverlay");
-    if (overlay) overlay.textContent = message;
+
+    content?.classList.toggle("is-locked", locked);
+
+    if (overlay) {
+        overlay.hidden = !locked;
+        if (locked) overlay.textContent = message;
+    }
+
+    if (locked) {
+        // Drop any rows already on screen: the server stops sending world state
+        // when the window closes, but what was delivered is still in the DOM.
+        const body = document.getElementById("mistyTimerBody");
+        if (body) body.innerHTML = "";
+        worldMap.clear();
+    }
 }
 
 /**
@@ -68,8 +90,10 @@ function showMistyLockedOverlay(message: string): void {
  * rather than a permanent change nobody announced.
  */
 function showMistyPublicBanner(): void {
-    const tab = document.getElementById("mistyTab");
-    if (!tab) return;
+    // Into the footer beside the filters: prepending to the tab made it a flex
+    // item stretching the full height as a green column down the left.
+    const footer = document.querySelector("#mistyTab .footer-left") ?? document.getElementById("mistyTab");
+    if (!footer) return;
 
     const existing = document.getElementById("mistyPublicBanner");
     const { open, reason, until } = getFeatures().mistyPublic;
@@ -86,7 +110,7 @@ function showMistyPublicBanner(): void {
     const ends = until ? ` until ${new Date(until).toLocaleString()}` : "";
     banner.textContent = `Misty is open to everyone${reason ? ` for ${reason}` : ""}${ends}.`;
 
-    if (!existing) tab.prepend(banner);
+    if (!existing) footer.prepend(banner);
 }
 
 export async function renderMistyTimers(): Promise<void> {
@@ -106,23 +130,7 @@ export async function renderMistyTimers(): Promise<void> {
 
             // Reset the layout before adding new rows
             mistyTableBody.innerHTML = "";
-            // User has the required role:
-            // Remove the locked overlay if present.
-            const lockedOverlay = document.querySelector("#mistyTab .locked-overlay");
-            if (lockedOverlay) {
-                lockedOverlay.remove();
-            }
-            // Remove the blur class (or you could remove the CSS blur filter style) so the table is fully functional.
-            const blurredWrapper = document.querySelector("#mistyTab .misty-blurred");
-            if (blurredWrapper) {
-                const parent = blurredWrapper.parentNode!;
-                // Move each child of the blurred wrapper directly under the parent.
-                while (blurredWrapper.firstChild) {
-                    parent.insertBefore(blurredWrapper.firstChild, blurredWrapper);
-                }
-                // Now remove the empty blurred wrapper.
-                parent.removeChild(blurredWrapper);
-            }
+            setMistyLocked(false);
 
             const token = localStorage.getItem("accessToken");
             const currentWorldEventsAxios = await axios.get(`${API_URL}/events/current`, {
@@ -145,7 +153,7 @@ export async function renderMistyTimers(): Promise<void> {
             // data arrived over the websocket and overwrote them. The server
             // now sends nothing, so the table is genuinely empty and the
             // overlay explains why.
-            showMistyLockedOverlay(mistyLockMessage(roleIds));
+            setMistyLocked(true, mistyLockMessage(roleIds));
         }
         showMistyPublicBanner();
         initTableSorting(tableSort, tableSortOrder);
