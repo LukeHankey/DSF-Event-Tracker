@@ -252,15 +252,22 @@ export function applyRegistryPayload(data: unknown): boolean {
 /**
  * Fetch the registry from the server, once, at startup.
  *
+ * `onApplied` runs after a successful fetch so the UI can re-render. Without
+ * it the Misty tab paints its locked state from the bundled defaults and never
+ * revisits the decision: the websocket only reports feature *changes*, so a
+ * client starting up while a window is already open would stay locked until
+ * something else happened to trigger a render.
+ *
  * Never throws: a client that cannot reach the server still works on the
  * bundled fallback, and live updates arrive over the websocket afterwards.
  */
-export async function fetchRegistry(): Promise<void> {
+export async function fetchRegistry(onApplied?: () => void): Promise<void> {
     try {
         const response = await axios.get(`${API_URL}/worlds/registry`);
         applyRegistryPayload(response.data);
         // The same document carries the feature windows, so one fetch does both.
         applyFeaturesPayload(response.data);
+        onApplied?.();
     } catch (error) {
         console.error("Could not fetch the world registry, using bundled worlds:", error);
     }
