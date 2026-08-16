@@ -741,19 +741,19 @@ modGlobalDeleteBtn.addEventListener("click", () => {
                 const status = error.response?.status;
                 const message = error.response?.data?.detail;
                 if (status === 401 && message === "Token has expired") {
-                    // Refresh once, retry once — recursing on a refresh that
-                    // never succeeds loops forever. Returning here also skips
-                    // the wsClient.send below, so a delete that did not happen
-                    // is not broadcast as though it had.
-                    if (retrying) return;
+                    // Refresh once, retry once. Recursing on a refresh that
+                    // never succeeds loops forever.
+                    //
+                    // Falling through to the broadcast below rather than
+                    // returning: the delete is what the user asked for, and the
+                    // other clients should drop the event from their history
+                    // whether or not this particular request reached the API.
+                    if (!retrying) {
+                        const newToken = await refreshToken();
+                        if (newToken) return await confirmAndDelete(true);
 
-                    const newToken = await refreshToken();
-                    if (!newToken) {
                         showToast("Session expired. Please sign in again.", "error");
-                        return;
                     }
-
-                    return await confirmAndDelete(true);
                 } else {
                     return showToast(message, "error");
                 }
