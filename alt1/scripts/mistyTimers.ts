@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_URL } from "../config";
 import { currentRoleIds, userHasRequiredRole } from "./permissions";
-import { canViewMisty, getFeatures, mistyLockMessage } from "./clientFeatures";
+import { canViewMisty, formatCountdown, getFeatures, mistyLockMessage, mistyWindowRemainingMs } from "./clientFeatures";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
@@ -96,7 +96,7 @@ function showMistyPublicBanner(): void {
     if (!footer) return;
 
     const existing = document.getElementById("mistyPublicBanner");
-    const { open, reason, until } = getFeatures().mistyPublic;
+    const { open, reason } = getFeatures().mistyPublic;
 
     if (!open) {
         existing?.remove();
@@ -107,8 +107,9 @@ function showMistyPublicBanner(): void {
     banner.id = "mistyPublicBanner";
     banner.className = "misty-public-banner";
 
-    const ends = until ? ` until ${new Date(until).toLocaleString()}` : "";
-    banner.textContent = `Misty is open to everyone${reason ? ` for ${reason}` : ""}${ends}.`;
+    const remaining = mistyWindowRemainingMs();
+    const ends = remaining === null ? "" : ` — ${formatCountdown(remaining)} left`;
+    banner.textContent = `Misty is open to everyone${reason ? ` for ${reason}` : ""}${ends}`;
 
     if (!existing) footer.prepend(banner);
 }
@@ -178,8 +179,29 @@ export function startMistyimerRefresh(): void {
     if (!refreshIntervalMisty) {
         refreshIntervalMisty = setInterval(() => {
             updateWorldTimers();
+            tickMistyWindow();
         }, 1000);
     }
+}
+
+/**
+ * Keep the banner counting down, and relock when the window runs out.
+ *
+ * The server stops sending world state at the end time, but nothing would tell
+ * the client to put the lock back: feature broadcasts only happen when someone
+ * changes the setting, and an unattended window ends on its own.
+ */
+function tickMistyWindow(): void {
+    const remaining = mistyWindowRemainingMs();
+    if (remaining === null) return;
+
+    if (remaining <= 0) {
+        if (!document.getElementById("mistyPublicBanner")) return;
+        void renderMistyTimers();
+        return;
+    }
+
+    showMistyPublicBanner();
 }
 
 function updateRowTimer(row: HTMLTableRowElement, worldEventStatus: WorldEventStatus, now: number): void {

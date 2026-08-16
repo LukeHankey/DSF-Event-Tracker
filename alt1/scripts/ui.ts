@@ -12,6 +12,8 @@ import { v4 as uuid, UUIDTypes } from "uuid";
 import axios from "axios";
 import { setDefaultTitleBar, showToast } from "./notifications";
 import { getMemberWorlds } from "./worldRegistry";
+import { signOut } from "./signOut";
+import { renderMistyTimers } from "./mistyTimers";
 
 // Grab all tabs as HTMLElements using the new BEM class name
 const tabs = document.querySelectorAll<HTMLElement>(".tabs__tab");
@@ -244,6 +246,26 @@ document.getElementById("validateDiscordID")?.addEventListener("click", async ()
 });
 
 // Step 2: Handle verification code input
+// Only offer signing out when there is a session to end.
+const signOutSection = document.getElementById("signOutSection");
+if (signOutSection && localStorage.getItem("refreshToken")) {
+    signOutSection.style.display = "block";
+}
+
+document.getElementById("signOutButton")?.addEventListener("click", async () => {
+    const message = document.getElementById("signOutMessage");
+    if (message) message.textContent = "Signing out…";
+
+    await signOut();
+
+    if (discordIDInput) discordIDInput.value = "";
+    if (signOutSection) signOutSection.style.display = "none";
+    if (message) message.textContent = "Signed out.";
+
+    // Relock anything that depended on being signed in, without a reload.
+    await renderMistyTimers();
+});
+
 document.getElementById("submitVerificationCode")?.addEventListener("click", async () => {
     const discordID = (document.getElementById("discordID") as HTMLInputElement).value;
     const verificationCode = (document.getElementById("verificationCode") as HTMLInputElement).value;
