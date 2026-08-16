@@ -203,6 +203,26 @@ export function getSpecialWorlds(world: string): SpecialWorld[] {
         }));
 }
 
+/** The registry key for the seasonal league worlds. */
+const LEAGUES_KEY = "leagues";
+
+const enabledLeagues = () => currentRegistry.specials.find((special) => special.key === LEAGUES_KEY && special.enabled);
+
+/**
+ * Whether a league season is running.
+ *
+ * Used to decide whether a leagues filter is worth showing at all: off-season
+ * the group is disabled and the control would filter nothing.
+ */
+export function hasLeagueWorlds(): boolean {
+    return Boolean(enabledLeagues());
+}
+
+/** Whether a world belongs to the current league season. */
+export function isLeagueWorld(world: string): boolean {
+    return enabledLeagues()?.worlds.includes(world) ?? false;
+}
+
 /** Narrow an unknown message — an HTTP body or a websocket frame — to a payload. */
 export function isRegistryPayload(data: unknown): data is WorldRegistryPayload {
     if (typeof data !== "object" || data === null) return false;

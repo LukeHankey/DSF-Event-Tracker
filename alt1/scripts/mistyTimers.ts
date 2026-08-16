@@ -9,6 +9,7 @@ import {
     mistyLockMessage,
     mistyWindowRemainingMs,
 } from "./clientFeatures";
+import { hasLeagueWorlds, isLeagueWorld } from "./worldRegistry";
 import { showToast } from "./notifications";
 import { refreshToken, wsClient } from "./ws";
 import { WorldRecord } from "./mistyDialog";
@@ -166,6 +167,7 @@ export async function renderMistyTimers(): Promise<void> {
             // overlay explains why.
             setMistyLocked(true, mistyLockMessage(roleIds));
         }
+        updateLeaguesFilterVisibility();
         showMistyPublicBanner();
         initTableSorting(tableSort, tableSortOrder);
     } catch (error) {
@@ -192,6 +194,17 @@ export function startMistyimerRefresh(): void {
             tickMistyWindow();
         }, 1000);
     }
+}
+
+/**
+ * Show the leagues filter only while a season is running.
+ *
+ * Off-season the group is disabled in the registry and the control would
+ * filter nothing, so it stays out of the way.
+ */
+export function updateLeaguesFilterVisibility(): void {
+    const label = document.getElementById("leaguesFilterLabel");
+    if (label) label.hidden = !hasLeagueWorlds();
 }
 
 /** Stop the per-second refresh when the tab is not being looked at. */
@@ -576,6 +589,7 @@ function hideWorlds(): void {
     const range3060 = (document.getElementById("range3060") as HTMLInputElement).checked;
     const range6090 = (document.getElementById("range6090") as HTMLInputElement).checked;
     const range90Plus = (document.getElementById("range90Plus") as HTMLInputElement).checked;
+    const showLeagues = (document.getElementById("rangeLeagues") as HTMLInputElement | null)?.checked ?? true;
 
     const tbody = document.getElementById("mistyTimersTable");
     if (!tbody) return;
@@ -599,7 +613,12 @@ function hideWorlds(): void {
         }
 
         if (visible) {
-            if (world <= 30 && !range130) visible = false;
+            // League worlds answer to their own filter rather than the ranges.
+            // They all sit above 90, so otherwise unticking "90+" would hide
+            // them even with Leagues ticked.
+            if (isLeagueWorld(String(world))) {
+                visible = showLeagues;
+            } else if (world <= 30 && !range130) visible = false;
             else if (world > 30 && world <= 60 && !range3060) visible = false;
             else if (world > 60 && world <= 90 && !range6090) visible = false;
             else if (world > 90 && !range90Plus) visible = false;
@@ -633,7 +652,7 @@ if (hideUnknownWorldsElement) {
     });
 }
 // Initialize range filters
-const ranges = ["range130", "range3060", "range6090", "range90Plus"];
+const ranges = ["range130", "range3060", "range6090", "range90Plus", "rangeLeagues"];
 ranges.forEach((id) => {
     const el = document.getElementById(id) as HTMLInputElement | null;
     if (el) {
