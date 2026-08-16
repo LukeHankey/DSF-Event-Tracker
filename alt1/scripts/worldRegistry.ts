@@ -15,6 +15,7 @@
 import axios from "axios";
 
 import { API_URL } from "../config";
+import { applyFeaturesPayload } from "./clientFeatures";
 
 /** Icons this build ships. A registry key with no entry here renders no icon. */
 export const WORLD_ACTIVITY_ICONS: Record<string, string> = {
@@ -258,6 +259,8 @@ export async function fetchRegistry(): Promise<void> {
     try {
         const response = await axios.get(`${API_URL}/worlds/registry`);
         applyRegistryPayload(response.data);
+        // The same document carries the feature windows, so one fetch does both.
+        applyFeaturesPayload(response.data);
     } catch (error) {
         console.error("Could not fetch the world registry, using bundled worlds:", error);
     }

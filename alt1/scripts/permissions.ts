@@ -43,3 +43,19 @@ export function userHasRequiredRole(requiredRoles: string[]): boolean {
 
     return decodedToken.role_ids.some((roleId: string) => requiredRoles.includes(roleId));
 }
+
+/**
+ * The signed-in user's role ids, or null when nobody is signed in.
+ *
+ * Distinguishes "signed in with no roles" from "not signed in", which matters
+ * for features that open up to any signed-in user.
+ */
+export function currentRoleIds(): string[] | null {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return null;
+
+    const decodedToken = decodeJWT(token);
+    if (!decodedToken || decodedToken.type !== "access") return null;
+
+    return decodedToken.role_ids ?? [];
+}

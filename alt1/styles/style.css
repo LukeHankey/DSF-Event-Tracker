@@ -1027,3 +1027,16 @@ summary {
 summary::marker {
   color: #e1bb34; /* Customize marker color */
 }
+
+/* Shown while a moderator has opened the Misty tab to everyone signed in, so
+   the wider access reads as temporary rather than an unannounced change. */
+.misty-public-banner {
+    background: #2f4f2f;
+    border: 1px solid #4a7a4a;
+    border-radius: 4px;
+    color: #d7ffd7;
+    font-size: 11px;
+    margin: 4px 4px 6px;
+    padding: 4px 6px;
+    text-align: center;
+}

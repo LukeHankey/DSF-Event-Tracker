@@ -7,6 +7,7 @@ import { decodeJWT, ExpiredTokenRecord } from "./permissions";
 import { updateProfileCounters, ProfileRecord, getEventCountData } from "./profile";
 import { WorldEventStatus, updateWorld, renderMistyTimers } from "./mistyTimers";
 import { applyRegistryPayload, WorldRegistryPayload } from "./worldRegistry";
+import { applyFeaturesPayload, ClientFeatures } from "./clientFeatures";
 import { WorldRecord } from "./mistyDialog";
 import { notifyEvent } from "./notifications";
 import { sendAuth } from "./wsAuth";
@@ -15,8 +16,16 @@ interface Version {
     version: string;
 }
 type RegistryUpdate = WorldRegistryPayload & { type: "worldRegistryUpdate" };
+type FeaturesUpdate = ClientFeatures & { type: "clientFeaturesUpdate" };
 type ReceivedData =
-    EventRecord | ProfileRecord | ExpiredTokenRecord | EventRecord[] | WorldEventStatus | RegistryUpdate | Version;
+    | EventRecord
+    | ProfileRecord
+    | ExpiredTokenRecord
+    | EventRecord[]
+    | WorldEventStatus
+    | RegistryUpdate
+    | FeaturesUpdate
+    | Version;
 declare const __APP_VERSION__: string;
 
 // Always read lastReload from sessionStorage when needed
@@ -178,6 +187,10 @@ export class WebSocketClient {
                         console.log("✅ Event sent successfully");
                     }
                 }
+            } else if ("type" in parsedData && parsedData.type === "clientFeaturesUpdate") {
+                // A moderator opened or closed the Misty tab; re-render so it
+                // unlocks or relocks without anyone restarting the app.
+                if (applyFeaturesPayload(parsedData)) await renderMistyTimers();
             } else if ("type" in parsedData && parsedData.type === "worldRegistryUpdate") {
                 // A /worlds change on Discord reaches open clients here, so a
                 // league season starts without anyone restarting the app.
