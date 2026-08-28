@@ -35,7 +35,7 @@
         "axios": "^1.19.0",
         "fuse.js": "^7.5.0",
         "tesseract.js": "^7.0.0",
-        "uuid": "^14.0.1"
+        "uuid": "^14.0.2"
     },
     "devDependencies": {
         "@eslint/css": "^1.4.0",
@@ -43,10 +43,10 @@
         "@eslint/js": "^10.0.1",
         "@eslint/json": "^2.0.1",
         "@eslint/markdown": "^8.0.3",
-        "@types/node": "^26.2.0",
+        "@types/node": "^26.3.0",
         "copy-webpack-plugin": "^14.0.0",
         "css-loader": "^7.1.4",
-        "eslint": "^10.8.1",
+        "eslint": "^10.9.1",
         "gh-pages": "^6.3.0",
         "globals": "^17.11.0",
         "html-webpack-plugin": "^5.6.8",
@@ -55,7 +55,7 @@
         "style-loader": "^4.0.0",
         "ts-loader": "^9.6.2",
         "typescript": "^6.0.3",
-        "typescript-eslint": "^8.67.0",
+        "typescript-eslint": "^8.68.0",
         "vitest": "^3.2.7",
         "webpack": "^5.109.2",
         "webpack-cli": "^7.2.2"
