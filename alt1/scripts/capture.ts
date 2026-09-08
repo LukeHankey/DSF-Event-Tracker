@@ -15,6 +15,7 @@ import { showToast } from "./notifications";
 import { renderMistyTimers, startMistyimerRefresh } from "./mistyTimers";
 import { startCapturingMisty } from "./mistyDialog";
 import { setDefaultTitleBar } from "./notifications";
+import { parseWorldNumber, worldReadOffsets } from "./worldNumber";
 
 /**
  * ChatBoxReader & color definitions
@@ -34,6 +35,7 @@ chatbox.readargs.colors.push(
 /* eslint-disable @typescript-eslint/no-require-imports */
 const imgs = webpackImages({
     runescapeWorldPretext: require("../assets/runescape_world_pretext.data.png"),
+    runescapeWorldPretextV2: require("../assets/runescape_world_pretext_v2.data.png"),
 });
 
 /**
@@ -632,19 +634,34 @@ function matchesEventEnd(lineText: string): string | null {
 
 /**
  * Find the current world number in the friend list
+ *
+ * The header is matched by its "RuneScape" pretext and the world is then read
+ * just past it. The current interface is tried first: its header is drawn in a
+ * wider font than the one the original pretext was cut from, so that older
+ * image no longer matches and is only kept as a fallback for older clients.
  */
 export const findWorldNumber = async (img: a1lib.ImgRefBind): Promise<string | null> => {
-    const imageRef = imgs.runescapeWorldPretext;
-    const pos = img.findSubimage(imageRef);
+    const pretexts = [
+        { image: imgs.runescapeWorldPretextV2, offsets: worldReadOffsets() },
+        { image: imgs.runescapeWorldPretext, offsets: [{ dx: 5, dy: 2 }] },
+    ];
     const buffData: ImageData = img.toData();
 
-    let worldNumber = null;
-    if (pos.length) {
-        for (const match of pos) {
-            const textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + 5, match.y + 2);
-            worldNumber = textObj.text.match(/\d{1,3}/)![0];
+    for (const pretext of pretexts) {
+        for (const match of img.findSubimage(pretext.image)) {
+            for (const { dx, dy } of pretext.offsets) {
+                let textObj;
+                try {
+                    textObj = OCR.findReadLine(buffData, font, [[255, 155, 0]], match.x + dx, match.y + dy);
+                } catch {
+                    // Reading off the edge of the capture. Try the next offset.
+                    continue;
+                }
+                const worldNumber = parseWorldNumber(textObj.text);
+                if (worldNumber) return worldNumber;
+            }
         }
     }
 
-    return worldNumber;
+    return null;
 };
