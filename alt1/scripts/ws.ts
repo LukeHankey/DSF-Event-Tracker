@@ -1,6 +1,7 @@
 import { EventRecord } from "./events";
 import { addNewEvent, updateEvent, removeEvent } from "./eventHistory";
 import { DEBUG, API_URL } from "../config";
+import { prepareLog } from "./logFormat";
 import { UUIDTypes, v4 as uuid } from "uuid";
 import axios from "axios";
 import { decodeJWT, ExpiredTokenRecord } from "./permissions";
@@ -50,10 +51,6 @@ console.warn = (...args: unknown[]) => {
     // Call original console.log
     originalConsoleWarn(...args);
     wsClient.log("warn", prepareLog(args));
-};
-
-const prepareLog = (args: unknown[]): string => {
-    return args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ");
 };
 
 export async function refreshToken(): Promise<string | null> {
