@@ -29,6 +29,14 @@ interface ReadDialogOptions {
 
 let mistyInterval: NodeJS.Timeout | null;
 
+/**
+ * Alt1 drops to -1 for a while after a world hop, and the friends list has to be
+ * open for the OCR fallback to find anything, so a single failed lookup is
+ * normal. Only give up on Misty once they keep failing.
+ */
+const maxWorldLookupFailures = 5;
+let worldLookupFailures = 0;
+
 // Initialize the DialogReader
 const reader = new DialogReader();
 let worker: Worker | null = null;
@@ -46,6 +54,7 @@ async function setupWorker() {
 
 export async function startCapturingMisty({ startWorker = false }: WorkerOptions = {}): Promise<void> {
     if (mistyInterval) return; // already running
+    worldLookupFailures = 0;
     mistyInterval = setInterval(readTextFromDialogBox, 1000);
     if (startWorker) {
         console.log("Starting OCR worker...");
@@ -159,15 +168,19 @@ async function fetchWorldNumber(): Promise<string> {
             ? currentWorld
             : alt1.currentWorld > 0
               ? String(alt1.currentWorld)
-              : await findWorldNumber(a1lib.captureHoldFullRs());
+              : ((await findWorldNumber(a1lib.captureHoldFullRs())) ?? sessionStorage.getItem("currentWorld"));
 
     if (!world || world === "-1") {
-        showToast("Misty time not updated - world not found.", "error");
-        console.log("Misty time not updated - world not found.");
-        stopCapturingMisty();
+        worldLookupFailures += 1;
+        console.log(`Misty time not updated - world not found (${worldLookupFailures}/${maxWorldLookupFailures}).`);
+        if (worldLookupFailures >= maxWorldLookupFailures) {
+            showToast("Misty time not updated - world not found.", "error");
+            stopCapturingMisty();
+        }
         throw new Error("World not found");
     }
 
+    worldLookupFailures = 0;
     return world;
 }
 
